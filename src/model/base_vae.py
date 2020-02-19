@@ -12,10 +12,10 @@ import pixyz.losses as pxl
 
 
 class Encoder(pxd.Normal):
-    def __init__(self, x_dim, z_dim):
+    def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["x"], var=["z"])
 
-        self.conv1 = nn.Conv2d(x_dim, 32, 2, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(channel_num, 32, 2, stride=2, padding=1)
         self.conv2 = nn.Conv2d(32, 32, 4, stride=2, padding=1)
         self.conv3 = nn.Conv2d(32, 64, 4, stride=2, padding=1)
         self.conv4 = nn.Conv2d(64, 64, 4, stride=2, padding=1)
@@ -35,7 +35,7 @@ class Encoder(pxd.Normal):
 
 
 class Decoder(pxd.Bernoulli):
-    def __init__(self, z_dim, x_dim):
+    def __init__(self, z_dim, channel_num):
         super().__init__(cond_var=["z"], var=["x"])
 
         self.fc1 = nn.Linear(z_dim, 256)
@@ -43,7 +43,8 @@ class Decoder(pxd.Bernoulli):
         self.deconv1 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
         self.deconv2 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)
         self.deconv3 = nn.ConvTranspose2d(32, 32, 4, stride=2, padding=1)
-        self.deconv4 = nn.ConvTranspose2d(32, x_dim, 4, stride=2, padding=1)
+        self.deconv4 = nn.ConvTranspose2d(32, channel_num, 4, stride=2,
+                                          padding=1)
 
     def forward(self, z):
         h = F.relu(self.fc1(z))
@@ -57,9 +58,9 @@ class Decoder(pxd.Bernoulli):
 
 
 class BaseVAE:
-    def __init__(self, x_dim, z_dim, device, beta=1, **kwargs):
+    def __init__(self, channel_num, z_dim, device, beta=1, **kwargs):
 
-        self.x_dim = x_dim
+        self.channel_num = channel_num
         self.z_dim = z_dim
         self.device = device
         self.beta = 1
@@ -67,8 +68,8 @@ class BaseVAE:
         # Distributions
         self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
                                 var=["z"], features_shape=[z_dim]).to(device)
-        self.decoder = Decoder(z_dim, x_dim).to(device)
-        self.encoder = Encoder(x_dim, z_dim).to(device)
+        self.decoder = Decoder(z_dim, channel_num).to(device)
+        self.encoder = Encoder(channel_num, z_dim).to(device)
         self.distributions = nn.ModuleList(
             [self.prior, self.decoder, self.encoder])
 
@@ -152,10 +153,6 @@ class BaseVAE:
             z = self.encoder.sample(x, return_all=False)
             x_recon = self.decoder.sample_mean(z).cpu()
 
-        x_sqrt = self.x_dim ** 0.5
-        x = x.view(-1, 1, x_sqrt, x_sqrt)
-        x_recon = x_recon.view(-1, 1, x_sqrt, x_sqrt)
-
         return torch.cat([x, x_recon])
 
     def sample(self, batch_n=1):
@@ -163,8 +160,5 @@ class BaseVAE:
         with torch.no_grad():
             z = self.prior.sample(batch_n=batch_n)
             x = self.decoder.sample_mean(z).cpu()
-
-        x_sqrt = self.x_dim ** 0.5
-        x = x.view(-1, 1, x_sqrt, x_sqrt)
 
         return x
