@@ -84,9 +84,9 @@ class BaseVAE:
 
     def _eval_loss(self, x_dict, **kwargs):
 
-        ce_loss = self.ce.eval(x_dict)
-        kl_loss = self.kl.eval(x_dict)
-        loss = (ce_loss + self.beta * kl_loss).mean()
+        ce_loss = self.ce.eval(x_dict).mean()
+        kl_loss = self.kl.eval(x_dict).mean()
+        loss = ce_loss + self.beta * kl_loss
         loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
                      "kl_loss": kl_loss.item()}
 
