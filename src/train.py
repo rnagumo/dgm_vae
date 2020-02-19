@@ -36,8 +36,8 @@ def train(args, logger, config):
     train_loader, test_loader = init_mnist_dataloader(
         args.root, args.batch_size, use_cuda)
 
-    # Data dimension (batch_size, input_size)
-    x_dim = train_loader.dataset.data.size(1)
+    # Data dimension, (batch_size, channel_num, height, width)
+    channel_num = iter(train_loader).next()[0].size(1)
 
     # Sample data for comparison
     x_org, _ = iter(test_loader).next()
@@ -50,7 +50,7 @@ def train(args, logger, config):
     # 3. Model
     # -------------------------------------------------------------------------
 
-    params = {"x_dim": x_dim, "device": device}
+    params = {"channel_num": channel_num, "device": device}
     model = BaseVAE(**config["vae_params"], **params)
 
     # -------------------------------------------------------------------------

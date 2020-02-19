@@ -15,7 +15,7 @@ class Encoder(pxd.Normal):
     def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["x"], var=["z"])
 
-        self.conv1 = nn.Conv2d(channel_num, 32, 2, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(channel_num, 32, 4, stride=2, padding=1)
         self.conv2 = nn.Conv2d(32, 32, 4, stride=2, padding=1)
         self.conv3 = nn.Conv2d(32, 64, 4, stride=2, padding=1)
         self.conv4 = nn.Conv2d(64, 64, 4, stride=2, padding=1)
@@ -28,6 +28,7 @@ class Encoder(pxd.Normal):
         h = F.relu(self.conv2(h))
         h = F.relu(self.conv3(h))
         h = F.relu(self.conv4(h))
+        h = h.view(-1, 1024)
         h = F.relu(self.fc1(h))
         loc = self.fc21(h)
         scale = F.softplus(self.fc22(h))
@@ -35,7 +36,7 @@ class Encoder(pxd.Normal):
 
 
 class Decoder(pxd.Bernoulli):
-    def __init__(self, z_dim, channel_num):
+    def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["z"], var=["x"])
 
         self.fc1 = nn.Linear(z_dim, 256)
@@ -49,7 +50,7 @@ class Decoder(pxd.Bernoulli):
     def forward(self, z):
         h = F.relu(self.fc1(z))
         h = F.relu(self.fc2(h))
-        h = h.reshape(-1, 64, 4, 4)
+        h = h.view(-1, 64, 4, 4)
         h = F.relu(self.deconv1(h))
         h = F.relu(self.deconv2(h))
         h = F.relu(self.deconv3(h))
@@ -68,7 +69,7 @@ class BaseVAE:
         # Distributions
         self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
                                 var=["z"], features_shape=[z_dim]).to(device)
-        self.decoder = Decoder(z_dim, channel_num).to(device)
+        self.decoder = Decoder(channel_num, z_dim).to(device)
         self.encoder = Encoder(channel_num, z_dim).to(device)
         self.distributions = nn.ModuleList(
             [self.prior, self.decoder, self.encoder])
@@ -98,8 +99,8 @@ class BaseVAE:
         ce_loss = 0
         kl_loss = 0
 
-        for x in tqdm(loader):
-            if isinstance(x, tuple):
+        for x in tqdm.tqdm(loader):
+            if isinstance(x, (tuple, list)):
                 x = x[0]
             x = x.to(self.device)
 
