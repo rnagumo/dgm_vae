@@ -104,6 +104,9 @@ class BaseVAE:
                 x = x[0]
             x = x.to(self.device)
 
+            # Mini-batch size
+            minibatch_size = x.size(0)
+
             # Calculate loss
             if training:
                 loss_dict = self.train({"x": x})
@@ -111,13 +114,13 @@ class BaseVAE:
                 loss_dict = self.test({"x": x})
 
             # Log
-            total_loss += loss_dict["loss"]
-            ce_loss += loss_dict["ce_loss"]
-            kl_loss += loss_dict["kl_loss"]
+            total_loss += loss_dict["loss"] * minibatch_size
+            ce_loss += loss_dict["ce_loss"] * minibatch_size
+            kl_loss += loss_dict["kl_loss"] * minibatch_size
 
-        total_loss *= loader.batch_size / len(loader.dataset)
-        ce_loss *= loader.batch_size / len(loader.dataset)
-        kl_loss *= loader.batch_size / len(loader.dataset)
+        total_loss /= len(loader.dataset)
+        ce_loss /= len(loader.dataset)
+        kl_loss /= len(loader.dataset)
 
         return {"loss": total_loss, "ce_loss": ce_loss, "kl_loss": kl_loss}
 
