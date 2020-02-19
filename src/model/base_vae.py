@@ -98,6 +98,8 @@ class BaseVAE:
         kl_loss = 0
 
         for x in tqdm(loader):
+            if isinstance(x, tuple):
+                x = x[0]
             x = x.to(self.device)
 
             # Calculate loss
