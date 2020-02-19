@@ -64,12 +64,6 @@ def train(args, logger, config):
         train_loss = model.run(train_loader, training=True)
         test_loss = model.run(test_loader, training=False)
 
-        # Reconstruction data
-        recon = model.reconstruction(x_org)
-
-        # Sample data
-        sample = model.sample(8)
-
         # Log
         writer.add_scalar("loss/train_loss", train_loss["loss"], epoch)
         writer.add_scalar("loss/test_loss", test_loss["loss"], epoch)
@@ -77,11 +71,19 @@ def train(args, logger, config):
                           train_loss["ce_loss"], epoch)
         writer.add_scalar("training/kl_divergence",
                           train_loss["kl_loss"], epoch)
-        writer.add_images("image_reconstruction", recon, epoch)
-        writer.add_images("image_from_latent", sample, epoch)
 
         logger.info(f"Train loss = {train_loss['loss']}")
         logger.info(f"Test loss = {test_loss['loss']}")
+
+        # Sample data
+        if epoch % args.plot_interval == 0:
+            # Reconstruction data
+            recon = model.reconstruction(x_org[:8])
+            writer.add_images("image_reconstruction", recon, epoch)
+
+            # Sample data
+            sample = model.sample(32)
+            writer.add_images("image_from_latent", sample, epoch)
 
     # -------------------------------------------------------------------------
     # 5. Summary
@@ -107,6 +109,7 @@ def init_args():
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--plot-interval", type=int, default=100)
 
     return parser.parse_args()
 
