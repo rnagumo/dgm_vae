@@ -64,7 +64,7 @@ class BaseVAE:
         self.channel_num = channel_num
         self.z_dim = z_dim
         self.device = device
-        self.beta = 1
+        self.beta = beta
 
         # Distributions
         self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
