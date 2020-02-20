@@ -52,8 +52,11 @@ def train(args, logger, config):
     params = {"channel_num": channel_num, "device": device}
 
     if args.model == "vae":
-        from model.base_vae import BaseVAE
+        from model.base import BaseVAE
         model = BaseVAE(**config["vae_params"], **params)
+    elif args.model == "beta":
+        from model.betavae import BetaVAE
+        model = BetaVAE(**config["beta_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
