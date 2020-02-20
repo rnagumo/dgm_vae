@@ -8,7 +8,6 @@ from torch.utils import tensorboard
 
 from dataset.mnist import init_mnist_dataloader
 from utils.utils import init_logger, load_config, check_logdir
-from model.base_vae import BaseVAE
 
 
 def train(args, logger, config):
@@ -51,7 +50,12 @@ def train(args, logger, config):
     # -------------------------------------------------------------------------
 
     params = {"channel_num": channel_num, "device": device}
-    model = BaseVAE(**config["vae_params"], **params)
+
+    if args.model == "vae":
+        from model.base_vae import BaseVAE
+        model = BaseVAE(**config["vae_params"], **params)
+    else:
+        raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # -------------------------------------------------------------------------
     # 4. Training
