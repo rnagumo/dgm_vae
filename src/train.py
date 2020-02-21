@@ -75,12 +75,9 @@ def train(args, logger, config):
         test_loss = model.run(test_loader, training=False)
 
         # Log
-        writer.add_scalar("loss/train_loss", train_loss["loss"], epoch)
-        writer.add_scalar("loss/test_loss", test_loss["loss"], epoch)
-        writer.add_scalar("training/cross_entropy",
-                          train_loss["ce_loss"], epoch)
-        writer.add_scalar("training/kl_divergence",
-                          train_loss["kl_loss"], epoch)
+        for label, losses in zip(["train", "test"], [train_loss, test_loss]):
+            for key, value in losses.items():
+                writer.add_scalar(f"{label}/{key}", value, epoch)
 
         logger.info(f"Train loss = {train_loss['loss']}")
         logger.info(f"Test loss = {test_loss['loss']}")
@@ -102,8 +99,8 @@ def train(args, logger, config):
     # Log hyper-parameters
     hparam_dict = vars(args)
     hparam_dict.update(config[f"{args.model}_params"])
-    metric_dict = {"train_loss": train_loss["loss"],
-                   "test_loss": test_loss["loss"]}
+    metric_dict = {"summary/train_loss": train_loss["loss"],
+                   "summary/test_loss": test_loss["loss"]}
     writer.add_hparams(hparam_dict, metric_dict)
 
     writer.close()
