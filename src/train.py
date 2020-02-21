@@ -57,6 +57,9 @@ def train(args, logger, config):
     elif args.model == "beta":
         from model.betavae import BetaVAE
         model = BetaVAE(**config["beta_params"], **params)
+    elif args.model == "factor":
+        from model.factorvae import FactorVAE
+        model = FactorVAE(**config["factor_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
