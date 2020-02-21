@@ -9,7 +9,6 @@ import tqdm
 
 import torch
 from torch import nn
-from torch.nn import functional as F
 
 import pixyz.distributions as pxd
 import pixyz.losses as pxl
@@ -39,7 +38,7 @@ class Discriminator(pxd.Deterministic):
 
     def forward(self, z):
         logits = self.model(z)
-        probs = F.softmax(logits)
+        probs = torch.sigmoid(logits)
         t = torch.clamp(probs, 1e-6, 1 - 1e-6)
         return {"t": t}
 
