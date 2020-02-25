@@ -108,7 +108,7 @@ def train(args, logger, config):
 
 def init_args():
     parser = argparse.ArgumentParser(description="VAE training")
-    parser.add_argument("--logdir", type=str, default="../logs/vae/tmp/")
+    parser.add_argument("--logdir", type=str, default="../logs/tmp/")
     parser.add_argument("--root", type=str, default="../data/mnist/")
     parser.add_argument("--config", type=str, default="./config.json")
     parser.add_argument("--model", type=str, default="vae")
