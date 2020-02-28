@@ -1,8 +1,6 @@
 
 """Base VAE class"""
 
-import tqdm
-
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
@@ -111,7 +109,7 @@ class BaseVAE:
         ce_loss = 0
         kl_loss = 0
 
-        for x in tqdm.tqdm(loader):
+        for x in loader:
             if isinstance(x, (tuple, list)):
                 x = x[0]
             x = x.to(self.device)
