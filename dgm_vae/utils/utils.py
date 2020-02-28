@@ -9,11 +9,14 @@ import time
 
 def init_logger(path):
     """Initializes logger.
+
     Set stream and file handler with specified format.
+
     Parameters
     ----------
     path : str
         Path to logging file directory
+
     Returns
     -------
     logger : logging.Logger
@@ -46,10 +49,12 @@ def init_logger(path):
 
 def load_config(path):
     """Loads config json file.
+
     Parameters
     ----------
     path : str
         Path to json file
+
     Returns
     -------
     config : dict
@@ -64,6 +69,7 @@ def load_config(path):
 
 def check_logdir(path):
     """Checks existence of logdir and mkdir.
+
     Parameters
     ----------
     path : str

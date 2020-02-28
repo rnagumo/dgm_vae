@@ -23,15 +23,22 @@ class Encoder(pxd.Normal):
         self.fc21 = nn.Linear(256, z_dim)
         self.fc22 = nn.Linear(256, z_dim)
 
+        self.fc3 = nn.Linear(64*64, z_dim)
+
     def forward(self, x):
-        h = F.relu(self.conv1(x))
-        h = F.relu(self.conv2(h))
-        h = F.relu(self.conv3(h))
-        h = F.relu(self.conv4(h))
-        h = h.view(-1, 1024)
-        h = F.relu(self.fc1(h))
-        loc = self.fc21(h)
-        scale = F.softplus(self.fc22(h))
+        # h = F.relu(self.conv1(x))
+        # h = F.relu(self.conv2(h))
+        # h = F.relu(self.conv3(h))
+        # h = F.relu(self.conv4(h))
+        # h = h.view(-1, 1024)
+        # h = F.relu(self.fc1(h))
+        # loc = self.fc21(h)
+        # scale = F.softplus(self.fc22(h))
+
+        h = x.view(-1, 64*64)
+        loc = self.fc3(h)
+        scale = F.softplus(loc)
+
         return {"loc": loc, "scale": scale}
 
 
@@ -47,14 +54,19 @@ class Decoder(pxd.Bernoulli):
         self.deconv4 = nn.ConvTranspose2d(32, channel_num, 4, stride=2,
                                           padding=1)
 
+        self.fc3 = nn.Linear(z_dim, 64*64)
+
     def forward(self, z):
-        h = F.relu(self.fc1(z))
-        h = F.relu(self.fc2(h))
-        h = h.view(-1, 64, 4, 4)
-        h = F.relu(self.deconv1(h))
-        h = F.relu(self.deconv2(h))
-        h = F.relu(self.deconv3(h))
-        probs = torch.sigmoid(self.deconv4(h))
+        # h = F.relu(self.fc1(z))
+        # h = F.relu(self.fc2(h))
+        # h = h.view(-1, 64, 4, 4)
+        # h = F.relu(self.deconv1(h))
+        # h = F.relu(self.deconv2(h))
+        # h = F.relu(self.deconv3(h))
+        # probs = torch.sigmoid(self.deconv4(h))
+
+        h = self.fc3(z)
+        probs = h.view(-1, 1, 64, 64)
         return {"probs": probs}
 
 
