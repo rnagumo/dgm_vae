@@ -11,4 +11,4 @@ Deep Generative Model: Variational Auto-Encoder
 # Ref
 
 Preferred Networks
-[Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/)blog/disentangled-represetation/
+[Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
