@@ -4,10 +4,11 @@
 import argparse
 
 import torch
-from torch.utils import tensorboard
+import tensorboardX as tb
 
-from dataset.mnist import init_mnist_dataloader
-from utils.utils import init_logger, load_config, check_logdir
+import dgm_vae.dataset as dvd
+import dgm_vae.model as dvm
+import dgm_vae.utils as dvu
 
 
 def train(args, logger, config):
@@ -25,14 +26,14 @@ def train(args, logger, config):
     torch.manual_seed(args.seed)
 
     # Tensorboard writer
-    writer = tensorboard.SummaryWriter(args.logdir)
+    writer = tb.SummaryWriter(args.logdir)
 
     # -------------------------------------------------------------------------
     # 2. Data
     # -------------------------------------------------------------------------
 
     # Loader
-    train_loader, test_loader = init_mnist_dataloader(
+    train_loader, test_loader = dvd.init_mnist_dataloader(
         args.root, args.batch_size, use_cuda)
 
     # Data dimension, (batch_size, channel_num, height, width)
@@ -52,14 +53,11 @@ def train(args, logger, config):
     params = {"channel_num": channel_num, "device": device}
 
     if args.model == "vae":
-        from model.base import BaseVAE
-        model = BaseVAE(**config["vae_params"], **params)
+        model = dvm.BaseVAE(**config["vae_params"], **params)
     elif args.model == "beta":
-        from model.betavae import BetaVAE
-        model = BetaVAE(**config["beta_params"], **params)
+        model = dvm.BetaVAE(**config["beta_params"], **params)
     elif args.model == "factor":
-        from model.factorvae import FactorVAE
-        model = FactorVAE(**config["factor_params"], **params)
+        model = dvm.FactorVAE(**config["factor_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
@@ -126,15 +124,15 @@ def main():
     args = init_args()
 
     # Make logdir
-    check_logdir(args.logdir)
+    dvu.check_logdir(args.logdir)
 
     # Logger
-    logger = init_logger(args.logdir)
+    logger = dvu.init_logger(args.logdir)
     logger.info("Start logger")
     logger.info(f"Commant line args: {args}")
 
     # Config
-    config = load_config(args.config)
+    config = dvu.load_config(args.config)
     logger.info(f"Configs: {config}")
 
     try:
