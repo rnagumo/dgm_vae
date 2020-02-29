@@ -90,4 +90,12 @@ class DIPVAE(BaseVAE):
         self.dip = DipLoss(self.q, lmd_od, lmd_d, dip_type)
 
     def _eval_loss(self, x_dict, **kwargs):
-        raise NotImplementedError
+
+        ce_loss = self.ce.eval(x_dict).mean()
+        kl_loss = self.kl.eval(x_dict).mean()
+        dip_loss = self.dip.eval(x_dict)
+        loss = ce_loss + kl_loss + dip_loss
+        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
+                     "kl_loss": kl_loss.item(), "dip_loss": dip_loss.item()}
+
+        return loss, loss_dict
