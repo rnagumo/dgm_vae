@@ -167,7 +167,7 @@ class BaseVAE:
             z = self.encoder.sample(x, return_all=False)
             x_recon = self.decoder.sample_mean(z).cpu()
 
-        return torch.cat([x, x_recon])
+        return z["z"], x_recon
 
     def sample(self, batch_n=1):
 
@@ -175,4 +175,4 @@ class BaseVAE:
             z = self.prior.sample(batch_n=batch_n)
             x = self.decoder.sample_mean(z).cpu()
 
-        return x
+        return z["z"], x

@@ -88,15 +88,19 @@ def train(args, logger, config):
 
         # Sample data
         if epoch % args.plot_interval == 0:
+            # Sample data
             logger.info("Sample data")
+            z_sample, x_sample = model.sample(32)
+            writer.add_images(
+                "sample/latnet", z_sample.view(32, 1, -1, 1), epoch)
+            writer.add_images("sample/observable", x_sample, epoch)
 
             # Reconstruction data
-            recon = model.reconstruction(x_org[:8])
-            writer.add_images("image_reconstruction", recon, epoch)
-
-            # Sample data
-            sample = model.sample(32)
-            writer.add_images("image_from_latent", sample, epoch)
+            logger.info("Reconstruct data")
+            z, x_recon = model.reconstruction(x_org[:8])
+            img = torch.cat([x_org[:8], x_recon])
+            writer.add_images("reconstruct/latent", z.view(8, 1, -1, 1), epoch)
+            writer.add_images("reconstruct/observable", img, epoch)
 
         # Save model
         if epoch % args.save_interval == 0:
