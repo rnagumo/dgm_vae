@@ -5,7 +5,7 @@ Disentangling by Factorising
 http://arxiv.org/abs/1802.05983
 """
 
-import tqdm
+import collections
 
 import torch
 from torch import nn
@@ -83,15 +83,12 @@ class FactorVAE(BaseVAE):
         return loss, loss_dict
 
     def run(self, loader, training=True):
+        """Overrides super().run() because tc needs to be trained."""
 
         # Returned value
-        total_loss = 0
-        ce_loss = 0
-        kl_loss = 0
-        tc_loss = 0
-        d_loss = 0
+        loss_dict = collections.defaultdict(float)
 
-        for x in tqdm.tqdm(loader):
+        for x in loader:
             if isinstance(x, (tuple, list)):
                 x = x[0]
             x = x.to(self.device)
@@ -102,24 +99,19 @@ class FactorVAE(BaseVAE):
 
             # Calculate loss
             if training:
-                loss_dict = self.train({"x": x[:len_x], "x_shf": x[len_x:]})
-                d_loss = self.tc.train({"x": x[:len_x], "x_shf": x[len_x:]})
+                _batch_loss = self.train({"x": x[:len_x], "x_shf": x[len_x:]})
+                _d_loss = self.tc.train({"x": x[:len_x], "x_shf": x[len_x:]})
             else:
-                loss_dict = self.test({"x": x[:len_x], "x_shf": x[len_x:]})
-                d_loss = self.tc.test({"x": x[:len_x], "x_shf": x[len_x:]})
+                _batch_loss = self.test({"x": x[:len_x], "x_shf": x[len_x:]})
+                _d_loss = self.tc.test({"x": x[:len_x], "x_shf": x[len_x:]})
 
-            # Log
-            total_loss += loss_dict["loss"] * minibatch_size
-            ce_loss += loss_dict["ce_loss"] * minibatch_size
-            kl_loss += loss_dict["kl_loss"] * minibatch_size
-            tc_loss += loss_dict["tc_loss"] * minibatch_size
-            d_loss += d_loss.item() * minibatch_size
+            # Accumulate minibatch loss
+            for key in _batch_loss:
+                loss_dict[key] += _batch_loss[key] * minibatch_size
+            loss_dict["d_loss"] += _d_loss.item() * minibatch_size
 
-        total_loss /= len(loader.dataset)
-        ce_loss /= len(loader.dataset)
-        kl_loss /= len(loader.dataset)
-        tc_loss /= len(loader.dataset)
-        d_loss /= len(loader.dataset)
+        # Devide by data size
+        for key in loss_dict:
+            loss_dict[key] /= len(loader.dataset)
 
-        return {"loss": total_loss, "ce_loss": ce_loss, "kl_loss": kl_loss,
-                "tc_loss": tc_loss, "d_loss": d_loss}
+        return loss_dict
