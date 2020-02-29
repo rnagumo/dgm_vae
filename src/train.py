@@ -20,7 +20,7 @@ def train(args, logger, config):
     # -------------------------------------------------------------------------
 
     # Cuda setting
-    use_cuda = args.cuda and torch.cuda.is_available()
+    use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     logger.info(f"Device: {device}")
 
@@ -136,7 +136,6 @@ def init_args():
     parser.add_argument("--root", type=str, default="../data/mnist/")
     parser.add_argument("--config", type=str, default="./config.json")
     parser.add_argument("--model", type=str, default="vae")
-    parser.add_argument("--cuda", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=5)
