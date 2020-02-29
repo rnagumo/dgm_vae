@@ -1,6 +1,8 @@
 
 """Base VAE class"""
 
+import collections
+
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
@@ -105,9 +107,7 @@ class BaseVAE:
     def run(self, loader, training=True):
 
         # Returned value
-        total_loss = 0
-        ce_loss = 0
-        kl_loss = 0
+        loss_dict = collections.defaultdict(float)
 
         for x in loader:
             if isinstance(x, (tuple, list)):
@@ -119,20 +119,19 @@ class BaseVAE:
 
             # Calculate loss
             if training:
-                loss_dict = self.train({"x": x})
+                _batch_loss = self.train({"x": x})
             else:
-                loss_dict = self.test({"x": x})
+                _batch_loss = self.test({"x": x})
 
-            # Log
-            total_loss += loss_dict["loss"] * minibatch_size
-            ce_loss += loss_dict["ce_loss"] * minibatch_size
-            kl_loss += loss_dict["kl_loss"] * minibatch_size
+            # Accumulate minibatch loss
+            for key in _batch_loss:
+                loss_dict[key] += _batch_loss[key] * minibatch_size
 
-        total_loss /= len(loader.dataset)
-        ce_loss /= len(loader.dataset)
-        kl_loss /= len(loader.dataset)
+        # Devide by data size
+        for key in loss_dict:
+            loss_dict[key] /= len(loader.dataset)
 
-        return {"loss": total_loss, "ce_loss": ce_loss, "kl_loss": kl_loss}
+        return loss_dict
 
     def train(self, x_dict={}, **kwargs):
 
