@@ -63,6 +63,10 @@ def train(args, logger, config):
         model = dvm.BetaVAE(**config["beta_params"], **params)
     elif args.model == "factor":
         model = dvm.FactorVAE(**config["factor_params"], **params)
+    elif args.model == "dip-i":
+        model = dvm.DIPVAE(**config["dip-i_params"], **params)
+    elif args.model == "dip-ii":
+        model = dvm.DIPVAE(**config["dip-ii_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
