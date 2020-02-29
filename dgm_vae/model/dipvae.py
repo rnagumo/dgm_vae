@@ -71,11 +71,11 @@ class DipLoss(Loss):
         cov_dip_off_diag = (cov_dip
                             - cov_dip_diag * torch.eye(cov_dip_diag.size(0)))
 
-        # Calculate moment
-        dip = (self.lmd_od * (cov_dip_off_diag ** 2).sum()
-               + self.lmd_d * ((cov_dip_diag - 1) ** 2).sum())
+        # Calculate loss
+        loss = (self.lmd_od * (cov_dip_off_diag ** 2).sum()
+                + self.lmd_d * ((cov_dip_diag - 1) ** 2).sum())
 
-        return dip
+        return loss, x_dict
 
     @property
     def _symbol(self):
@@ -87,7 +87,7 @@ class DIPVAE(BaseVAE):
                  **kwargs):
         super().__init__(channel_num, z_dim, device)
 
-        self.dip = DipLoss(self.q, lmd_od, lmd_d, dip_type)
+        self.dip = DipLoss(self.encoder, lmd_od, lmd_d, dip_type)
 
     def _eval_loss(self, x_dict, **kwargs):
 
