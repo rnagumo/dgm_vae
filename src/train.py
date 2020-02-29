@@ -2,6 +2,8 @@
 """Training method"""
 
 import argparse
+import datetime
+import pathlib
 
 import torch
 import tensorboardX as tb
@@ -27,6 +29,9 @@ def train(args, logger, config):
 
     # Tensorboard writer
     writer = tb.SummaryWriter(args.logdir)
+
+    # Timer
+    timer = datetime.datetime.now()
 
     # -------------------------------------------------------------------------
     # 2. Data
@@ -70,18 +75,21 @@ def train(args, logger, config):
 
         # Training
         train_loss = model.run(train_loader, training=True)
-        test_loss = model.run(test_loader, training=False)
-
-        # Log
-        for label, losses in zip(["train", "test"], [train_loss, test_loss]):
-            for key, value in losses.items():
-                writer.add_scalar(f"{label}/{key}", value, epoch)
-
         logger.info(f"Train loss = {train_loss['loss']}")
-        logger.info(f"Test loss = {test_loss['loss']}")
+        for key, value in train_loss.items():
+            writer.add_scalar(f"train/{key}", value, epoch)
+
+        # Test
+        if epoch % args.test_interval == 0:
+            test_loss = model.run(test_loader, training=False)
+            logger.info(f"Test loss = {test_loss['loss']}")
+            for key, value in test_loss.items():
+                writer.add_scalar(f"test/{key}", value, epoch)
 
         # Sample data
         if epoch % args.plot_interval == 0:
+            logger.info("Sample data")
+
             # Reconstruction data
             recon = model.reconstruction(x_org[:8])
             writer.add_images("image_reconstruction", recon, epoch)
@@ -90,6 +98,15 @@ def train(args, logger, config):
             sample = model.sample(32)
             writer.add_images("image_from_latent", sample, epoch)
 
+        # Save model
+        if epoch % args.save_interval == 0:
+            logger.info(f"Save model at epoch {epoch}")
+            t = timer.strftime("%Y%m%d%H%M%S")
+            filename = f"{args.model}_{t}_epoch_{epoch}.pt"
+            torch.save({"distributions_dict": model.distributions.state_dict(),
+                        "optimizer_dict": model.optimizer.state_dict()},
+                       pathlib.Path(args.logdir, filename))
+
     # -------------------------------------------------------------------------
     # 5. Summary
     # -------------------------------------------------------------------------
@@ -97,8 +114,9 @@ def train(args, logger, config):
     # Log hyper-parameters
     hparam_dict = vars(args)
     hparam_dict.update(config[f"{args.model}_params"])
-    metric_dict = {"summary/train_loss": train_loss["loss"],
-                   "summary/test_loss": test_loss["loss"]}
+    metric_dict = {"summary/train_loss": train_loss["loss"]}
+    if "test_loss" in locals():
+        metric_dict.update({"summary/test_loss": test_loss["loss"]})
     writer.add_hparams(hparam_dict, metric_dict)
 
     writer.close()
@@ -114,7 +132,9 @@ def init_args():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--test-interval", type=int, default=10)
     parser.add_argument("--plot-interval", type=int, default=100)
+    parser.add_argument("--save-interval", type=int, default=100)
 
     return parser.parse_args()
 
@@ -139,8 +159,8 @@ def main():
         train(args, logger, config)
     except Exception as e:
         logger.exception(f"Run function error: {e}")
-
-    logger.info("End logger")
+    finally:
+        logger.info("End logger")
 
 
 if __name__ == "__main__":
