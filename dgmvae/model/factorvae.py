@@ -73,10 +73,10 @@ class FactorVAE(BaseVAE):
     def _eval_loss(self, x_dict, **kwargs):
 
         ce_loss = self.ce.eval(x_dict).mean()
-        kl_loss = self.kl.eval(x_dict).mean()
-        tc_loss = self.tc.eval(x_dict)
+        kl_loss = self.beta * self.kl.eval(x_dict).mean()
+        tc_loss = self.gamma * self.tc.eval(x_dict)
 
-        loss = ce_loss + kl_loss + self.gamma * tc_loss
+        loss = ce_loss + kl_loss + tc_loss
         loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
                      "kl_loss": kl_loss.item(), "tc_loss": tc_loss.item()}
 
