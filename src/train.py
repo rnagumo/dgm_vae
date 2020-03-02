@@ -8,9 +8,9 @@ import pathlib
 import torch
 import tensorboardX as tb
 
-import dgm_vae.dataset as dvd
-import dgm_vae.model as dvm
-import dgm_vae.utils as dvu
+import dgmvae.dataset as dvd
+import dgmvae.model as dvm
+import dgmvae.utils as dvu
 
 
 def train(args, logger, config):
@@ -67,6 +67,8 @@ def train(args, logger, config):
         model = dvm.DIPVAE(**config["dip-i_params"], **params)
     elif args.model == "dip-ii":
         model = dvm.DIPVAE(**config["dip-ii_params"], **params)
+    elif args.model == "joint":
+        model = dvm.JointVAE(**config["joint_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
