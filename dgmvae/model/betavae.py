@@ -23,8 +23,10 @@ class BetaVAE(BaseVAE):
     def _eval_loss(self, x_dict, **kwargs):
 
         ce_loss = self.ce.eval(x_dict).mean()
-        kl_loss = self.kl.eval(x_dict).mean()
-        loss = ce_loss + self.beta * torch.abs(kl_loss - self.c)
+        _kl_loss = self.kl.eval(x_dict).mean()
+        kl_loss = self.beta * torch.abs(_kl_loss - self.c)
+
+        loss = ce_loss + kl_loss
         loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
                      "kl_loss": kl_loss.item()}
 
