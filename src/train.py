@@ -159,7 +159,7 @@ def main():
     # Logger
     logger = dvu.init_logger(args.logdir)
     logger.info("Start logger")
-    logger.info(f"Commant line args: {args}")
+    logger.info(f"Command line args: {args}")
 
     # Config
     config = dvu.load_config(args.config)
