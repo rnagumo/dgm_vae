@@ -64,7 +64,7 @@ class FactorVAE(BaseVAE):
         self.encoder_shf = InferenceShuffleDim(self.encoder).to(device)
 
         # Discriminator
-        self.disc = Discriminator(z_dim)
+        self.disc = Discriminator(z_dim).to(device)
 
         # Loss
         self.tc = pxl.AdversarialKullbackLeibler(
