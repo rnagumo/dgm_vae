@@ -57,7 +57,7 @@ class DiscreteEncoder(pxd.RelaxedCategorical):
 
     def forward(self, h):
         logits = self.fc1(h)
-        probs = torch.sigmoid(logits)
+        probs = F.softmax(logits, dim=1)
         probs = torch.clamp(probs, 1e-6, 1 - 1e-6)
         return {"probs": probs}
 
