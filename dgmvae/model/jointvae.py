@@ -13,7 +13,7 @@ import pixyz.distributions as pxd
 import pixyz.losses as pxl
 
 from .base import BaseVAE
-from ..loss.discrete_kl import DiscreteKullbackLeibler
+from ..loss.discrete_kl import CategoricalKullbackLeibler
 
 
 class EncoderFunction(pxd.Deterministic):
@@ -117,7 +117,7 @@ class JointVAE(BaseVAE):
         self.ce = pxl.CrossEntropy(self.encoder_cont * self.encoder_disc,
                                    self.decoder)
         self.kl_cont = pxl.KullbackLeibler(self.encoder_cont, self.prior_cont)
-        self.kl_disc = DiscreteKullbackLeibler(
+        self.kl_disc = CategoricalKullbackLeibler(
             self.encoder_disc, self.prior_disc)
 
         # Coefficient for kl

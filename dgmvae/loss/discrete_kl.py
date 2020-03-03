@@ -23,7 +23,7 @@ def _kl_categorical_categorical(p, q):
     return t.sum(-1)
 
 
-class DiscreteKullbackLeibler(Loss):
+class CategoricalKullbackLeibler(Loss):
     def __init__(self, p, q, input_var=None, dim=None):
         self.dim = dim
         super().__init__(p, q, input_var)
