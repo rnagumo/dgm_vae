@@ -151,5 +151,5 @@ class AAE(BaseVAE):
 
         # Adversarial loss
         self.disc = Discriminator(z_dim).to(device)
-        self.tc = pxl.AdversarialKullbackLeibler(
+        self.tc = pxl.AdversarialJensenShannon(
             self.encoder_cont, self.prior_cont, self.disc)
