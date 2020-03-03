@@ -106,6 +106,9 @@ class BaseVAE:
 
     def run(self, loader, training=True):
 
+        # Dataset size
+        dataset_size = len(loader.dataset)
+
         # Returned value
         loss_dict = collections.defaultdict(float)
 
@@ -117,11 +120,14 @@ class BaseVAE:
             # Mini-batch size
             minibatch_size = x.size(0)
 
+            # Input data
+            x_dict = {"x": x, "dataset_size": dataset_size}
+
             # Calculate loss
             if training:
-                _batch_loss = self.train({"x": x})
+                _batch_loss = self.train(x_dict)
             else:
-                _batch_loss = self.test({"x": x})
+                _batch_loss = self.test(x_dict)
 
             # Accumulate minibatch loss
             for key in _batch_loss:
@@ -129,7 +135,7 @@ class BaseVAE:
 
         # Devide by data size
         for key in loss_dict:
-            loss_dict[key] /= len(loader.dataset)
+            loss_dict[key] /= dataset_size
 
         return loss_dict
 
