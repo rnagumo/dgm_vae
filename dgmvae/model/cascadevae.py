@@ -4,6 +4,9 @@
 Learning Discrete and Continuous Factors of Data via Alternating
 Disentanglement
 http://arxiv.org/abs/1905.09432
+
+code by authors (TensorFlow)
+https://github.com/snu-mllab/DisentanglementICML19
 """
 
 from .base import BaseVAE
