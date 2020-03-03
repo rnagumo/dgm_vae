@@ -6,3 +6,4 @@ from .factorvae import FactorVAE
 from .dipvae import DIPVAE
 from .jointvae import JointVAE
 from .aae import AAE
+from .avb import AVB

@@ -73,6 +73,8 @@ def train(args, logger, config):
         model = dvm.TCVAE(**config["tcvae_params"], **params)
     elif args.model == "aae":
         model = dvm.AAE(**config["aae_params"], **params)
+    elif args.model == "avb":
+        model = dvm.AVB(**config["avb_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
