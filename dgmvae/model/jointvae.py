@@ -160,7 +160,7 @@ class JointVAE(BaseVAE):
 
         return loss, loss_dict
 
-    def reconstruction(self, x, concat=True):
+    def reconstruct(self, x, concat=True):
 
         with torch.no_grad():
             x = x.to(self.device)

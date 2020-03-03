@@ -105,9 +105,9 @@ def train(args, logger, config):
                 "sample/latnet", z_sample.view(32, 1, -1, 1), epoch)
             writer.add_images("sample/observable", x_sample, epoch)
 
-            # Reconstruction data
+            # reconstruct data
             logger.info("Reconstruct data")
-            z, x_recon = model.reconstruction(x_org[:8])
+            z, x_recon = model.reconstruct(x_org[:8])
             img = torch.cat([x_org[:8], x_recon])
             writer.add_images("reconstruct/latent", z.view(8, 1, -1, 1), epoch)
             writer.add_images("reconstruct/observable", img, epoch)

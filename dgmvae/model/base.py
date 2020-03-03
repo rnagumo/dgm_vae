@@ -165,7 +165,7 @@ class BaseVAE:
 
         return loss_dict
 
-    def reconstruction(self, x):
+    def reconstruct(self, x):
 
         with torch.no_grad():
             x = x.to(self.device)
