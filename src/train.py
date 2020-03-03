@@ -69,6 +69,8 @@ def train(args, logger, config):
         model = dvm.DIPVAE(**config["dip-ii_params"], **params)
     elif args.model == "joint":
         model = dvm.JointVAE(**config["joint_params"], **params)
+    elif args.model == "tcvae":
+        model = dvm.TCVAE(**config["tcvae_params"], **params)
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 

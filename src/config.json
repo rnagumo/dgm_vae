@@ -34,5 +34,11 @@
         "temperature": 0.1,
         "gamma_cont": 30,
         "gamma_disc": 30
+    },
+    "tcvae_params": {
+        "z_dim": 10,
+        "alpha": 1,
+        "beta": 1,
+        "gamma": 1
     }
 }
