@@ -7,16 +7,16 @@ Adversarial Autoencoders
 http://arxiv.org/abs/1511.05644
 """
 
+import collections
 
 import torch
-from torch import nn, optim
+from torch import nn
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
 import pixyz.losses as pxl
 
 from .base import BaseVAE
-from ..loss.discrete_kl import CategoricalKullbackLeibler
 
 
 class Discriminator(pxd.Deterministic):
@@ -121,7 +121,7 @@ class AAE(BaseVAE):
 
         self.c_dim = c_dim
 
-        # Distributions
+        # Prior
         self.prior_cont = pxd.Normal(
             loc=torch.tensor(0.), scale=torch.tensor(1.),
             var=["z"], features_shape=[z_dim]).to(device)
@@ -143,13 +143,83 @@ class AAE(BaseVAE):
         ])
 
         # Loss
-        self.ce = pxl.CrossEntropy(self.encoder_cont * self.encoder_disc,
-                                   self.decoder)
-        self.kl_cont = pxl.KullbackLeibler(self.encoder_cont, self.prior_cont)
-        self.kl_disc = CategoricalKullbackLeibler(
-            self.encoder_disc, self.prior_disc)
+        self.ce = pxl.CrossEntropy(self.encoder_cont, self.decoder)
 
         # Adversarial loss
         self.disc = Discriminator(z_dim).to(device)
-        self.tc = pxl.AdversarialJensenShannon(
+        self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder_cont, self.prior_cont, self.disc)
+
+    def _eval_loss(self, x_dict, **kwargs):
+
+        # Calculate loss
+        ce_loss = self.ce.eval(x_dict).mean()
+        js_loss = self.adv_js.eval(x_dict).mean()
+        loss = ce_loss + js_loss
+
+        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
+                     "js_loss": js_loss.item()}
+
+        return loss, loss_dict
+
+    def run(self, loader, training=True):
+        # Returned value
+        loss_dict = collections.defaultdict(float)
+
+        for x in loader:
+            if isinstance(x, (tuple, list)):
+                x = x[0]
+            x = x.to(self.device)
+
+            # Mini-batch size
+            minibatch_size = x.size(0)
+
+            # Sample h (surrogate latent) and c (categorical latent)
+            x_dict = {"x": x}
+            x_dict = (self.encoder_disc * self.encoder_func).sample(x_dict)
+
+            # Calculate loss
+            if training:
+                _batch_loss = self.train(x_dict)
+                _d_loss = self.adv_js.train(x_dict)
+            else:
+                _batch_loss = self.test(x_dict)
+                _d_loss = self.adv_js.test(x_dict)
+
+            # Accumulate minibatch loss
+            for key in _batch_loss:
+                loss_dict[key] += _batch_loss[key] * minibatch_size
+            loss_dict["d_loss"] += _d_loss.item() * minibatch_size
+
+        # Devide by data size
+        for key in loss_dict:
+            loss_dict[key] /= len(loader.dataset)
+
+        return loss_dict
+
+    def reconstruction(self, x, concat=True):
+
+        with torch.no_grad():
+            x = x.to(self.device)
+            h = self.encoder_func.sample(x, return_all=False)
+            z = self.encoder_cont.sample(h, return_all=False)
+            c = self.encoder_disc.sample(h, return_all=False)
+            x_recon = self.decoder.sample_mean(
+                {"z": z["z"], "c": c["c"]}).cpu()
+
+        if concat:
+            return torch.cat([z["z"], c["c"]]), x_recon
+
+        return z["z"], c["c"], x_recon
+
+    def sample(self, batch_n=1, concat=True):
+
+        with torch.no_grad():
+            z = self.prior_cont.sample(batch_n=batch_n)
+            c = self.prior_disc.sample(batch_n=batch_n)
+            x = self.decoder.sample_mean({"z": z["z"], "c": c["c"]}).cpu()
+
+        if concat:
+            return torch.cat([z["z"], c["c"]]), x
+
+        return z["z"], x
