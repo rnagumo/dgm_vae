@@ -69,7 +69,7 @@ class DipLoss(Loss):
         # Get diagonal and off-diagonal elements
         cov_dip_diag = torch.diagonal(cov_dip)
         cov_dip_off_diag = (cov_dip
-                            - cov_dip_diag * torch.eye(cov_dip_diag.size(0)))
+                            - torch.eye(cov_dip_diag.size(0)) * cov_dip_diag)
 
         # Calculate loss
         loss = (self.lmd_od * (cov_dip_off_diag ** 2).sum()
