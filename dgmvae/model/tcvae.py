@@ -8,6 +8,7 @@ code by author
 https://github.com/rtqichen/beta-tcvae
 """
 
+import math
 import torch
 
 from .base import BaseVAE
@@ -44,8 +45,7 @@ class TCVAE(BaseVAE):
         # log NM
         dataset_size = x_dict["dataset_size"]
         batch_size = x_dict["x"].size(0)
-        lognm = torch.log(
-            torch.tensor([dataset_size * batch_size], dtype=torch.float32))
+        lognm = math.log(dataset_size * batch_size)
 
         # log \prod q(z_j)
         log_qz_prodmarginal = (torch.logsumexp(_logqz, 1) - lognm).sum(1)
