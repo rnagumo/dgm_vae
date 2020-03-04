@@ -28,7 +28,7 @@ class AVBDiscriminator(pxd.Deterministic):
     def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["x", "z"], var=["t"])
 
-        self.x_disc = nn.Sequential(
+        self.disc_x = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
             nn.Conv2d(32, 32, 4, stride=2, padding=1),
             nn.Conv2d(32, 64, 4, stride=2, padding=1),
@@ -36,7 +36,7 @@ class AVBDiscriminator(pxd.Deterministic):
         )
         self.fc_x = nn.Linear(1024, 256)
 
-        self.z_disc = nn.Sequential(
+        self.disc_z = nn.Sequential(
             nn.Linear(z_dim, 512),
             nn.Linear(512, 512),
             nn.Linear(512, 256),
@@ -45,9 +45,9 @@ class AVBDiscriminator(pxd.Deterministic):
         self.fc = nn.Linear(512, 1)
 
     def forward(self, x, z):
-        h_x = self.x_disc(x)
+        h_x = self.disc_x(x)
         h_x = self.fc_x(h_x.view(-1, 1024))
-        h_z = self.z_disc(z)
+        h_z = self.disc_z(z)
         logits = self.fc(torch.cat([h_x, h_z], dim=1))
         probs = torch.sigmoid(logits)
         t = torch.clamp(probs, 1e-6, 1 - 1e-6)
@@ -183,3 +183,12 @@ class AVB(BaseVAE):
             loss_dict[key] /= len(loader.dataset)
 
         return loss_dict
+
+    def reconstruct(self, x):
+
+        with torch.no_grad():
+            x = x.to(self.device)
+            z = (self.encoder * self.normal).sample(x, return_all=False)
+            x_recon = self.decoder.sample_mean(z).cpu()
+
+        return z["z"], x_recon
