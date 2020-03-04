@@ -73,8 +73,9 @@ class DipLoss(Loss):
             cov_dip = _get_e_cov(params["scale"]) + _get_cov_mu(params["loc"])
 
         # Get diagonal and off-diagonal elements
-        cov_dip_diag = cov_dip * torch.eye(cov_dip.size(0))
-        cov_dip_off_diag = cov_dip - cov_dip_diag
+        cov_dip_diag = torch.diag(cov_dip)
+        eye = torch.eye(cov_dip.size(0), device=cov_dip.device)
+        cov_dip_off_diag = cov_dip - cov_dip_diag * eye
 
         # Calculate loss
         loss = (self.lmd_od * (cov_dip_off_diag ** 2).sum()
