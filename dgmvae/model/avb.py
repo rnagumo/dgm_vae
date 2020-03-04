@@ -190,8 +190,8 @@ class AVB(BaseVAE):
 
         with torch.no_grad():
             x = x.to(self.device)
-            x_dict = self.normal.sample({"x": x}, batch_n=batch_n)
-            z = self.encoder.sample(x_dict, return_all=False)
+            e = self.normal.sample(batch_n=batch_n)
+            z = self.encoder.sample({"x": x, "e": e}, return_all=False)
             x_recon = self.decoder.sample_mean(z).cpu()
 
         return z["z"], x_recon
