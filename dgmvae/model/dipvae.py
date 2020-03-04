@@ -45,7 +45,7 @@ def _get_e_cov(scale):
     """
 
     # Cov
-    cov = scale.unsqueeze(2) * torch.eye(scale.size(1))
+    cov = scale.unsqueeze(2) * torch.eye(scale.size(1), device=scale.device)
 
     return cov.sum(dim=0)
 
