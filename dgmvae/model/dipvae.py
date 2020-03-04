@@ -19,7 +19,10 @@ def _get_cov_mu(mu):
 
     cov(mu) = E[mu mu^T] - E[mu]E[mu]^T
 
-    mu: [batch_size, latent_dim]
+    Input
+        mu: [batch_size, latent_dim]
+    Output
+        cov(mu): [latent_dim, latent_dim]
     """
 
     # E[mu mu^T]
@@ -35,7 +38,10 @@ def _get_cov_mu(mu):
 def _get_e_cov(scale):
     """Computes expectation of cov E[Cov_encoder] from scale
 
-    sclae: [batch_size, latent_dim]
+    Input
+        scale: [batch_size, latent_dim]
+    Output
+        cov: [latent_dim, latent_dim]
     """
 
     # Cov
