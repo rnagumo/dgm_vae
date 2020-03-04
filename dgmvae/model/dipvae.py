@@ -58,7 +58,7 @@ class DipLoss(Loss):
     def _get_eval(self, x_dict={}, **kwargs):
 
         # Compute mu and scale of normal distribution
-        params = self.p.get_params(x_dict)
+        params = self.p.get_params({"x": x_dict["x"]})
 
         # Compute covariance
         if self.dip_type == "i":
