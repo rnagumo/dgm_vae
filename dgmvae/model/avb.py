@@ -186,9 +186,12 @@ class AVB(BaseVAE):
 
     def reconstruct(self, x):
 
+        batch_n = x.size(0)
+
         with torch.no_grad():
             x = x.to(self.device)
-            z = (self.encoder * self.normal).sample(x, return_all=False)
+            x_dict = self.normal.sample({"x": x}, batch_n=batch_n)
+            z = self.encoder.sample(x_dict, return_all=False)
             x_recon = self.decoder.sample_mean(z).cpu()
 
         return z["z"], x_recon
