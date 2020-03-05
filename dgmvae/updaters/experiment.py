@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 import pytorch_lightning as pl
 
 
-class VAEExperiment(pl.LightningModule):
+class VAEUpdater(pl.LightningModule):
 
     def __init__(self, model, params):
         super().__init__()
