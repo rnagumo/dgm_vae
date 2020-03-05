@@ -2,11 +2,14 @@
 """Base VAE class"""
 
 from torch import nn
+from pixyz.distributions.distributions import Distribution
 
 
 class BaseVAE(nn.Module):
     def __init__(self):
         super().__init__()
+
+        self.distributions = nn.ModuleDict([])
 
     def encode(self, inputs):
         """Encode latent z given observable x"""
@@ -25,7 +28,33 @@ class BaseVAE(nn.Module):
         raise NotImplementedError
 
     def forward(self, *inputs):
+        """Reconstruct inputs data"""
         raise NotImplementedError
 
     def loss_function(self, *inputs, **kwargs):
+        """Calculate loss in train/val/test"""
         raise NotImplementedError
+
+    @property
+    def loss_cls(self):
+        """Return instance of pixyz.losses.Loss class"""
+        raise NotImplementedError
+
+    def __str__(self):
+        prob_text = []
+        func_text = []
+
+        for prob in self.distributions._modules.values():
+            if isinstance(prob, Distribution):
+                prob_text.append(prob.prob_text)
+            else:
+                func_text.append(prob.__str__())
+
+            text = ("Distributions (for training): \n "
+                    " {} \n".format(", ".join(prob_text)))
+            if len(func_text) > 0:
+                text += ("Deterministic functions (for training): \n "
+                         " {} \n".format(", ".join(func_text)))
+
+            text += "Loss function: \n  {} \n".format(str(self.loss_cls))
+            return text
