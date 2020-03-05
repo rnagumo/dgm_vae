@@ -20,7 +20,7 @@ class BaseVAE(nn.Module):
         raise NotImplementedError
 
     def sample(self, batch_size, device, **kwargs):
-        """Sample data from latent"""
+        """Sample observable x' from sampled latent z"""
         raise NotImplementedError
 
     def reconstruct(self, x, **kwargs):
