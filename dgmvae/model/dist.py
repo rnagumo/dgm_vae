@@ -11,7 +11,7 @@ class Encoder(pxd.Normal):
     def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["x"], var=["z"])
 
-        self.conv = nn.Sequential([
+        self.conv = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
             nn.ReLU(),
             nn.Conv2d(32, 32, 4, stride=2, padding=1),
@@ -20,7 +20,7 @@ class Encoder(pxd.Normal):
             nn.ReLU(),
             nn.Conv2d(64, 64, 4, stride=2, padding=1),
             nn.ReLU(),
-        ])
+        )
 
         self.fc1 = nn.Linear(1024, 256)
         self.fc21 = nn.Linear(256, z_dim)
@@ -39,14 +39,14 @@ class Decoder(pxd.Bernoulli):
     def __init__(self, channel_num, z_dim):
         super().__init__(cond_var=["z"], var=["x"])
 
-        self.fc = nn.Sequential([
+        self.fc = nn.Sequential(
             nn.Linear(z_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 1024),
             nn.ReLU(),
-        ])
+        )
 
-        self.deconv = nn.Sequential([
+        self.deconv = nn.Sequential(
             nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1),
             nn.ReLU(),
             nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1),
@@ -55,7 +55,7 @@ class Decoder(pxd.Bernoulli):
             nn.ReLU(),
             nn.ConvTranspose2d(32, channel_num, 4, stride=2, padding=1),
             nn.Sigmoid(),
-        ])
+        )
 
     def forward(self, z):
         h = self.fc(z)
