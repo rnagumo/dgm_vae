@@ -65,7 +65,7 @@ def main():
         # "logger": logger,
         "default_save_path": args.logdir,
         "gpus": gpus,
-        "early_stop_callback": False,
+        "early_stop_callback": None,
         "max_epochs": args.epochs,
     }
     trainer = pl.Trainer(**trainer_params)
