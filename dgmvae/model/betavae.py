@@ -25,8 +25,8 @@ class BetaVAE(BaseVAE):
         # Parameters
         self.channel_num = channel_num
         self.z_dim = z_dim
-        self.beta = beta
-        self.c = c
+        self._beta_value = beta
+        self._c_value = c
 
         # Distributions
         self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
@@ -39,6 +39,8 @@ class BetaVAE(BaseVAE):
         # Loss class
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)
         self.kl = pxl.KullbackLeibler(self.encoder, self.prior)
+        self.beta = pxl.Parameter("beta")
+        self.c = pxl.Parameter("c")
 
     def encode(self, x, sample=True):
         if sample:
@@ -65,10 +67,17 @@ class BetaVAE(BaseVAE):
             return self.decoder.sample_mean(z)
         return z
 
-    def loss_function(self, x_dict, **kwargs):
+    def loss_func(self, x_dict, **kwargs):
+
+        # TODO
+        x_dict.update({"beta": self._beta_value, "c": self._c_value})
+
         ce_loss = self.ce.eval(x_dict).mean()
-        _kl_loss = self.kl.eval(x_dict).mean()
-        kl_loss = self.beta * torch.abs(_kl_loss - self.c)
+        kl_loss = (self.beta * (self.kl - self.c).abs()).eval(x_dict).mean()
         loss = ce_loss + kl_loss
 
         return {"loss": loss, "ce_loss": ce_loss, "kl_loss": kl_loss}
+
+    @property
+    def loss_cls(self):
+        return self.ce + self.beta * (self.kl - self.c).abs()
