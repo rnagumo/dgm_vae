@@ -22,6 +22,10 @@ class VAEUpdater(pl.LightningModule):
         self.train_size = 0
         self.test_size = 0
 
+    @property
+    def hparams(self):
+        return {"batch_size": self.batch_size}
+
     def forward(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
 
