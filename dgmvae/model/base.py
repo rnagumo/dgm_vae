@@ -27,7 +27,7 @@ class BaseVAE(nn.Module):
         """Reconstruct inputs data"""
         raise NotImplementedError
 
-    def loss_function(self, *inputs, **kwargs):
+    def loss_func(self, *inputs, **kwargs):
         """Calculate loss in train/val/test"""
         raise NotImplementedError
 
