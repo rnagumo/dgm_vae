@@ -1,19 +1,23 @@
 {
     "vae_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 1
     },
     "beta_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 2,
         "c": 1
     },
     "factor_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 2,
         "gamma": 10
     },
     "dip-i_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
         "lmd_od": 50,
@@ -21,6 +25,7 @@
         "dip_type": "i"
     },
     "dip-ii_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
         "lmd_od": 50,
@@ -28,6 +33,7 @@
         "dip_type": "ii"
     },
     "joint_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
         "c_dim": 10,
@@ -36,17 +42,20 @@
         "gamma_disc": 30
     },
     "tcvae_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "alpha": 1,
         "beta": 1,
         "gamma": 1
     },
     "aae_params": {
+        "channel_num": 1,
         "beta": 1,
         "z_dim": 10,
         "c_dim": 10
     },
     "avb_params": {
+        "channel_num": 1,
         "z_dim": 10,
         "e_dim": 10,
         "beta": 1

@@ -40,24 +40,22 @@ def main():
     # -------------------------------------------------------------------------
 
     # VAE model
-    model_params = {"channel_num": 1}
-
     if args.model == "beta":
-        model = dvm.BetaVAE(**config["beta_params"], **model_params)
+        model = dvm.BetaVAE(**config["beta_params"])
     elif args.model == "factor":
-        model = dvm.FactorVAE(**config["factor_params"], **model_params)
+        model = dvm.FactorVAE(**config["factor_params"])
     elif args.model == "dip-i":
-        model = dvm.DIPVAE(**config["dip-i_params"], **model_params)
+        model = dvm.DIPVAE(**config["dip-i_params"])
     elif args.model == "dip-ii":
-        model = dvm.DIPVAE(**config["dip-ii_params"], **model_params)
+        model = dvm.DIPVAE(**config["dip-ii_params"])
     elif args.model == "joint":
-        model = dvm.JointVAE(**config["joint_params"], **model_params)
+        model = dvm.JointVAE(**config["joint_params"])
     elif args.model == "tcvae":
-        model = dvm.TCVAE(**config["tcvae_params"], **model_params)
+        model = dvm.TCVAE(**config["tcvae_params"])
     elif args.model == "aae":
-        model = dvm.AAE(**config["aae_params"], **model_params)
+        model = dvm.AAE(**config["aae_params"])
     elif args.model == "avb":
-        model = dvm.AVB(**config["avb_params"], **model_params)
+        model = dvm.AVB(**config["avb_params"])
     else:
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
