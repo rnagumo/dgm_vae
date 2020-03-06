@@ -14,40 +14,69 @@ class VAEUpdater(pl.LightningModule):
 
         self.model = model
         self.params = params
-        self.device = params["device"]
-        self.loader = None
+        self.device = None
+
+        # Dataset parameter
+        self.x_org = None
+        self.train_size = 0
+        self.test_size = 0
 
     def forward(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        loss_dict = self.model.loss_function({"x": x})
+        loss_dict = self.model.loss_func({"x": x})
 
         for key in loss_dict:
             loss_dict[key] *= x.size(0)
-
         return loss_dict
+
+    def training_end(self, outputs):
+        loss_dict = {}
+
+        # Accumulate 1-epoch loss
+        for key in outputs[0]:
+            loss_dict[f"train/{key}"] = \
+                torch.stack(x[key] for x in outputs).sum()
+
+        # Standardize by dataset size
+        for key in loss_dict:
+            loss_dict[key] /= self.train_size
+
+        results = {
+            "loss": loss_dict["train/loss"],
+            "progress_bar": {"training_loss": loss_dict["train/loss"]},
+            "log": loss_dict
+        }
+
+        return results
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        loss_dict = self.model.loss_function({"x": x})
+        self.device = x.device
+        loss_dict = self.model.loss_func({"x": x})
 
         for key in loss_dict:
             loss_dict[key] *= x.size(0)
-
         return loss_dict
 
     def validation_end(self, outputs):
+        loss_dict = {}
 
-        # Calculate average loss
-        avg_loss = torch.stack([x["loss"] for x in outputs]).sum()
-        avg_loss /= len(outputs)
+        # Accumulate 1-epoch loss
+        for key in outputs[0]:
+            loss_dict[f"val/{key}"] = \
+                torch.stack(x[key] for x in outputs).sum()
 
-        # Returned doct
+        # Standardize by dataset size
+        for key in loss_dict:
+            loss_dict[key] /= self.train_size
+
         results = {
-            "progress_bar": avg_loss,
-            "log": {"validataion/loss": avg_loss},
+            "val_loss": loss_dict["val/loss"],
+            "progress_bar": {"val_loss": loss_dict["val/loss"]},
+            "log": loss_dict
         }
 
         return results
@@ -56,7 +85,7 @@ class VAEUpdater(pl.LightningModule):
         return torch.optim.Adam(self.model.parameters())
 
     def reconstruct_images(self):
-        x_org, _ = iter(self.loader).next()
+        pass
 
     def prepare_data(self):
         """Download dataset"""
@@ -67,33 +96,37 @@ class VAEUpdater(pl.LightningModule):
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        _dataset = datasets.MNIST(root=self.params["root"], train=True,
-                                  transform=_transform)
+        dataset = datasets.MNIST(root=self.params["root"], train=True,
+                                 transform=_transform)
 
         # Params for data loader
         params = {"batch_size": self.params["batch_size"]}
-        if self.params["cuda"]:
-            params.update({"num_workers": 1, "pin_memory": True})
 
-        return torch.utils.data.DataLoader(_dataset, shuffle=True, **params)
+        # Loader
+        loader = torch.utils.data.DataLoader(dataset, shuffle=True, **params)
+        self.train_size = len(loader)
+
+        return loader
 
     @pl.data_loader
     def val_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        _dataset = datasets.MNIST(root=self.params["root"], train=False,
-                                  transform=_transform)
+        dataset = datasets.MNIST(root=self.params["root"], train=False,
+                                 transform=_transform)
 
         # Params for data loader
-        _params = {"batch_size": self.params["batch_size"]}
-        if self.params["cuda"]:
-            _params.update({"num_workers": 1, "pin_memory": True})
+        params = {"batch_size": self.params["batch_size"]}
 
-        # Instantiate for sampling image at reconstruction
-        self.loader = torch.utils.data.DataLoader(
-            _dataset, shuffle=False, **_params)
+        # Loader
+        loader = torch.utils.data.DataLoader(dataset, shuffle=False, **params)
+        self.test_size = len(loader)
 
-        return self.loader
+        # Sample image
+        x_org, _ = iter(loader).next()
+        self.x_org = x_org[:8]
+
+        return loader
 
     def data_transform(self):
         _transform = transforms.Compose([
