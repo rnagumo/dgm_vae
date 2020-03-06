@@ -7,8 +7,6 @@ Adversarial Autoencoders
 http://arxiv.org/abs/1511.05644
 """
 
-import collections
-
 import torch
 from torch import nn
 from torch.nn import functional as F
