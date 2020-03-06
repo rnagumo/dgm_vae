@@ -11,10 +11,8 @@ http://seiya-kumada.blogspot.com/2018/07/adversarial-variational-bayes.html
 https://github.com/LMescheder/AdversarialVariationalBayes
 """
 
-import collections
-
 import torch
-from torch import nn, optim
+from torch import nn
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
