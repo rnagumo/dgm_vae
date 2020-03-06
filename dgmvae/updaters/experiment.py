@@ -25,7 +25,7 @@ class VAEUpdater(pl.LightningModule):
     def forward(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
 
-    def training_step(self, batch, batch_idx, optimizer_idx):
+    def training_step(self, batch, batch_idx, optimizer_idx=0):
         x, y = batch
         return self.model.loss_func({"x": x}, optimizer_idx=optimizer_idx)
 
@@ -44,7 +44,7 @@ class VAEUpdater(pl.LightningModule):
 
         return results
 
-    def validation_step(self, batch, batch_idx, optimizer_idx):
+    def validation_step(self, batch, batch_idx, optimizer_idx=0):
         x, y = batch
 
         # Set device
@@ -65,7 +65,7 @@ class VAEUpdater(pl.LightningModule):
 
     def configure_optimizers(self):
         optims = [torch.optim.Adam(self.model.parameters())]
-        if self.model.second_optim is None:
+        if self.model.second_optim is not None:
             optims.append(self.model.second_optim)
         return optims
 
