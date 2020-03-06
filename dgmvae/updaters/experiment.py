@@ -47,19 +47,15 @@ class VAEUpdater(pl.LightningModule):
         if self.device is None:
             self.device = x.device
 
-        # Calculate loss
-        loss_dict = self.model.loss_func({"x": x})
+        return self.model.loss_func({"x": x})
 
-        results = {}
-        for key in loss_dict:
-            results[f"val/{key}"] = loss_dict[key]
-
-        output = {
-            "val_loss": results["val/loss"],
-            "log": results
+    def validation_end(self, outputs):
+        avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
+        results = {
+            "val_loss": avg_loss,
+            "log": {"val/loss": avg_loss}
         }
-
-        return output
+        return results
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.model.parameters())
