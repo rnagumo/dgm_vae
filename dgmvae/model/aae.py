@@ -218,7 +218,7 @@ class AAE(BaseVAE):
         elif optimizer_idx == 1:
             # Discriminator loss
             loss = self.adv_js.eval(x_dict, discriminator=True)
-            return {"loss": loss, "adv_loss": loss}
+            return {"adv_loss": loss}
         else:
             pass
 
