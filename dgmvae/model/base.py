@@ -19,7 +19,7 @@ class BaseVAE(nn.Module):
         """Decode observable x given latent z"""
         raise NotImplementedError
 
-    def sample(self, batch_size, device, **kwargs):
+    def sample(self, batch_size, **kwargs):
         """Sample observable x' from sampled latent z"""
         raise NotImplementedError
 
