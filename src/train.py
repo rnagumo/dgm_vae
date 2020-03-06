@@ -57,18 +57,17 @@ def main():
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # Updater
-    updater_params = vars(args)
-    updater = dvu.VAEUpdater(model, updater_params)
+    updater = dvu.VAEUpdater(model, vars(args))
 
     # Trainer
-    trainer_params = {
+    params = {
         # "logger": logger,
         "default_save_path": args.logdir,
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
     }
-    trainer = pl.Trainer(**trainer_params)
+    trainer = pl.Trainer(**params)
 
     # Run
     trainer.fit(updater)
