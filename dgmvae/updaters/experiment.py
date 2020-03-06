@@ -25,9 +25,9 @@ class VAEUpdater(pl.LightningModule):
     def forward(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx, optimizer_idx):
         x, y = batch
-        return self.model.loss_func({"x": x})
+        return self.model.loss_func({"x": x}, optimizer_idx=optimizer_idx)
 
     def training_end(self, outputs):
         """Training step end"""
@@ -44,14 +44,14 @@ class VAEUpdater(pl.LightningModule):
 
         return results
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx, optimizer_idx):
         x, y = batch
 
         # Set device
         if self.device is None:
             self.device = x.device
 
-        return self.model.loss_func({"x": x})
+        return self.model.loss_func({"x": x}, optimizer_idx=optimizer_idx)
 
     def validation_end(self, outputs):
         """Validation epoch end"""
@@ -64,7 +64,10 @@ class VAEUpdater(pl.LightningModule):
         return results
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.model.parameters())
+        optims = [torch.optim.Adam(self.model.parameters())]
+        if self.model.second_optim is None:
+            optims.append(self.model.second_optim)
+        return optims
 
     def reconstruct_images(self):
         pass
