@@ -32,9 +32,6 @@ def main():
     # Random seed
     torch.manual_seed(args.seed)
 
-    # Tensorboard writer
-    # logger = pl.loggers.TensorBoardLogger(args.logdir)
-
     # -------------------------------------------------------------------------
     # 2. Training
     # -------------------------------------------------------------------------
