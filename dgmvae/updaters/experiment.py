@@ -60,10 +60,10 @@ class VAEUpdater(pl.LightningModule):
     def validation_end(self, outputs):
         """Validation epoch end"""
 
-        avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
+        val_loss = torch.stack([x["loss"] for x in outputs]).mean()
         results = {
-            "val_loss": avg_loss,
-            "log": {"val/loss": avg_loss}
+            "val_loss": val_loss,
+            "log": {"val/loss": val_loss}
         }
         return results
 
