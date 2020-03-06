@@ -40,25 +40,30 @@ class BetaVAE(BaseVAE):
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)
         self.kl = pxl.KullbackLeibler(self.encoder, self.prior)
 
-    def encode(self, x):
-        return self.encoder(x)
+    def encode(self, x, sample=True):
+        if sample:
+            return self.encoder.sample(x)
+        return self.encoder.sample_mean(x)
 
-    def decode(self, z):
-        return self.decoder(z)
+    def decode(self, z, sample=False):
+        if sample:
+            return self.decoder.sample(z)
+        return self.decoder.sample_mean(z)
 
     def sample(self, batch_n=1):
         z = self.prior.sample(batch_n=batch_n)
         x = self.decoder.sample_mean(z)
         return x
 
-    def reconstruct(self, x, device):
-        x = x.to(device)
-        z = self.encoder.sample(x, return_all=False)
-        x_recon = self.decoder.sample_mean(z)
-        return x_recon
+    def forward(self, x, sample=True, reconstruct=True):
+        if sample:
+            z = self.encoder.sample(x, return_all=False)
+        else:
+            z = self.encoder.sample_mean(x, return_all=False)
 
-    def forward(self, x):
-        return self.reconstruct(x)
+        if reconstruct:
+            return self.decoder.sample_mean(z)
+        return z
 
     def loss_function(self, x_dict, **kwargs):
         ce_loss = self.ce.eval(x_dict).mean()
