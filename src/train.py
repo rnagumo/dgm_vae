@@ -57,7 +57,7 @@ def main():
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # Updater
-    updater = dvu.VAEUpdater(model, **vars(args))
+    updater = dvu.VAEUpdater(model, **config["updater_params"])
 
     # Trainer
     params = {
@@ -75,12 +75,10 @@ def main():
 def init_args():
     parser = argparse.ArgumentParser(description="VAE training")
     parser.add_argument("--logdir", type=str, default="../logs/")
-    parser.add_argument("--root", type=str, default="../data/mnist/")
     parser.add_argument("--config", type=str, default="./config.json")
     parser.add_argument("--model", type=str, default="beta")
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--test-interval", type=int, default=10)
     parser.add_argument("--plot-interval", type=int, default=100)
