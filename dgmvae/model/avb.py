@@ -109,10 +109,6 @@ class AVB(BaseVAE):
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder, self.prior, self.disc)
 
-        # Optimizer
-        params = self.distributions.parameters()
-        self.optimizer = optim.Adam(params)
-
     def encode(self, x, mean=False):
         batch_n = x.size(0)
         e = self.normal.sample(batch_n=batch_n)
