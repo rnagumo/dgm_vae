@@ -21,12 +21,13 @@ import pixyz.distributions as pxd
 import pixyz.losses as pxl
 
 from .base import BaseVAE
+from .dist import Decoder
 
 
 class AVBDiscriminator(pxd.Deterministic):
     """T(x, z)"""
     def __init__(self, channel_num, z_dim):
-        super().__init__(cond_var=["x", "z"], var=["t"])
+        super().__init__(cond_var=["x", "z"], var=["t"], name="d")
 
         self.disc_x = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
@@ -57,7 +58,7 @@ class AVBDiscriminator(pxd.Deterministic):
 class AVBEncoder(pxd.Deterministic):
     """Deterministic encoder z_phi (x, e)"""
     def __init__(self, channel_num, z_dim, e_dim):
-        super().__init__(cond_var=["x", "e"], var=["z"])
+        super().__init__(cond_var=["x", "e"], var=["z"], name="q")
 
         self.enc_x = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
@@ -81,45 +82,22 @@ class AVBEncoder(pxd.Deterministic):
         return {"z": z}
 
 
-class Decoder(pxd.Bernoulli):
-    def __init__(self, channel_num, z_dim):
-        super().__init__(cond_var=["z"], var=["x"])
-
-        self.fc1 = nn.Linear(z_dim, 256)
-        self.fc2 = nn.Linear(256, 1024)
-        self.deconv1 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
-        self.deconv2 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)
-        self.deconv3 = nn.ConvTranspose2d(32, 32, 4, stride=2, padding=1)
-        self.deconv4 = nn.ConvTranspose2d(32, channel_num, 4, stride=2,
-                                          padding=1)
-
-    def forward(self, z):
-        h = F.relu(self.fc1(z))
-        h = F.relu(self.fc2(h))
-        h = h.view(-1, 64, 4, 4)
-        h = F.relu(self.deconv1(h))
-        h = F.relu(self.deconv2(h))
-        h = F.relu(self.deconv3(h))
-        probs = torch.sigmoid(self.deconv4(h))
-        return {"probs": probs}
-
-
 class AVB(BaseVAE):
-    def __init__(self, channel_num, z_dim, e_dim, device, beta, **kwargs):
+    def __init__(self, channel_num, z_dim, e_dim, beta, **kwargs):
+        super().__init__()
 
         self.channel_num = channel_num
         self.z_dim = z_dim
         self.e_dim = e_dim
-        self.device = device
-        self.beta = beta
+        self._beta_val = beta
 
         # Distributions
         self.normal = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
-                                 var=["e"], features_shape=[e_dim]).to(device)
+                                 var=["e"], features_shape=[e_dim])
         self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
-                                var=["z"], features_shape=[z_dim]).to(device)
-        self.decoder = Decoder(channel_num, z_dim).to(device)
-        self.encoder = AVBEncoder(channel_num, z_dim, e_dim).to(device)
+                                var=["z"], features_shape=[z_dim])
+        self.decoder = Decoder(channel_num, z_dim)
+        self.encoder = AVBEncoder(channel_num, z_dim, e_dim)
         self.distributions = nn.ModuleList(
             [self.normal, self.prior, self.decoder, self.encoder])
 
@@ -127,7 +105,7 @@ class AVB(BaseVAE):
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)
 
         # Adversarial loss
-        self.disc = AVBDiscriminator(channel_num, z_dim).to(device)
+        self.disc = AVBDiscriminator(channel_num, z_dim)
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder, self.prior, self.disc)
 
@@ -147,51 +125,63 @@ class AVB(BaseVAE):
 
         return loss, loss_dict
 
-    def run(self, loader, training=True):
-        # Returned value
-        loss_dict = collections.defaultdict(float)
-
-        for x in loader:
-            if isinstance(x, (tuple, list)):
-                x = x[0]
-            x = x.to(self.device)
-
-            # Mini-batch size
-            minibatch_size = x.size(0)
-
-            # Input
-            x_dict = {"x": x}
-
-            # Sample e (noize)
-            x_dict = self.normal.sample(x_dict, batch_n=minibatch_size)
-
-            # Calculate loss
-            if training:
-                _batch_loss = self.train(x_dict)
-                _d_loss = self.adv_js.train(x_dict)
-            else:
-                _batch_loss = self.test(x_dict)
-                _d_loss = self.adv_js.test(x_dict)
-
-            # Accumulate minibatch loss
-            for key in _batch_loss:
-                loss_dict[key] += _batch_loss[key] * minibatch_size
-            loss_dict["d_loss"] += _d_loss.item() * minibatch_size
-
-        # Devide by data size
-        for key in loss_dict:
-            loss_dict[key] /= len(loader.dataset)
-
-        return loss_dict
-
-    def reconstruct(self, x):
-
+    def encode(self, x, mean=False):
         batch_n = x.size(0)
+        e = self.normal.sample(batch_n=batch_n)
+        inputs = {"x": x, "e": e["e"]}
 
-        with torch.no_grad():
-            x = x.to(self.device)
-            e = self.normal.sample(batch_n=batch_n)
-            z = self.encoder.sample({"x": x, "e": e}, return_all=False)
-            x_recon = self.decoder.sample_mean(z).cpu()
+        if mean:
+            return self.encoder.sample_mean(inputs)
+        return self.encoder.sample(inputs, return_all=False)
 
-        return z["z"], x_recon
+    def decode(self, z, mean=False):
+        if not isinstance(z, dict):
+            z = {"z": z}
+
+        if mean:
+            return self.decoder.sample_mean(z)
+        return self.decoder.sample(z, return_all=False)
+
+    def sample(self, batch_n=1):
+        z = self.prior.sample(batch_n=batch_n)
+        return self.decoder.sample_mean(z)
+
+    def forward(self, x, reconstruct=True, return_latent=False):
+        if reconstruct:
+            z = self.encode(x)
+            sample = self.decode(z, mean=True)
+            if return_latent:
+                z.update({"x": sample})
+                return z
+            return sample
+
+        return self.encode(x, mean=True)
+
+    def loss_func(self, x_dict, **kwargs):
+
+        optimizer_idx = kwargs["optimizer_idx"]
+
+        # Sample e
+        batch_n = x_dict["x"].size(0)
+        x_dict = self.normal.sample(x_dict, batch_n=batch_n)
+
+        if optimizer_idx == 0:
+            # VAE loss
+            ce_loss = self.ce.eval(x_dict).mean()
+            js_loss = self.adv_js.eval(x_dict).mean()
+            loss = ce_loss + js_loss
+            return {"loss": loss, "ce_loss": ce_loss, "js_loss": js_loss}
+        elif optimizer_idx == 1:
+            # Discriminator loss
+            loss = self.adv_js.eval(x_dict, discriminator=True)
+            return {"loss": loss, "adv_loss": loss}
+        else:
+            raise ValueError
+
+    @property
+    def loss_cls(self):
+        return (self.ce + self.adv_js).expectation(self.normal)
+
+    @property
+    def second_optim(self):
+        return self.adv_js.d_optimizer
