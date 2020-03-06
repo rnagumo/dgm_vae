@@ -113,18 +113,6 @@ class AVB(BaseVAE):
         params = self.distributions.parameters()
         self.optimizer = optim.Adam(params)
 
-    def _eval_loss(self, x_dict, **kwargs):
-
-        # Calculate loss
-        ce_loss = self.ce.eval(x_dict).mean()
-        js_loss = self.adv_js.eval(x_dict).mean()
-        loss = ce_loss + js_loss
-
-        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
-                     "js_loss": js_loss.item()}
-
-        return loss, loss_dict
-
     def encode(self, x, mean=False):
         batch_n = x.size(0)
         e = self.normal.sample(batch_n=batch_n)
