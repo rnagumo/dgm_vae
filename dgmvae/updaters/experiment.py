@@ -27,19 +27,23 @@ class VAEUpdater(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        loss_dict = self.model.loss_func({"x": x})
+        return self.model.loss_func({"x": x})
 
-        results = {}
-        for key in loss_dict:
-            results[f"train/{key}"] = loss_dict[key]
+    def training_end(self, outputs):
 
-        output = {
-            "loss": results["train/loss"],
-            "progress_bar": {"training_loss": results["train/loss"]},
-            "log": results
+        loss_dict = {}
+        for key in outputs:
+            loss_dict[f"train/{key}"] = outputs[key]
+
+        results = {
+            "loss": loss_dict["train/loss"],
+            "progress_bar": {"training_loss": loss_dict["train/loss"]},
+            "log": loss_dict
         }
 
-        return output
+        self.logger.log_metrics(loss_dict)
+
+        return results
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
