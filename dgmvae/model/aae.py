@@ -190,17 +190,14 @@ class AAE(BaseVAE):
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
-    def forward(self, x, reconstruct=True, return_latent=False):
-        if reconstruct:
-            latent = self.encode(x)
-            sample = self.decode(latent=latent, mean=True)
+    def forward(self, x, return_latent=False):
+        latent = self.encode(x)
+        sample = self.decode(latent=latent, mean=True)
 
-            if return_latent:
-                latent.update({"x": sample})
-                return latent
-            return sample
-
-        return self.encode(x, mean=True)
+        if return_latent:
+            latent.update({"x": sample})
+            return latent
+        return sample
 
     def loss_func(self, x_dict, **kwargs):
 

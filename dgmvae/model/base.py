@@ -23,7 +23,7 @@ class BaseVAE(nn.Module):
         """Samples observable x from sampled latent z"""
         raise NotImplementedError
 
-    def forward(self, x, reconstruct=True, return_latent=False):
+    def forward(self, x, return_latent=False):
         """Reconstructs observable x' given inputs data x"""
         raise NotImplementedError
 
