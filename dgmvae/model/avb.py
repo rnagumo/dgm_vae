@@ -75,7 +75,7 @@ class AVBEncoder(pxd.Deterministic):
         h_x = self.enc_x(x)
         h_x = h_x.view(-1, 1024)
         h_x = F.relu(self.fc_x(h_x))
-        h_e = self.fc_e(e)
+        h_e = F.relu(self.fc_e(e))
         z = self.fc(torch.cat([h_x, h_e], dim=1))
         return {"z": z}
 
