@@ -29,13 +29,7 @@ class BaseVAE(nn.Module):
 
     def forward(self, x, sample=True, reconstruct=True):
         """Reconstruct inputs data"""
-
-        z = self.encode(x, sample=sample)
-
-        if reconstruct:
-            return self.decode(z)
-
-        return z
+        raise NotImplementedError
 
     @property
     def loss_cls(self):
