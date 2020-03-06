@@ -55,8 +55,7 @@ class VAEUpdater(pl.LightningModule):
             results[f"val/{key}"] = loss_dict[key]
 
         output = {
-            "loss": results["val/loss"],
-            "progress_bar": {"val_loss": results["val/loss"]},
+            "val_loss": results["val/loss"],
             "log": results
         }
 
