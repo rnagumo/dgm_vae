@@ -9,11 +9,11 @@ import pytorch_lightning as pl
 
 class VAEUpdater(pl.LightningModule):
 
-    def __init__(self, model, params):
+    def __init__(self, model, hparams):
         super().__init__()
 
         self.model = model
-        self.params = params
+        self.hparams = hparams
 
         # Dataset parameters
         self.device = None
@@ -65,18 +65,18 @@ class VAEUpdater(pl.LightningModule):
 
     def prepare_data(self):
         """Download dataset"""
-        datasets.MNIST(root=self.params["root"], train=True, download=True)
-        datasets.MNIST(root=self.params["root"], train=False, download=True)
+        datasets.MNIST(root=self.hparams["root"], train=True, download=True)
+        datasets.MNIST(root=self.hparams["root"], train=False, download=True)
 
     @pl.data_loader
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        dataset = datasets.MNIST(root=self.params["root"], train=True,
+        dataset = datasets.MNIST(root=self.hparams["root"], train=True,
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.params["batch_size"]}
+        params = {"batch_size": self.hparams["batch_size"]}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=True, **params)
@@ -88,11 +88,11 @@ class VAEUpdater(pl.LightningModule):
     def val_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        dataset = datasets.MNIST(root=self.params["root"], train=False,
+        dataset = datasets.MNIST(root=self.hparams["root"], train=False,
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.params["batch_size"]}
+        params = {"batch_size": self.hparams["batch_size"]}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=False, **params)
@@ -104,7 +104,8 @@ class VAEUpdater(pl.LightningModule):
 
         return loader
 
-    def data_transform(self):
+    @staticmethod
+    def data_transform():
         _transform = transforms.Compose([
             transforms.Resize(64),
             transforms.ToTensor(),
