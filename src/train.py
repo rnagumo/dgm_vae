@@ -61,7 +61,6 @@ def main():
 
     # Trainer
     params = {
-        # "logger": logger,
         "default_save_path": args.logdir,
         "gpus": gpus,
         "early_stop_callback": None,
