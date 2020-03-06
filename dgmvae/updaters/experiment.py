@@ -28,58 +28,39 @@ class VAEUpdater(pl.LightningModule):
         x, y = batch
         loss_dict = self.model.loss_func({"x": x})
 
+        results = {}
         for key in loss_dict:
-            loss_dict[key] *= x.size(0)
-        return loss_dict
+            results[f"train/{key}"] = loss_dict[key]
 
-    def training_end(self, outputs):
-        loss_dict = {}
-
-        # Accumulate 1-epoch loss
-        for key in outputs[0]:
-            loss_dict[f"train/{key}"] = \
-                torch.stack([x[key] for x in outputs]).sum()
-
-        # Standardize by dataset size
-        for key in loss_dict:
-            loss_dict[key] /= self.train_size
-
-        results = {
-            "loss": loss_dict["train/loss"],
-            "progress_bar": {"training_loss": loss_dict["train/loss"]},
-            "log": loss_dict
+        output = {
+            "loss": results["train/loss"],
+            "progress_bar": {"training_loss": results["train/loss"]},
+            "log": results
         }
 
-        return results
+        return output
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        self.device = x.device
+
+        # Set device
+        if self.device is None:
+            self.device = x.device
+
+        # Calculate loss
         loss_dict = self.model.loss_func({"x": x})
 
+        results = {}
         for key in loss_dict:
-            loss_dict[key] *= x.size(0)
-        return loss_dict
+            results[f"val/{key}"] = loss_dict[key]
 
-    def validation_end(self, outputs):
-        loss_dict = {}
-
-        # Accumulate 1-epoch loss
-        for key in outputs[0]:
-            loss_dict[f"val/{key}"] = \
-                torch.stack([x[key] for x in outputs]).sum()
-
-        # Standardize by dataset size
-        for key in loss_dict:
-            loss_dict[key] /= self.train_size
-
-        results = {
-            "val_loss": loss_dict["val/loss"],
-            "progress_bar": {"val_loss": loss_dict["val/loss"]},
-            "log": loss_dict
+        output = {
+            "loss": results["val/loss"],
+            "progress_bar": {"val_loss": results["val/loss"]},
+            "log": results
         }
 
-        return results
+        return output
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.model.parameters())
