@@ -9,7 +9,7 @@ import pixyz.distributions as pxd
 
 class Encoder(pxd.Normal):
     def __init__(self, channel_num, z_dim):
-        super().__init__(cond_var=["x"], var=["z"])
+        super().__init__(cond_var=["x"], var=["z"], name="q")
 
         self.conv = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
@@ -37,7 +37,7 @@ class Encoder(pxd.Normal):
 
 class Decoder(pxd.Bernoulli):
     def __init__(self, channel_num, z_dim):
-        super().__init__(cond_var=["z"], var=["x"])
+        super().__init__(cond_var=["z"], var=["x"], name="p")
 
         self.fc = nn.Sequential(
             nn.Linear(z_dim, 256),
