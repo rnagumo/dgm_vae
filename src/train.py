@@ -57,7 +57,7 @@ def main():
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # Updater
-    updater = dvu.VAEUpdater(model, vars(args))
+    updater = dvu.VAEUpdater(model, args)
 
     # Trainer
     params = {

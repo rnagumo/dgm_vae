@@ -65,18 +65,18 @@ class VAEUpdater(pl.LightningModule):
 
     def prepare_data(self):
         """Download dataset"""
-        datasets.MNIST(root=self.hparams["root"], train=True, download=True)
-        datasets.MNIST(root=self.hparams["root"], train=False, download=True)
+        datasets.MNIST(root=self.hparams.root, train=True, download=True)
+        datasets.MNIST(root=self.hparams.root, train=False, download=True)
 
     @pl.data_loader
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        dataset = datasets.MNIST(root=self.hparams["root"], train=True,
+        dataset = datasets.MNIST(root=self.hparams.root, train=True,
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.hparams["batch_size"]}
+        params = {"batch_size": self.hparams.batch_size}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=True, **params)
@@ -92,7 +92,7 @@ class VAEUpdater(pl.LightningModule):
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.hparams["batch_size"]}
+        params = {"batch_size": self.hparams.batch_size}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=False, **params)
