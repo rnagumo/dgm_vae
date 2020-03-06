@@ -38,7 +38,7 @@ class VAEUpdater(pl.LightningModule):
         # Accumulate 1-epoch loss
         for key in outputs[0]:
             loss_dict[f"train/{key}"] = \
-                torch.stack(x[key] for x in outputs).sum()
+                torch.stack([x[key] for x in outputs]).sum()
 
         # Standardize by dataset size
         for key in loss_dict:
@@ -67,7 +67,7 @@ class VAEUpdater(pl.LightningModule):
         # Accumulate 1-epoch loss
         for key in outputs[0]:
             loss_dict[f"val/{key}"] = \
-                torch.stack(x[key] for x in outputs).sum()
+                torch.stack([x[key] for x in outputs]).sum()
 
         # Standardize by dataset size
         for key in loss_dict:
