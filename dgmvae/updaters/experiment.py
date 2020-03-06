@@ -14,9 +14,9 @@ class VAEUpdater(pl.LightningModule):
 
         self.model = model
         self.params = params
-        self.device = None
 
-        # Dataset parameter
+        # Dataset parameters
+        self.device = None
         self.x_org = None
         self.train_size = 0
         self.test_size = 0
