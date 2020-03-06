@@ -30,6 +30,7 @@ class VAEUpdater(pl.LightningModule):
         return self.model.loss_func({"x": x})
 
     def training_end(self, outputs):
+        """Training step end"""
 
         loss_dict = {}
         for key in outputs:
@@ -40,8 +41,6 @@ class VAEUpdater(pl.LightningModule):
             "progress_bar": {"training_loss": loss_dict["train/loss"]},
             "log": loss_dict
         }
-
-        self.logger.log_metrics(loss_dict)
 
         return results
 
@@ -55,6 +54,8 @@ class VAEUpdater(pl.LightningModule):
         return self.model.loss_func({"x": x})
 
     def validation_end(self, outputs):
+        """Validation epoch end"""
+
         avg_loss = torch.stack([x["loss"] for x in outputs]).mean()
         results = {
             "val_loss": avg_loss,
