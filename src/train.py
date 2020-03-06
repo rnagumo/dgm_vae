@@ -65,6 +65,8 @@ def main():
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
+        "check_val_every_n_epoch": args.val_interval,
+        "log_save_interval": args.log_save_interval,
     }
     trainer = pl.Trainer(**params)
 
@@ -80,9 +82,8 @@ def init_args():
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--test-interval", type=int, default=10)
-    parser.add_argument("--plot-interval", type=int, default=100)
-    parser.add_argument("--save-interval", type=int, default=100)
+    parser.add_argument("--val-interval", type=int, default=1)
+    parser.add_argument("--log-save-interval", type=int, default=100)
 
     return parser.parse_args()
 
