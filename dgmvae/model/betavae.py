@@ -42,30 +42,37 @@ class BetaVAE(BaseVAE):
         self.beta = pxl.Parameter("beta")
         self.c = pxl.Parameter("c")
 
-    def encode(self, x, sample=True):
-        if sample:
-            return self.encoder.sample(x)
-        return self.encoder.sample_mean(x)
+    def encode(self, x, mean=False):
+        if not isinstance(x, dict):
+            x = {"x": x}
 
-    def decode(self, z, sample=False):
-        if sample:
-            return self.decoder.sample(z)
-        return self.decoder.sample_mean(z)
+        if mean:
+            return self.encoder.sample_mean(x)
+        return self.encoder.sample(x, return_all=False)
+
+    def decode(self, z, mean=False):
+        if not isinstance(z, dict):
+            z = {"z": z}
+
+        if mean:
+            return self.decoder.sample_mean(z)
+        return self.decoder.sample(z, return_all=False)
 
     def sample(self, batch_n=1):
         z = self.prior.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean(z)
         return sample
 
-    def forward(self, x, sample=True, reconstruct=True):
-        if sample:
-            z = self.encoder.sample(x, return_all=False)
-        else:
-            z = self.encoder.sample_mean(x, return_all=False)
+    def forward(self, x, reconstruct=True):
+        if not isinstance(x, dict):
+            x = {"x": x}
 
         if reconstruct:
+            z = self.encoder.sample(x, return_all=False)
             return self.decoder.sample_mean(z)
-        return z
+
+        # Return latent
+        return self.encoder.sample_mean(x)
 
     def loss_func(self, x_dict, **kwargs):
 
