@@ -43,7 +43,7 @@ class VAEUpdater(pl.LightningModule):
             "progress_bar": {"training_loss": loss_dict["train/loss"]},
         }
 
-        self.logger.log_metrics(loss_dict)
+        self.logger.log_metrics(loss_dict, self.global_step)
 
         return results
 
