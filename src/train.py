@@ -65,7 +65,6 @@ def main():
         # "logger": logger,
         "default_save_path": args.logdir,
         "gpus": gpus,
-        "check_val_every_n_epoch": args.test_interval,
         "early_stop_callback": False,
         "max_epochs": args.epochs,
     }
