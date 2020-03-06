@@ -21,7 +21,7 @@ from .base import BaseVAE
 
 class Discriminator(pxd.Deterministic):
     def __init__(self, z_dim):
-        super().__init__(cond_var=["z"], var=["t"])
+        super().__init__(cond_var=["z"], var=["t"], name="d")
 
         self.model = nn.Sequential(
             nn.Linear(z_dim, 1000),
@@ -48,7 +48,7 @@ class Discriminator(pxd.Deterministic):
 
 class EncoderFunction(pxd.Deterministic):
     def __init__(self, channel_num):
-        super().__init__(cond_var=["x"], var=["h"])
+        super().__init__(cond_var=["x"], var=["h"], name="f_e")
 
         self.conv1 = nn.Conv2d(channel_num, 32, 4, stride=2, padding=1)
         self.conv2 = nn.Conv2d(32, 32, 4, stride=2, padding=1)
@@ -68,7 +68,7 @@ class EncoderFunction(pxd.Deterministic):
 
 class ContinuousEncoder(pxd.Normal):
     def __init__(self, z_dim):
-        super().__init__(cond_var=["h"], var=["z"])
+        super().__init__(cond_var=["h"], var=["z"], name="q_z")
 
         self.fc11 = nn.Linear(256, z_dim)
         self.fc12 = nn.Linear(256, z_dim)
@@ -81,7 +81,7 @@ class ContinuousEncoder(pxd.Normal):
 
 class DiscreteEncoder(pxd.Categorical):
     def __init__(self, c_dim):
-        super().__init__(cond_var=["h"], var=["c"])
+        super().__init__(cond_var=["h"], var=["c"], name="q_c")
 
         self.fc1 = nn.Linear(256, c_dim)
 
@@ -94,7 +94,7 @@ class DiscreteEncoder(pxd.Categorical):
 
 class JointDecoder(pxd.Bernoulli):
     def __init__(self, channel_num, z_dim, c_dim):
-        super().__init__(cond_var=["z", "c"], var=["x"])
+        super().__init__(cond_var=["z", "c"], var=["x"], name="p")
 
         self.fc1 = nn.Linear(z_dim + c_dim, 256)
         self.fc2 = nn.Linear(256, 1024)
@@ -116,26 +116,30 @@ class JointDecoder(pxd.Bernoulli):
 
 
 class AAE(BaseVAE):
-    def __init__(self, device, channel_num, beta, z_dim, c_dim, **kwargs):
-        super().__init__(channel_num, z_dim, device, beta, **kwargs)
+    def __init__(self, channel_num, beta, z_dim, c_dim, **kwargs):
+        super().__init__()
 
+        # Parameters
+        self.channel_num = channel_num
+        self.z_dim = z_dim
         self.c_dim = c_dim
+        self._beta_value = beta
 
         # Prior
         self.prior_cont = pxd.Normal(
             loc=torch.tensor(0.), scale=torch.tensor(1.),
-            var=["z"], features_shape=[z_dim]).to(device)
+            var=["z"], features_shape=[z_dim])
         self.prior_disc = pxd.Categorical(
             probs=torch.ones(c_dim, dtype=torch.float32) / c_dim,
-            var=["c"]).to(device)
+            var=["c"])
 
         # Encoder
-        self.encoder_func = EncoderFunction(channel_num).to(device)
-        self.encoder_cont = ContinuousEncoder(z_dim).to(device)
-        self.encoder_disc = DiscreteEncoder(c_dim).to(device)
+        self.encoder_func = EncoderFunction(channel_num)
+        self.encoder_cont = ContinuousEncoder(z_dim)
+        self.encoder_disc = DiscreteEncoder(c_dim)
 
         # Decoder
-        self.decoder = JointDecoder(channel_num, z_dim, c_dim).to(device)
+        self.decoder = JointDecoder(channel_num, z_dim, c_dim)
 
         self.distributions = nn.ModuleList([
             self.prior_cont, self.prior_disc, self.encoder_func,
@@ -144,82 +148,84 @@ class AAE(BaseVAE):
 
         # Loss
         self.ce = pxl.CrossEntropy(self.encoder_cont, self.decoder)
+        self.beta = pxl.Parameter("beta")
 
         # Adversarial loss
-        self.disc = Discriminator(z_dim).to(device)
+        self.disc = Discriminator(z_dim)
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder_cont, self.prior_cont, self.disc)
 
-    def _eval_loss(self, x_dict, **kwargs):
+    def encode(self, x, mean=False):
 
-        # Calculate loss
-        ce_loss = self.ce.eval(x_dict).mean()
-        js_loss = self.adv_js.eval(x_dict).mean()
-        loss = ce_loss + js_loss
+        h = self.encoder_func.sample(x, return_all=False)
 
-        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
-                     "js_loss": js_loss.item()}
+        if mean:
+            z = self.encoder_cont.sample_mean(h)
+            c = self.encoder_disc.sample_mean(h)
+            return z, c
 
-        return loss, loss_dict
+        z = self.encoder_cont.sample(h, return_all=False)
+        c = self.encoder_disc.sample(h, return_all=False)
+        z.update(c)
+        return z
 
-    def run(self, loader, training=True):
-        # Returned value
-        loss_dict = collections.defaultdict(float)
-
-        for x in loader:
-            if isinstance(x, (tuple, list)):
-                x = x[0]
-            x = x.to(self.device)
-
-            # Mini-batch size
-            minibatch_size = x.size(0)
-
-            # Sample h (surrogate latent) and c (categorical latent)
-            x_dict = {"x": x}
-            x_dict = (self.encoder_disc * self.encoder_func).sample(x_dict)
-
-            # Calculate loss
-            if training:
-                _batch_loss = self.train(x_dict)
-                _d_loss = self.adv_js.train(x_dict)
+    def decode(self, z=None, c=None, latent=None, mean=False):
+        if latent is None:
+            latent = {}
+            if isinstance(z, dict):
+                latent.update(z)
             else:
-                _batch_loss = self.test(x_dict)
-                _d_loss = self.adv_js.test(x_dict)
+                latent["z"] = z
 
-            # Accumulate minibatch loss
-            for key in _batch_loss:
-                loss_dict[key] += _batch_loss[key] * minibatch_size
-            loss_dict["d_loss"] += _d_loss.item() * minibatch_size
+            if isinstance(c, dict):
+                latent.update(c)
+            else:
+                latent["c"] = c
 
-        # Devide by data size
-        for key in loss_dict:
-            loss_dict[key] /= len(loader.dataset)
+        if mean:
+            return self.decoder.sample_mean(latent)
+        return self.decoder.sample(latent, return_all=False)
 
-        return loss_dict
+    def sample(self, batch_n=1):
+        z = self.prior_cont.sample(batch_n=batch_n)
+        c = self.prior_disc.sample(batch_n=batch_n)
+        sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
+        return sample
 
-    def reconstruct(self, x, concat=True):
+    def forward(self, x, reconstruct=True, return_latent=False):
+        if reconstruct:
+            latent = self.encode(x)
+            sample = self.decode(latent=latent, mean=True)
 
-        with torch.no_grad():
-            x = x.to(self.device)
-            h = self.encoder_func.sample(x, return_all=False)
-            z = self.encoder_cont.sample(h, return_all=False)
-            c = self.encoder_disc.sample(h, return_all=False)
-            x_recon = self.decoder.sample_mean(
-                {"z": z["z"], "c": c["c"]}).cpu()
+            if return_latent:
+                latent.update({"x": sample})
+                return latent
+            return sample
 
-        if concat:
-            return torch.cat([z["z"], c["c"]]), x_recon
+        return self.encode(x, mean=True)
 
-        return z["z"], c["c"], x_recon
+    def loss_func(self, x_dict, **kwargs):
 
-    def sample(self, batch_n=1, concat=True):
+        optimizer_idx = kwargs["optimizer_idx"]
 
-        with torch.no_grad():
-            z = self.prior_cont.sample(batch_n=batch_n)
-            c = self.prior_disc.sample(batch_n=batch_n)
-            x = self.decoder.sample_mean({"z": z["z"], "c": c["c"]}).cpu()
+        if optimizer_idx == 0:
+            # VAE loss
+            ce_loss = self.ce.eval(x_dict).mean()
+            js_loss = self.adv_js.eval(x_dict).mean()
+            loss = ce_loss + js_loss
+            return {"loss": loss, "ce_loss": ce_loss, "js_loss": js_loss}
+        elif optimizer_idx == 1:
+            # Discriminator loss
+            loss = self.adv_js.eval(x_dict, discriminator=True)
+            return {"loss": loss, "adv_loss": loss}
+        else:
+            raise ValueError
 
-        if concat:
-            return torch.cat([z["z"], c["c"]]), x
+    @property
+    def loss_cls(self):
+        return (self.ce + self.adv_js).expectation(
+                    self.encoder_disc * self.encoder_func)
 
-        return z["z"], x
+    @property
+    def second_optim(self):
+        return self.adv_js.d_optimizer
