@@ -9,11 +9,12 @@ import pytorch_lightning as pl
 
 class VAEUpdater(pl.LightningModule):
 
-    def __init__(self, model, hparams):
+    def __init__(self, model, root, batch_size, **kwargs):
         super().__init__()
 
         self.model = model
-        self.hparams = hparams
+        self.root = root
+        self.batch_size = batch_size
 
         # Dataset parameters
         self.device = None
@@ -65,18 +66,18 @@ class VAEUpdater(pl.LightningModule):
 
     def prepare_data(self):
         """Download dataset"""
-        datasets.MNIST(root=self.hparams.root, train=True, download=True)
-        datasets.MNIST(root=self.hparams.root, train=False, download=True)
+        datasets.MNIST(root=self.root, train=True, download=True)
+        datasets.MNIST(root=self.root, train=False, download=True)
 
     @pl.data_loader
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        dataset = datasets.MNIST(root=self.hparams.root, train=True,
+        dataset = datasets.MNIST(root=self.root, train=True,
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.hparams.batch_size}
+        params = {"batch_size": self.batch_size}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=True, **params)
@@ -88,11 +89,11 @@ class VAEUpdater(pl.LightningModule):
     def val_dataloader(self):
         # Dataset
         _transform = self.data_transform()
-        dataset = datasets.MNIST(root=self.hparams["root"], train=False,
+        dataset = datasets.MNIST(root=self.root, train=False,
                                  transform=_transform)
 
         # Params for data loader
-        params = {"batch_size": self.hparams.batch_size}
+        params = {"batch_size": self.batch_size}
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=False, **params)
