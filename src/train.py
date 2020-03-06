@@ -76,7 +76,7 @@ def main():
         "default_save_path": args.logdir,
         "gpus": gpus,
         "check_val_every_n_epoch": args.test_interval,
-        "max_epochs": args.epochs,
+        "min_epochs": args.epochs,
     }
     trainer = pl.Trainer(**trainer_params)
     trainer.fit(updater)
