@@ -11,11 +11,11 @@ class BaseVAE(nn.Module):
 
         self.distributions = nn.ModuleDict([])
 
-    def encode(self, inputs):
+    def encode(self, x, sample=True):
         """Encode latent z given observable x"""
         raise NotImplementedError
 
-    def decode(self, inputs):
+    def decode(self, z, sample=False):
         """Decode observable x given latent z"""
         raise NotImplementedError
 
@@ -23,17 +23,19 @@ class BaseVAE(nn.Module):
         """Sample observable x' from sampled latent z"""
         raise NotImplementedError
 
-    def reconstruct(self, x, **kwargs):
-        """Reconstruct observable x' given data x"""
-        raise NotImplementedError
-
-    def forward(self, *inputs):
-        """Reconstruct inputs data"""
-        raise NotImplementedError
-
     def loss_function(self, *inputs, **kwargs):
         """Calculate loss in train/val/test"""
         raise NotImplementedError
+
+    def forward(self, x, sample=True, reconstruct=True):
+        """Reconstruct inputs data"""
+
+        z = self.encode(x, sample=sample)
+
+        if reconstruct:
+            return self.decode(z)
+
+        return z
 
     @property
     def loss_cls(self):
