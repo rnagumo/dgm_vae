@@ -63,10 +63,14 @@ class BetaVAE(BaseVAE):
         sample = self.decoder.sample_mean(z)
         return sample
 
-    def forward(self, x, reconstruct=True):
+    def forward(self, x, reconstruct=True, return_latent=False):
         if reconstruct:
             z = self.encode(x)
-            return self.decode(z, mean=True)
+            sample = self.decode(z, mean=True)
+            if return_latent:
+                z.update({"x": sample})
+                return z
+            return sample
 
         # Return latent
         return self.encode(x, mean=True)
