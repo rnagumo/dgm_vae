@@ -12,28 +12,28 @@ class BaseVAE(nn.Module):
         self.distributions = nn.ModuleDict([])
 
     def encode(self, *inputs, mean=False):
-        """Encode latent z given observable x"""
+        """Encodes latent z given observable x"""
         raise NotImplementedError
 
     def decode(self, *inputs, mean=False):
-        """Decode observable x given latent z"""
+        """Decodes observable x given latent z"""
         raise NotImplementedError
 
     def sample(self, batch_size, **kwargs):
-        """Sample observable x' from sampled latent z"""
+        """Samples observable x from sampled latent z"""
         raise NotImplementedError
 
     def forward(self, x, reconstruct=True, return_latent=False):
-        """Reconstruct inputs data"""
+        """Reconstructs observable x' given inputs data x"""
         raise NotImplementedError
 
     def loss_func(self, *inputs, **kwargs):
-        """Calculate loss in train/val/test"""
+        """Calculates loss"""
         raise NotImplementedError
 
     @property
     def loss_cls(self):
-        """Return instance of pixyz.losses.Loss class"""
+        """Returns instance of pixyz.losses.Loss class for printing"""
         raise NotImplementedError
 
     def __str__(self):
@@ -57,4 +57,5 @@ class BaseVAE(nn.Module):
 
     @property
     def second_optim(self):
+        """Returns second optimizer for Adversarial loss"""
         return None
