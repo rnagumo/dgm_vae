@@ -158,7 +158,7 @@ class AVB(BaseVAE):
             loss = self.adv_js.eval(x_dict, discriminator=True)
             return {"loss": loss, "adv_loss": loss}
         else:
-            raise ValueError
+            pass
 
     @property
     def loss_cls(self):
