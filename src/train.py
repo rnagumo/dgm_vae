@@ -69,6 +69,8 @@ def main():
         "min_epochs": args.epochs,
     }
     trainer = pl.Trainer(**trainer_params)
+
+    # Run
     trainer.fit(updater)
 
 
