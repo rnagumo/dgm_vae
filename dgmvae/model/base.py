@@ -23,12 +23,12 @@ class BaseVAE(nn.Module):
         """Sample observable x' from sampled latent z"""
         raise NotImplementedError
 
-    def loss_function(self, *inputs, **kwargs):
-        """Calculate loss in train/val/test"""
-        raise NotImplementedError
-
     def forward(self, x, sample=True, reconstruct=True):
         """Reconstruct inputs data"""
+        raise NotImplementedError
+
+    def loss_function(self, *inputs, **kwargs):
+        """Calculate loss in train/val/test"""
         raise NotImplementedError
 
     @property
