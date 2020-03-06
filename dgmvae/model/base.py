@@ -46,11 +46,11 @@ class BaseVAE(nn.Module):
             else:
                 func_text.append(prob.__str__())
 
-            text = ("Distributions (for training): \n "
-                    " {} \n".format(", ".join(prob_text)))
-            if len(func_text) > 0:
-                text += ("Deterministic functions (for training): \n "
-                         " {} \n".format(", ".join(func_text)))
+        text = ("Distributions (for training): \n "
+                " {} \n".format(", ".join(prob_text)))
+        if len(func_text) > 0:
+            text += ("Deterministic functions (for training): \n "
+                     " {} \n".format(", ".join(func_text)))
 
-            text += "Loss function: \n  {} \n".format(str(self.loss_cls))
-            return text
+        text += "Loss function: \n  {} \n".format(str(self.loss_cls))
+        return text
