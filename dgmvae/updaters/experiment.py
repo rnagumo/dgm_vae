@@ -9,10 +9,11 @@ import pytorch_lightning as pl
 
 class VAEUpdater(pl.LightningModule):
 
-    def __init__(self, model, root, batch_size, **kwargs):
+    def __init__(self, model, hparams, root, batch_size, **kwargs):
         super().__init__()
 
         self.model = model
+        self.hparams = hparams
         self.root = root
         self.batch_size = batch_size
 
