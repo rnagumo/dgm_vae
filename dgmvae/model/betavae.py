@@ -54,8 +54,8 @@ class BetaVAE(BaseVAE):
 
     def sample(self, batch_n=1):
         z = self.prior.sample(batch_n=batch_n)
-        x = self.decoder.sample_mean(z)
-        return x
+        sample = self.decoder.sample_mean(z)
+        return sample
 
     def forward(self, x, sample=True, reconstruct=True):
         if sample:
