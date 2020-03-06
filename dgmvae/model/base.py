@@ -54,3 +54,7 @@ class BaseVAE(nn.Module):
 
         text += "Loss function: \n  {} \n".format(str(self.loss_cls))
         return text
+
+    @property
+    def second_optim(self):
+        return None
