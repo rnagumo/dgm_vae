@@ -2,7 +2,6 @@
 """Training method"""
 
 import argparse
-import datetime
 import json
 import pathlib
 
@@ -36,9 +35,6 @@ def main():
     # Tensorboard writer
     # logger = pl.loggers.TensorBoardLogger(args.logdir)
 
-    # Timer
-    timer = datetime.datetime.now()
-
     # -------------------------------------------------------------------------
     # 2. Training
     # -------------------------------------------------------------------------
@@ -67,7 +63,6 @@ def main():
 
     # Updater
     updater_params = vars(args)
-    updater_params.update({"timer": timer})
     updater = dvu.VAEUpdater(model, updater_params)
 
     # Trainer
