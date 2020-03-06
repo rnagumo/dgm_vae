@@ -208,6 +208,9 @@ class AAE(BaseVAE):
 
         optimizer_idx = kwargs["optimizer_idx"]
 
+        # Sample h (surrogate latent) and c (categorical latent)
+        x_dict = (self.encoder_disc * self.encoder_func).sample(x_dict)
+
         if optimizer_idx == 0:
             # VAE loss
             ce_loss = self.ce.eval(x_dict).mean()
