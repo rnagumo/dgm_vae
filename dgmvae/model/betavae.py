@@ -64,15 +64,12 @@ class BetaVAE(BaseVAE):
         return sample
 
     def forward(self, x, reconstruct=True):
-        if not isinstance(x, dict):
-            x = {"x": x}
-
         if reconstruct:
-            z = self.encoder.sample(x, return_all=False)
-            return self.decoder.sample_mean(z)
+            z = self.encode(x)
+            return self.decode(z, mean=True)
 
         # Return latent
-        return self.encoder.sample_mean(x)
+        return self.encode(x, mean=True)
 
     def loss_func(self, x_dict, **kwargs):
 
