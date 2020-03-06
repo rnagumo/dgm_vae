@@ -114,7 +114,7 @@ class JointDecoder(pxd.Bernoulli):
 
 
 class AAE(BaseVAE):
-    def __init__(self, channel_num, beta, z_dim, c_dim, **kwargs):
+    def __init__(self, channel_num, z_dim, c_dim, beta, **kwargs):
         super().__init__()
 
         # Parameters
