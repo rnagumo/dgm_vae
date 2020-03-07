@@ -29,16 +29,23 @@ class AVBDiscriminator(pxd.Deterministic):
 
         self.disc_x = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(32, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(32, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(64, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
         )
         self.fc_x = nn.Linear(1024, 256)
 
         self.disc_z = nn.Sequential(
             nn.Linear(z_dim, 512),
+            nn.ReLU(),
             nn.Linear(512, 512),
+            nn.ReLU(),
             nn.Linear(512, 256),
+            nn.ReLU(),
         )
 
         self.fc = nn.Linear(512, 1)
@@ -60,22 +67,31 @@ class AVBEncoder(pxd.Deterministic):
 
         self.enc_x = nn.Sequential(
             nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(32, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(32, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
             nn.Conv2d(64, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
         )
         self.fc_x = nn.Sequential(
             nn.Linear(1024, 256),
-            nn.Linear(256, z_dim)
+            nn.ReLU(),
+            nn.Linear(256, z_dim),
+            nn.ReLU(),
         )
-        self.fc_e = nn.Linear(e_dim, z_dim)
+        self.fc_e = nn.Sequential(
+            nn.Linear(e_dim, z_dim),
+            nn.ReLU(),
+        )
         self.fc = nn.Linear(z_dim * 2, z_dim)
 
     def forward(self, x, e):
         h_x = self.enc_x(x)
         h_x = h_x.view(-1, 1024)
-        h_x = F.relu(self.fc_x(h_x))
-        h_e = F.relu(self.fc_e(e))
+        h_x = self.fc_x(h_x)
+        h_e = self.fc_e(e)
         z = self.fc(torch.cat([h_x, h_e], dim=1))
         return {"z": z}
 
