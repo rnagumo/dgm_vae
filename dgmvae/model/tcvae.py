@@ -109,11 +109,16 @@ class TCVAE(BaseVAE):
         # log q(z)
         log_qz = torch.logsumexp(_logqz.sum(2), 1) - lognm
 
+        # Coeff
+        alpha = self.alpha.eval(x_dict)
+        beta = self.beta.eval(x_dict)
+        gamma = self.gamma.eval(x_dict)
+
         # Calculate ELBO loss
         recon = -log_px.mean()
-        mutual_info = self.alpha * (log_qz_x - log_qz).mean()
-        independence = self.beta * (log_qz - log_qz_prodmarginal).mean()
-        dim_wise_kl = self.gamma * (log_qz_prodmarginal - log_pz).mean()
+        mutual_info = alpha * (log_qz_x - log_qz).mean()
+        independence = beta * (log_qz - log_qz_prodmarginal).mean()
+        dim_wise_kl = gamma * (log_qz_prodmarginal - log_pz).mean()
         loss = recon + mutual_info + independence + dim_wise_kl
 
         loss_dict = {"loss": loss, "recon": recon, "mutual_info": mutual_info,
