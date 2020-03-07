@@ -15,33 +15,7 @@ import pixyz.distributions as pxd
 import pixyz.losses as pxl
 
 from .base import BaseVAE
-
-
-class Discriminator(pxd.Deterministic):
-    def __init__(self, z_dim):
-        super().__init__(cond_var=["z"], var=["t"], name="d")
-
-        self.model = nn.Sequential(
-            nn.Linear(z_dim, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1000),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(1000, 1),
-        )
-
-    def forward(self, z):
-        logits = self.model(z)
-        probs = torch.sigmoid(logits)
-        t = torch.clamp(probs, 1e-6, 1 - 1e-6)
-        return {"t": t}
+from .dist import Discriminator
 
 
 class EncoderFunction(pxd.Deterministic):

@@ -1,6 +1,7 @@
 
 """Shared distributions"""
 
+import torch
 from torch import nn
 from torch.nn import functional as F
 
@@ -62,3 +63,30 @@ class Decoder(pxd.Bernoulli):
         h = h.view(-1, 64, 4, 4)
         probs = self.deconv(h)
         return {"probs": probs}
+
+
+class Discriminator(pxd.Deterministic):
+    def __init__(self, z_dim):
+        super().__init__(cond_var=["z"], var=["t"], name="d")
+
+        self.model = nn.Sequential(
+            nn.Linear(z_dim, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1000),
+            nn.LeakyReLU(0.2),
+            nn.Linear(1000, 1),
+        )
+
+    def forward(self, z):
+        logits = self.model(z)
+        probs = torch.sigmoid(logits)
+        t = torch.clamp(probs, 1e-6, 1 - 1e-6)
+        return {"t": t}
