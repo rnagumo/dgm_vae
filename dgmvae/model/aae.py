@@ -98,46 +98,46 @@ class AAE(BaseVAE):
         self._beta_value = beta
 
         # Prior
-        self.prior_cont = pxd.Normal(
+        self.prior_z = pxd.Normal(
             loc=torch.tensor(0.), scale=torch.tensor(1.),
             var=["z"], features_shape=[z_dim])
-        self.prior_disc = pxd.Categorical(
+        self.prior_c = pxd.Categorical(
             probs=torch.ones(c_dim, dtype=torch.float32) / c_dim,
             var=["c"])
 
         # Encoder
         self.encoder_func = EncoderFunction(channel_num)
-        self.encoder_cont = ContinuousEncoder(z_dim)
-        self.encoder_disc = DiscreteEncoder(c_dim)
+        self.encoder_z = ContinuousEncoder(z_dim)
+        self.encoder_c = DiscreteEncoder(c_dim)
 
         # Decoder
         self.decoder = JointDecoder(channel_num, z_dim, c_dim)
 
         self.distributions = nn.ModuleList([
-            self.prior_cont, self.prior_disc, self.encoder_func,
-            self.encoder_cont, self.encoder_disc, self.decoder,
+            self.prior_z, self.prior_c, self.encoder_func,
+            self.encoder_z, self.encoder_c, self.decoder,
         ])
 
         # Loss
-        self.ce = pxl.CrossEntropy(self.encoder_cont, self.decoder)
+        self.ce = pxl.CrossEntropy(self.encoder_z, self.decoder)
         self.beta = pxl.Parameter("beta")
 
         # Adversarial loss
         self.disc = Discriminator(z_dim)
         self.adv_js = pxl.AdversarialJensenShannon(
-            self.encoder_cont, self.prior_cont, self.disc)
+            self.encoder_z, self.prior_z, self.disc)
 
     def encode(self, x, mean=False):
 
         h = self.encoder_func.sample(x, return_all=False)
 
         if mean:
-            z = self.encoder_cont.sample_mean(h)
-            c = self.encoder_disc.sample_mean(h)
+            z = self.encoder_z.sample_mean(h)
+            c = self.encoder_c.sample_mean(h)
             return z, c
 
-        z = self.encoder_cont.sample(h, return_all=False)
-        c = self.encoder_disc.sample(h, return_all=False)
+        z = self.encoder_z.sample(h, return_all=False)
+        c = self.encoder_c.sample(h, return_all=False)
         z.update(c)
         return z
 
@@ -159,8 +159,8 @@ class AAE(BaseVAE):
         return self.decoder.sample(latent, return_all=False)
 
     def sample(self, batch_n=1):
-        z = self.prior_cont.sample(batch_n=batch_n)
-        c = self.prior_disc.sample(batch_n=batch_n)
+        z = self.prior_z.sample(batch_n=batch_n)
+        c = self.prior_c.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
@@ -178,7 +178,7 @@ class AAE(BaseVAE):
         optimizer_idx = kwargs["optimizer_idx"]
 
         # Sample h (surrogate latent) and c (categorical latent)
-        x_dict = (self.encoder_disc * self.encoder_func).sample(x_dict)
+        x_dict = (self.encoder_c * self.encoder_func).sample(x_dict)
 
         if optimizer_idx == 0:
             # VAE loss
@@ -194,7 +194,7 @@ class AAE(BaseVAE):
     @property
     def loss_cls(self):
         return (self.ce + self.adv_js).expectation(
-                    self.encoder_disc * self.encoder_func)
+                    self.encoder_c * self.encoder_func)
 
     @property
     def second_optim(self):
