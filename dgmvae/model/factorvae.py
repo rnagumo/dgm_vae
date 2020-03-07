@@ -90,7 +90,7 @@ class FactorVAE(BaseVAE):
         optimizer_idx = kwargs["optimizer_idx"]
 
         x = x_dict["x"]
-        len_x = x.size(0)
+        len_x = x.size(0) // 2
         x_dict.update({"x": x[:len_x], "x_shf": x[len_x:]})
         x_dict.update({"beta": self._beta_value, "gamma": self._gamma_value})
 
