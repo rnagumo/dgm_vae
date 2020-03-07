@@ -5,8 +5,6 @@ Disentangling by Factorising
 http://arxiv.org/abs/1802.05983
 """
 
-import collections
-
 import torch
 from torch import nn
 
