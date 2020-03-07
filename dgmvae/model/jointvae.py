@@ -6,7 +6,7 @@ http://arxiv.org/abs/1804.00104
 """
 
 import torch
-from torch import nn, optim
+from torch import nn
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
