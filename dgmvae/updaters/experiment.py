@@ -28,7 +28,8 @@ class VAEUpdater(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, optimizer_idx=0):
         x, y = batch
-        outputs = self.model.loss_func({"x": x}, optimizer_idx=optimizer_idx)
+        x_dict = {"x": x, "dataset_size": self.train_size}
+        outputs = self.model.loss_func(x_dict, optimizer_idx=optimizer_idx)
 
         loss_dict = {}
         for key in outputs:
@@ -50,12 +51,13 @@ class VAEUpdater(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx, optimizer_idx=0):
         x, y = batch
+        x_dict = {"x": x, "dataset_size": self.train_size}
 
         # Set device
         if self.device is None:
             self.device = x.device
 
-        return self.model.loss_func({"x": x}, optimizer_idx=optimizer_idx)
+        return self.model.loss_func(x_dict, optimizer_idx=optimizer_idx)
 
     def validation_end(self, outputs):
         """Validation epoch end"""
