@@ -18,27 +18,33 @@ from ..loss.discrete_kl import CategoricalKullbackLeibler
 
 class EncoderFunction(pxd.Deterministic):
     def __init__(self, channel_num):
-        super().__init__(cond_var=["x"], var=["h"])
+        super().__init__(cond_var=["x"], var=["h"], name="f")
 
-        self.conv1 = nn.Conv2d(channel_num, 32, 4, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, 4, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(32, 64, 4, stride=2, padding=1)
-        self.conv4 = nn.Conv2d(64, 64, 4, stride=2, padding=1)
-        self.fc1 = nn.Linear(1024, 256)
+        self.enc_x = nn.Sequential(
+            nn.Conv2d(channel_num, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
+        )
+        self.fc = nn.Sequential(
+            nn.Linear(1024, 256),
+            nn.ReLU(),
+        )
 
     def forward(self, x):
-        h = F.relu(self.conv1(x))
-        h = F.relu(self.conv2(h))
-        h = F.relu(self.conv3(h))
-        h = F.relu(self.conv4(h))
+        h = self.enc_x(x)
         h = h.view(-1, 1024)
-        h = F.relu(self.fc1(h))
+        h = self.fc(h)
         return {"h": h}
 
 
 class ContinuousEncoder(pxd.Normal):
     def __init__(self, z_dim):
-        super().__init__(cond_var=["h"], var=["z"])
+        super().__init__(cond_var=["h"], var=["z"], name="q_z")
 
         self.fc11 = nn.Linear(256, z_dim)
         self.fc12 = nn.Linear(256, z_dim)
@@ -51,7 +57,8 @@ class ContinuousEncoder(pxd.Normal):
 
 class DiscreteEncoder(pxd.RelaxedCategorical):
     def __init__(self, c_dim, temperature):
-        super().__init__(cond_var=["h"], var=["c"], temperature=temperature)
+        super().__init__(cond_var=["h"], var=["c"], name="q_c",
+                         temperature=temperature)
 
         self.fc1 = nn.Linear(256, c_dim)
 
@@ -66,76 +73,127 @@ class JointDecoder(pxd.Bernoulli):
     def __init__(self, channel_num, z_dim, c_dim):
         super().__init__(cond_var=["z", "c"], var=["x"])
 
-        self.fc1 = nn.Linear(z_dim + c_dim, 256)
-        self.fc2 = nn.Linear(256, 1024)
-        self.deconv1 = nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1)
-        self.deconv2 = nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1)
-        self.deconv3 = nn.ConvTranspose2d(32, 32, 4, stride=2, padding=1)
-        self.deconv4 = nn.ConvTranspose2d(32, channel_num, 4, stride=2,
-                                          padding=1)
+        self.fc = nn.Sequential(
+            nn.Linear(z_dim + c_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 1024),
+            nn.ReLU(),
+        )
+
+        self.deconv = nn.Sequential(
+            nn.ConvTranspose2d(64, 64, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(64, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 32, 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, channel_num, 4, stride=2, padding=1),
+            nn.Sigmoid(),
+        )
 
     def forward(self, z, c):
-        h = F.relu(self.fc1(torch.cat([z, c], dim=1)))
-        h = F.relu(self.fc2(h))
+        h = self.fc(torch.cat([z, c], dim=1))
         h = h.view(-1, 64, 4, 4)
-        h = F.relu(self.deconv1(h))
-        h = F.relu(self.deconv2(h))
-        h = F.relu(self.deconv3(h))
-        probs = torch.sigmoid(self.deconv4(h))
+        probs = self.deconv(h)
         return {"probs": probs}
 
 
 class JointVAE(BaseVAE):
-    def __init__(self, device, channel_num, z_dim, c_dim, temperature,
-                 gamma_cont, gamma_disc, **kwargs):
+    def __init__(self, channel_num, z_dim, c_dim, temperature, gamma_z,
+                 gamma_c, **kwargs):
+        super().__init__()
 
-        self.device = device
         self.channel_num = channel_num
         self.z_dim = z_dim
         self.c_dim = c_dim
+        self._gamma_z_value = gamma_z
+        self._gamma_c_value = gamma_c
 
         # Distributions
-        self.prior_cont = pxd.Normal(
+        self.prior_z = pxd.Normal(
             loc=torch.tensor(0.), scale=torch.tensor(1.),
-            var=["z"], features_shape=[z_dim]).to(device)
-        self.prior_disc = pxd.Categorical(
+            var=["z"], features_shape=[z_dim])
+        self.prior_c = pxd.Categorical(
             probs=torch.ones(c_dim, dtype=torch.float32) / c_dim,
-            var=["c"]).to(device)
+            var=["c"])
 
-        self.encoder_func = EncoderFunction(channel_num).to(device)
-        self.encoder_cont = ContinuousEncoder(z_dim).to(device)
-        self.encoder_disc = DiscreteEncoder(c_dim, temperature).to(device)
-
-        self.decoder = JointDecoder(channel_num, z_dim, c_dim).to(device)
+        self.encoder_func = EncoderFunction(channel_num)
+        self.encoder_z = ContinuousEncoder(z_dim)
+        self.encoder_c = DiscreteEncoder(c_dim, temperature)
+        self.decoder = JointDecoder(channel_num, z_dim, c_dim)
 
         self.distributions = nn.ModuleList([
-            self.prior_cont, self.prior_disc, self.encoder_func,
-            self.encoder_cont, self.encoder_disc, self.decoder
+            self.prior_z, self.prior_c, self.encoder_func,
+            self.encoder_z, self.encoder_c, self.decoder
         ])
 
         # Loss
-        self.ce = pxl.CrossEntropy(self.encoder_cont * self.encoder_disc,
+        self.ce = pxl.CrossEntropy(self.encoder_z * self.encoder_c,
                                    self.decoder)
-        self.kl_cont = pxl.KullbackLeibler(self.encoder_cont, self.prior_cont)
-        self.kl_disc = CategoricalKullbackLeibler(
-            self.encoder_disc, self.prior_disc)
+        self.kl_z = pxl.KullbackLeibler(self.encoder_z, self.prior_z)
+        self.kl_c = CategoricalKullbackLeibler(
+            self.encoder_c, self.prior_c)
 
         # Coefficient for kl
-        self.gamma_cont = gamma_cont
-        self.gamma_disc = gamma_disc
+        self.gamma_z = pxl.Parameter("gamma_z")
+        self.gamma_c = pxl.Parameter("gamma_c")
 
         # Capacity
-        self.cap_cont = pxl.Parameter("cap_cont")
-        self.cap_disc = pxl.Parameter("cap_disc")
+        self.cap_z = pxl.Parameter("cap_z")
+        self.cap_c = pxl.Parameter("cap_c")
 
-        # Optimizer
-        params = self.distributions.parameters()
-        self.optimizer = optim.Adam(params)
+    def encode(self, x, mean=False):
 
-    def _eval_loss(self, x_dict, **kwargs):
+        h = self.encoder_func.sample(x, return_all=False)
+
+        if mean:
+            z = self.encoder_z.sample_mean(h)
+            c = self.encoder_c.sample_mean(h)
+            return z, c
+
+        z = self.encoder_z.sample(h, return_all=False)
+        c = self.encoder_c.sample(h, return_all=False)
+        z.update(c)
+        return z
+
+    def decode(self, latent=None, z=None, c=None, mean=False):
+        if latent is None:
+            latent = {}
+            if isinstance(z, dict):
+                latent.update(z)
+            else:
+                latent["z"] = z
+
+            if isinstance(c, dict):
+                latent.update(c)
+            else:
+                latent["c"] = c
+
+        if mean:
+            return self.decoder.sample_mean(latent)
+        return self.decoder.sample(latent, return_all=False)
+
+    def sample(self, batch_n=1):
+        z = self.prior_z.sample(batch_n=batch_n)
+        c = self.prior_c.sample(batch_n=batch_n)
+        sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
+        return sample
+
+    def forward(self, x, return_latent=False):
+        latent = self.encode(x)
+        sample = self.decode(latent=latent, mean=True)
+
+        if return_latent:
+            latent.update({"x": sample})
+            return latent
+        return sample
+
+    def loss_func(self, x_dict, **kwargs):
 
         # TODO: update capacity values per epoch
-        x_dict.update({"cap_cont": 1, "cap_disc": 1})
+        x_dict.update({"gamma_z": self._gamma_z_value,
+                       "gamma_c": self._gamma_c_value,
+                       "cap_z": 1, "cap_c": 1})
 
         # Sample h (surrogate latent variable)
         x_dict = self.encoder_func.sample(x_dict)
@@ -144,45 +202,21 @@ class JointVAE(BaseVAE):
         ce_loss = self.ce.eval(x_dict).mean()
 
         # KL for continuous latent
-        _kl_cont = self.kl_cont.eval(x_dict).mean()
-        _cap_cont = self.cap_cont.eval(x_dict)
-        kl_cont_loss = self.gamma_cont * torch.abs(_kl_cont - _cap_cont)
+        kl_z_loss = (
+            self.gamma_z * (self.kl_z - self.cap_z).abs()).eval(x_dict).mean()
 
         # KL for discrete latent
-        _kl_disc = self.kl_disc.eval(x_dict).mean()
-        _cap_disc = self.cap_disc.eval(x_dict)
-        kl_disc_loss = self.gamma_disc * torch.abs(_kl_disc - _cap_disc)
+        kl_c_loss = (
+            self.gamma_c * (self.kl_c - self.cap_c).abs()).eval(x_dict).mean()
 
-        loss = ce_loss + kl_cont_loss + kl_disc_loss
-        loss_dict = {"loss": loss, "ce_loss": ce_loss,
-                     "kl_cont_loss": kl_cont_loss,
-                     "kl_disc_loss": kl_disc_loss}
+        loss = ce_loss + kl_z_loss + kl_c_loss
+        loss_dict = {"loss": loss, "ce_loss": ce_loss, "kl_z_loss": kl_z_loss,
+                     "kl_c_loss": kl_c_loss}
 
-        return loss, loss_dict
+        return loss_dict
 
-    def reconstruct(self, x, concat=True):
-
-        with torch.no_grad():
-            x = x.to(self.device)
-            h = self.encoder_func.sample(x, return_all=False)
-            z = self.encoder_cont.sample(h, return_all=False)
-            c = self.encoder_disc.sample(h, return_all=False)
-            x_recon = self.decoder.sample_mean(
-                {"z": z["z"], "c": c["c"]}).cpu()
-
-        if concat:
-            return torch.cat([z["z"], c["c"]]), x_recon
-
-        return z["z"], c["c"], x_recon
-
-    def sample(self, batch_n=1, concat=True):
-
-        with torch.no_grad():
-            z = self.prior_cont.sample(batch_n=batch_n)
-            c = self.prior_disc.sample(batch_n=batch_n)
-            x = self.decoder.sample_mean({"z": z["z"], "c": c["c"]}).cpu()
-
-        if concat:
-            return torch.cat([z["z"], c["c"]]), x
-
-        return z["z"], x
+    @property
+    def loss_cls(self):
+        return (self.ce + self.gamma_z * (self.kl_z - self.cap_z).abs()
+                + self.gamma_c * (self.kl_c - self.cap_c).abs()
+                ).expectation(self.encoder_func)
