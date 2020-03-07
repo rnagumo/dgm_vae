@@ -1,17 +1,11 @@
 
-"""DIP-VAE
+"""DIP loss"""
 
-Disentangled Inferred Prior-VAE
-
-Variational Inference of Disentangled Latent Concepts from Unlabeled
-Observations
-http://arxiv.org/abs/1711.00848
-"""
+import sympy
 
 import torch
 from pixyz.losses.losses import Loss
-
-from .base import BaseVAE
+from pixyz.utils import get_dict_values
 
 
 def _get_cov_mu(mu):
@@ -64,7 +58,8 @@ class DipLoss(Loss):
     def _get_eval(self, x_dict={}, **kwargs):
 
         # Compute mu and scale of normal distribution
-        params = self.p.get_params({"x": x_dict["x"]})
+        input_dict = get_dict_values(x_dict, self.p.input_var, True)
+        params = self.p.get_params(input_dict)
 
         # Compute covariance
         if self.dip_type == "i":
@@ -85,23 +80,15 @@ class DipLoss(Loss):
 
     @property
     def _symbol(self):
-        raise NotImplementedError
+        if self.dip_type == "i":
+            p_text = ("\\lambda_{od}\\sum_{i \\neq j}\\left[Cov_{p(x)} "
+                      "\\left[\\mu_\\phi(x)\\right]\\right]^2_{ij} + "
+                      "\\lambda_d \\sum_i \\left(Cov_{p(x)}\\left[ "
+                      "\\mu_\\phi(x) \\right]_{ii} - 1 \\right)^2")
+        elif self.dip_type == "ii":
+            p_text = ("\\lambda_{od}\\sum_{i \\neq j}\\left[Cov_{q_\\phi(x)} "
+                      "\\left[z \\right]\\right]^2_{ij} + "
+                      "\\lambda_d \\sum_i \\left(Cov_{q_\\phi(z)}\\left[z "
+                      "\\right]_{ii} - 1 \\right)^2")
 
-
-class DIPVAE(BaseVAE):
-    def __init__(self, channel_num, z_dim, device, lmd_od, lmd_d, dip_type,
-                 **kwargs):
-        super().__init__(channel_num, z_dim, device)
-
-        self.dip = DipLoss(self.encoder, lmd_od, lmd_d, dip_type)
-
-    def _eval_loss(self, x_dict, **kwargs):
-
-        ce_loss = self.ce.eval(x_dict).mean()
-        kl_loss = self.beta * self.kl.eval(x_dict).mean()
-        dip_loss = self.dip.eval(x_dict)
-        loss = ce_loss + kl_loss + dip_loss
-        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
-                     "kl_loss": kl_loss.item(), "dip_loss": dip_loss.item()}
-
-        return loss, loss_dict
+        return sympy.Symbol(p_text)
