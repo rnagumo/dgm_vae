@@ -9,99 +9,87 @@ http://arxiv.org/abs/1711.00848
 """
 
 import torch
-from pixyz.losses.losses import Loss
+from torch import nn
+
+import pixyz.distributions as pxd
+import pixyz.losses as pxl
 
 from .base import BaseVAE
-
-
-def _get_cov_mu(mu):
-    """Computes covariance of mu.
-
-    cov(mu) = E[mu mu^T] - E[mu]E[mu]^T
-
-    Input
-        mu: [batch_size, latent_dim]
-    Output
-        cov(mu): [latent_dim, latent_dim]
-    """
-
-    # E[mu mu^T]
-    e_mu_mut = (mu.unsqueeze(2) * mu.unsqueeze(1)).mean(dim=0)
-
-    # E[mu]E[mu]^T
-    e_mu = mu.sum(dim=0)
-    e_mu_e_mut = e_mu.unsqueeze(1) * e_mu.unsqueeze(0)
-
-    return e_mu_mut - e_mu_e_mut
-
-
-def _get_e_cov(scale):
-    """Computes expectation of cov E[Cov_encoder] from scale
-
-    Input
-        scale: [batch_size, latent_dim]
-    Output
-        cov: [latent_dim, latent_dim]
-    """
-
-    # Cov
-    cov = scale.unsqueeze(2) * torch.eye(scale.size(1), device=scale.device)
-
-    return cov.sum(dim=0)
-
-
-class DipLoss(Loss):
-    def __init__(self, p, lmd_od, lmd_d, dip_type, **kwargs):
-        super().__init__(p, **kwargs)
-
-        if dip_type not in ["i", "ii"]:
-            raise ValueError(f"Inappropriate type is specified: {dip_type}")
-
-        self.lmd_od = lmd_od
-        self.lmd_d = lmd_d
-        self.dip_type = dip_type
-
-    def _get_eval(self, x_dict={}, **kwargs):
-
-        # Compute mu and scale of normal distribution
-        params = self.p.get_params({"x": x_dict["x"]})
-
-        # Compute covariance
-        if self.dip_type == "i":
-            cov_dip = _get_cov_mu(params["loc"])
-        elif self.dip_type == "ii":
-            cov_dip = _get_e_cov(params["scale"]) + _get_cov_mu(params["loc"])
-
-        # Get diagonal and off-diagonal elements
-        cov_dip_diag = torch.diag(cov_dip)
-        eye = torch.eye(cov_dip.size(0), device=cov_dip.device)
-        cov_dip_off_diag = cov_dip - cov_dip_diag * eye
-
-        # Calculate loss
-        loss = (self.lmd_od * (cov_dip_off_diag ** 2).sum()
-                + self.lmd_d * ((cov_dip_diag - 1) ** 2).sum())
-
-        return loss, x_dict
-
-    @property
-    def _symbol(self):
-        raise NotImplementedError
+from .dist import Decoder, Encoder
+from ..loss.dip_loss import DipLoss
 
 
 class DIPVAE(BaseVAE):
-    def __init__(self, channel_num, z_dim, device, lmd_od, lmd_d, dip_type,
+    def __init__(self, channel_num, z_dim, beta, c, lmd_od, lmd_d, dip_type,
                  **kwargs):
-        super().__init__(channel_num, z_dim, device)
+        super().__init__()
 
+        # Parameters
+        self.channel_num = channel_num
+        self.z_dim = z_dim
+        self._beta_value = beta
+        self._c_value = c
+        self.lmd_od = lmd_od
+        self.lmd_d = lmd_d
+
+        # Distributions
+        self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
+                                var=["z"], features_shape=[z_dim])
+        self.decoder = Decoder(channel_num, z_dim)
+        self.encoder = Encoder(channel_num, z_dim)
+        self.distributions = nn.ModuleList(
+            [self.prior, self.decoder, self.encoder])
+
+        # Loss class
+        self.ce = pxl.CrossEntropy(self.encoder, self.decoder)
+        _kl = pxl.KullbackLeibler(self.encoder, self.prior)
+        _beta = pxl.Parameter("beta")
+        _c = pxl.Parameter("c")
+        self.kl = _beta * (_kl - _c).abs()
         self.dip = DipLoss(self.encoder, lmd_od, lmd_d, dip_type)
 
-    def _eval_loss(self, x_dict, **kwargs):
+    def encode(self, x, mean=False):
+        if not isinstance(x, dict):
+            x = {"x": x}
+
+        if mean:
+            return self.encoder.sample_mean(x)
+        return self.encoder.sample(x, return_all=False)
+
+    def decode(self, z, mean=False):
+        if not isinstance(z, dict):
+            z = {"z": z}
+
+        if mean:
+            return self.decoder.sample_mean(z)
+        return self.decoder.sample(z, return_all=False)
+
+    def sample(self, batch_n=1):
+        z = self.prior.sample(batch_n=batch_n)
+        sample = self.decoder.sample_mean(z)
+        return sample
+
+    def forward(self, x, return_latent=False):
+        z = self.encode(x)
+        sample = self.decode(z, mean=True)
+        if return_latent:
+            z.update({"x": sample})
+            return z
+        return sample
+
+    def loss_func(self, x_dict, **kwargs):
+
+        x_dict.update({"beta": self._beta_value, "c": self._c_value})
 
         ce_loss = self.ce.eval(x_dict).mean()
-        kl_loss = self.beta * self.kl.eval(x_dict).mean()
+        kl_loss = self.kl.eval(x_dict).mean()
         dip_loss = self.dip.eval(x_dict)
         loss = ce_loss + kl_loss + dip_loss
-        loss_dict = {"loss": loss.item(), "ce_loss": ce_loss.item(),
-                     "kl_loss": kl_loss.item(), "dip_loss": dip_loss.item()}
+        loss_dict = {"loss": loss, "ce_loss": ce_loss, "kl_loss": kl_loss,
+                     "dip_loss": dip_loss}
 
-        return loss, loss_dict
+        return loss_dict
+
+    @property
+    def loss_cls(self):
+        return self.ce + self.kl + self.dip
