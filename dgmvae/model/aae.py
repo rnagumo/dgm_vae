@@ -141,7 +141,7 @@ class AAE(BaseVAE):
         z.update(c)
         return z
 
-    def decode(self, z=None, c=None, latent=None, mean=False):
+    def decode(self, latent=None, z=None, c=None, mean=False):
         if latent is None:
             latent = {}
             if isinstance(z, dict):
