@@ -1,14 +1,17 @@
 
-# dgm_vae
+# dgmvae
 
 Deep Generative Model: Variational Auto-Encoder
 
-# Software
+# Requirements
 
-* PyTorch ([official](https://pytorch.org/))
-* Pixyz ([github](https://github.com/masa-su/pixyz))
+* Python == 3.7
+* PyTorch == 1.2.0 ([Official](https://pytorch.org/))
+* Torchvision == 0.4.0 ([GitHub](https://github.com/pytorch/vision))
+* PyTorch Lightning == 0.6.0 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
+* Pixyz == 0.1.4 ([GitHub](https://github.com/masa-su/pixyz))
 
-# Ref
+# Reference
 
-Preferred Networks
-[Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
+* Preferred Networks: [Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
+* PyTorch VAE by AntixK: [GitHub](https://github.com/AntixK/PyTorch-VAE)
