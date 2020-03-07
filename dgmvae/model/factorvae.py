@@ -17,7 +17,7 @@ from .dist import Decoder, Encoder, Discriminator
 
 class InferenceShuffleDim(pxd.Deterministic):
     def __init__(self, q):
-        super().__init__(cond_var=["x_shf"], var=["z"], name="q_shf")
+        super().__init__(cond_var=["x_shf"], var=["z"], name="q")
 
         self.q = q
 
