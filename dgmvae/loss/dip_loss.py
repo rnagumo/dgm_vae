@@ -1,6 +1,8 @@
 
 """DIP loss"""
 
+import sympy
+
 import torch
 from pixyz.losses.losses import Loss
 from pixyz.utils import get_dict_values
@@ -78,4 +80,15 @@ class DipLoss(Loss):
 
     @property
     def _symbol(self):
-        raise NotImplementedError
+        if self.dip_type == "i":
+            p_text = ("\\lambda_{od}\\sum_{i \\neq j}\\left[Cov_{p(x)} "
+                      "\\left[\\mu_\\phi(x)\\right]\\right]^2_{ij} + "
+                      "\\lambda_d \\sum_i \\left(Cov_{p(x)}\\left[ "
+                      "\\mu_\\phi(x) \\right]_{ii} - 1 \\right)^2")
+        elif self.dip_type == "ii":
+            p_text = ("\\lambda_{od}\\sum_{i \\neq j}\\left[Cov_{q_\\phi(x)} "
+                      "\\left[z \\right]\\right]^2_{ij} + "
+                      "\\lambda_d \\sum_i \\left(Cov_{q_\\phi(z)}\\left[z "
+                      "\\right]_{ii} - 1 \\right)^2")
+
+        return sympy.Symbol(p_text)
