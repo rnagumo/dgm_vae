@@ -16,7 +16,7 @@ import pixyz.losses as pxl
 
 from .base import BaseVAE
 from .dist import Decoder, Encoder
-from ..loss.dip_loss import DipLoss
+from ..losses.dip_loss import DipLoss
 
 
 class DIPVAE(BaseVAE):
