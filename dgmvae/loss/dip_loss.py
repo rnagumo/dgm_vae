@@ -3,6 +3,7 @@
 
 import torch
 from pixyz.losses.losses import Loss
+from pixyz.utils import get_dict_values
 
 
 def _get_cov_mu(mu):
@@ -55,7 +56,8 @@ class DipLoss(Loss):
     def _get_eval(self, x_dict={}, **kwargs):
 
         # Compute mu and scale of normal distribution
-        params = self.p.get_params(x_dict)
+        input_dict = get_dict_values(x_dict, self.p.input_var, True)
+        params = self.p.get_params(input_dict)
 
         # Compute covariance
         if self.dip_type == "i":
