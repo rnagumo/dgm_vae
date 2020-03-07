@@ -36,11 +36,10 @@
     "joint_params": {
         "channel_num": 1,
         "z_dim": 10,
-        "beta": 1,
         "c_dim": 10,
         "temperature": 0.1,
-        "gamma_cont": 30,
-        "gamma_disc": 30
+        "gamma_z": 30,
+        "gamma_c": 30
     },
     "tcvae_params": {
         "channel_num": 1,
