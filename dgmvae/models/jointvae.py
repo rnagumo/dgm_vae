@@ -13,7 +13,7 @@ import pixyz.distributions as pxd
 import pixyz.losses as pxl
 
 from .base import BaseVAE
-from ..loss.discrete_kl import CategoricalKullbackLeibler
+from ..losses.discrete_kl import CategoricalKullbackLeibler
 
 
 class EncoderFunction(pxd.Deterministic):

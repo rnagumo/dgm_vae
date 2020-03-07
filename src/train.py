@@ -8,7 +8,7 @@ import pathlib
 import torch
 import pytorch_lightning as pl
 
-import dgmvae.model as dvm
+import dgmvae.models as dvm
 import dgmvae.updaters as dvu
 
 
