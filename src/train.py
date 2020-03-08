@@ -26,7 +26,7 @@ def main():
         config = json.load(f)
 
     # Cuda setting
-    use_cuda = torch.cuda.is_available() and args.cuda is not None
+    use_cuda = torch.cuda.is_available() and args.cuda != "null"
     gpus = args.cuda if use_cuda else None
 
     # Random seed
