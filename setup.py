@@ -3,11 +3,10 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    "pytorch-lightning==0.6.0",
-    "torch==1.2.0",
-    "torchvision==0.4.0",
-    "pixyz==0.1.4",
-    "Pillow>=6.0, <7.0",
+    "pytorch-lightning>=0.7.0",
+    "torch>=1.4.0",
+    "torchvision>=0.5.0",
+    "pixyz>=0.1.4",
 ]
 
 setup(
