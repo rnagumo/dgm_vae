@@ -5,7 +5,6 @@ Deep Generative Model: Variational Auto-Encoder
 
 # Requirements
 
-* Python == 3.7
 * PyTorch >= 1.4.0 ([Official](https://pytorch.org/))
 * Torchvision >= 0.5.0 ([GitHub](https://github.com/pytorch/vision))
 * PyTorch Lightning >= 0.7.0 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
