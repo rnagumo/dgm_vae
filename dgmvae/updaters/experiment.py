@@ -83,7 +83,6 @@ class VAEUpdater(pl.LightningModule):
         datasets.MNIST(root=self.root, train=True, download=True)
         datasets.MNIST(root=self.root, train=False, download=True)
 
-    @pl.data_loader
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
@@ -99,7 +98,6 @@ class VAEUpdater(pl.LightningModule):
 
         return loader
 
-    @pl.data_loader
     def val_dataloader(self):
         # Dataset
         _transform = self.data_transform()
