@@ -59,9 +59,8 @@ class VAEUpdater(pl.LightningModule):
 
         return self.model.loss_func(x_dict, optimizer_idx=optimizer_idx)
 
-    def validation_end(self, outputs):
-        """Validation epoch end"""
-
+    def validation_epoch_end(self, outputs):
+        # Accumulate val loss
         val_loss = torch.stack([x["loss"] for x in outputs]).mean()
         results = {
             "val_loss": val_loss,
@@ -83,7 +82,6 @@ class VAEUpdater(pl.LightningModule):
         datasets.MNIST(root=self.root, train=True, download=True)
         datasets.MNIST(root=self.root, train=False, download=True)
 
-    @pl.data_loader
     def train_dataloader(self):
         # Dataset
         _transform = self.data_transform()
@@ -99,7 +97,6 @@ class VAEUpdater(pl.LightningModule):
 
         return loader
 
-    @pl.data_loader
     def val_dataloader(self):
         # Dataset
         _transform = self.data_transform()
