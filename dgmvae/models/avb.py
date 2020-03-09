@@ -111,8 +111,8 @@ class AVB(BaseVAE):
                                 var=["z"], features_shape=[z_dim])
         self.decoder = Decoder(channel_num, z_dim)
         self.encoder = AVBEncoder(channel_num, z_dim, e_dim)
-        self.distributions = nn.ModuleList(
-            [self.normal, self.prior, self.decoder, self.encoder])
+        self.distributions = [self.normal, self.prior, self.decoder,
+                              self.encoder]
 
         # Loss
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)

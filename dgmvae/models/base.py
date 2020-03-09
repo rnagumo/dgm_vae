@@ -9,7 +9,7 @@ class BaseVAE(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.distributions = nn.ModuleDict([])
+        self.distributions = []
 
     def encode(self, *inputs, mean=False):
         """Encodes latent z given observable x"""
@@ -40,7 +40,7 @@ class BaseVAE(nn.Module):
         prob_text = []
         func_text = []
 
-        for prob in self.distributions._modules.values():
+        for prob in self.distributions:
             if isinstance(prob, Distribution):
                 prob_text.append(prob.prob_text)
             else:

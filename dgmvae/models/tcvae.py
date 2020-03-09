@@ -37,8 +37,7 @@ class TCVAE(BaseVAE):
                                 var=["z"], features_shape=[z_dim])
         self.decoder = Decoder(channel_num, z_dim)
         self.encoder = Encoder(channel_num, z_dim)
-        self.distributions = nn.ModuleList(
-            [self.prior, self.decoder, self.encoder])
+        self.distributions = [self.prior, self.decoder, self.encoder]
 
         # Loss class
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)

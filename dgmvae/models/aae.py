@@ -113,10 +113,8 @@ class AAE(BaseVAE):
         # Decoder
         self.decoder = JointDecoder(channel_num, z_dim, c_dim)
 
-        self.distributions = nn.ModuleList([
-            self.prior_z, self.prior_c, self.encoder_func,
-            self.encoder_z, self.encoder_c, self.decoder,
-        ])
+        self.distributions = [self.prior_z, self.prior_c, self.encoder_func,
+                              self.encoder_z, self.encoder_c, self.decoder]
 
         # Loss
         self.ce = pxl.CrossEntropy(self.encoder_z, self.decoder)

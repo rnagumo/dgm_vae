@@ -42,8 +42,8 @@ class FactorVAE(BaseVAE):
         self.decoder = Decoder(channel_num, z_dim)
         self.encoder = Encoder(channel_num, z_dim)
         self.encoder_shf = InferenceShuffleDim(self.encoder)
-        self.distributions = nn.ModuleList(
-            [self.prior, self.decoder, self.encoder, self.encoder_shf])
+        self.distributions = [self.prior, self.decoder, self.encoder,
+                              self.encoder_shf]
 
         # Loss
         self.ce = pxl.CrossEntropy(self.encoder, self.decoder)
