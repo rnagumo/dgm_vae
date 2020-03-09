@@ -9,7 +9,6 @@ http://arxiv.org/abs/1711.00848
 """
 
 import torch
-from torch import nn
 
 import pixyz.distributions as pxd
 import pixyz.losses as pxl

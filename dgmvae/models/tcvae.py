@@ -11,7 +11,6 @@ https://github.com/rtqichen/beta-tcvae
 import math
 
 import torch
-from torch import nn
 
 import pixyz.distributions as pxd
 import pixyz.losses as pxl

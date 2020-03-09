@@ -6,7 +6,6 @@ http://arxiv.org/abs/1802.05983
 """
 
 import torch
-from torch import nn
 
 import pixyz.distributions as pxd
 import pixyz.losses as pxl
