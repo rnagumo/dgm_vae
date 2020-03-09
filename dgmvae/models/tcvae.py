@@ -125,7 +125,7 @@ class TCVAE(BaseVAE):
         return loss_dict
 
     @property
-    def loss_cls(self):
+    def loss_str(self):
         p_text = ("\\mathbb{E}_{q(z|n)p(n)} \\left[\\log p(n|z)\\right] "
                   "- \\alpha I_q(z;n) "
                   "- \\beta D_{KL}\\left[q(z) || \\prod_j q(z_j) \\right] "

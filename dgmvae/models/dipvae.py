@@ -89,5 +89,5 @@ class DIPVAE(BaseVAE):
         return loss_dict
 
     @property
-    def loss_cls(self):
-        return self.ce + self.kl + self.dip
+    def loss_str(self):
+        return str(self.ce + self.kl + self.dip)

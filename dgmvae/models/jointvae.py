@@ -212,7 +212,7 @@ class JointVAE(BaseVAE):
         return loss_dict
 
     @property
-    def loss_cls(self):
-        return (self.ce + self.gamma_z * (self.kl_z - self.cap_z).abs()
-                + self.gamma_c * (self.kl_c - self.cap_c).abs()
-                ).expectation(self.encoder_func)
+    def loss_str(self):
+        return str((self.ce + self.gamma_z * (self.kl_z - self.cap_z).abs()
+                    + self.gamma_c * (self.kl_c - self.cap_c).abs()
+                    ).expectation(self.encoder_func))

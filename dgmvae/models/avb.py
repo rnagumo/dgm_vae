@@ -171,8 +171,8 @@ class AVB(BaseVAE):
             return {"adv_loss": loss}
 
     @property
-    def loss_cls(self):
-        return (self.ce + self.adv_js).expectation(self.normal)
+    def loss_str(self):
+        return str((self.ce + self.adv_js).expectation(self.normal))
 
     @property
     def second_optim(self):

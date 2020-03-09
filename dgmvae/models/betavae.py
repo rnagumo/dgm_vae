@@ -81,5 +81,5 @@ class BetaVAE(BaseVAE):
         return {"loss": loss, "ce_loss": ce_loss, "kl_loss": kl_loss}
 
     @property
-    def loss_cls(self):
-        return self.ce + self.beta * (self.kl - self.c).abs()
+    def loss_str(self):
+        return str(self.ce + self.beta * (self.kl - self.c).abs())

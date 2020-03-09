@@ -109,8 +109,8 @@ class FactorVAE(BaseVAE):
             return {"adv_loss": loss}
 
     @property
-    def loss_cls(self):
-        return self.ce + self.beta * self.kl + self.gamma * self.adv_js
+    def loss_str(self):
+        return str(self.ce + self.beta * self.kl + self.gamma * self.adv_js)
 
     @property
     def second_optim(self):

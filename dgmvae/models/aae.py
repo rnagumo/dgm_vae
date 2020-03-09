@@ -188,9 +188,9 @@ class AAE(BaseVAE):
             return {"adv_loss": loss}
 
     @property
-    def loss_cls(self):
-        return (self.ce + self.adv_js).expectation(
-                    self.encoder_c * self.encoder_func)
+    def loss_str(self):
+        return str((self.ce + self.adv_js).expectation(
+                   self.encoder_c * self.encoder_func))
 
     @property
     def second_optim(self):
