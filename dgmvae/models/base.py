@@ -28,20 +28,20 @@ class BaseVAE(nn.Module):
         # Return tensor of reconstructed image
         return obs
 
-    def encode(self, *inputs, mean=False):
-        """Encodes latent z given observable x"""
+    def encode(self, x, mean=False, **kwargs):
+        """Encodes latent given observable x"""
         raise NotImplementedError
 
-    def decode(self, *inputs, mean=False):
-        """Decodes observable x given latent z"""
+    def decode(self, latent, mean=False, **kwargs):
+        """Decodes observable x given latent"""
         raise NotImplementedError
 
-    def sample(self, batch_size, **kwargs):
+    def sample(self, batch_n=1, **kwargs):
         """Samples observable x from sampled latent z"""
         raise NotImplementedError
 
-    def loss_func(self, *inputs, **kwargs):
-        """Calculates loss"""
+    def loss_func(self, x, **kwargs):
+        """Calculates loss given observable x"""
         raise NotImplementedError
 
     @property
