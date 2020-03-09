@@ -21,7 +21,7 @@ class VAEUpdater(pl.LightningModule):
         self.device = None
         self.x_org = None
         self.train_size = 0
-        self.test_size = 0
+        self.val_size = 0
 
     def forward(self, inputs, **kwargs):
         return self.model(inputs, **kwargs)
@@ -51,7 +51,7 @@ class VAEUpdater(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx, optimizer_idx=0):
         x, y = batch
-        x_dict = {"x": x, "dataset_size": self.train_size}
+        x_dict = {"x": x, "dataset_size": self.val_size}
 
         # Set device
         if self.device is None:
@@ -108,7 +108,7 @@ class VAEUpdater(pl.LightningModule):
 
         # Loader
         loader = torch.utils.data.DataLoader(dataset, shuffle=False, **params)
-        self.test_size = len(loader)
+        self.val_size = len(loader)
 
         # Sample image
         x_org, _ = iter(loader).next()
