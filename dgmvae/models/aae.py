@@ -137,18 +137,18 @@ class AAE(BaseVAE):
         z.update(c)
         return z
 
-    def decode(self, latent=None, z=None, c=None, mean=False):
-        if latent is None:
+    def decode(self, latent, mean=False, **kwargs):
+        if not latent:
             latent = {}
-            if isinstance(z, dict):
-                latent.update(z)
+            if "z" in kwargs:
+                latent["z"] = kwargs["z"]
             else:
-                latent["z"] = z
+                raise ValueError("z is not given")
 
-            if isinstance(c, dict):
-                latent.update(c)
+            if "c" in kwargs:
+                latent["c"] = kwargs["c"]
             else:
-                latent["c"] = c
+                raise ValueError("z is not given")
 
         if mean:
             return self.decoder.sample_mean(latent)
@@ -160,17 +160,11 @@ class AAE(BaseVAE):
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
-    def forward(self, x, return_latent=False):
-        latent = self.encode(x)
-        sample = self.decode(latent=latent, mean=True)
+    def loss_func(self, x, **kwargs):
+        # Input
+        x_dict = {"x": x}
 
-        if return_latent:
-            latent.update({"x": sample})
-            return latent
-        return sample
-
-    def loss_func(self, x_dict, **kwargs):
-
+        # Select optimizer
         optimizer_idx = kwargs["optimizer_idx"]
 
         # Sample h (surrogate latent) and c (categorical latent)
