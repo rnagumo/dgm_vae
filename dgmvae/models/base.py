@@ -32,8 +32,8 @@ class BaseVAE(nn.Module):
         raise NotImplementedError
 
     @property
-    def loss_cls(self):
-        """Returns instance of pixyz.losses.Loss class for printing"""
+    def loss_str(self):
+        """Returns loss string"""
         raise NotImplementedError
 
     def __str__(self):
@@ -52,7 +52,7 @@ class BaseVAE(nn.Module):
             text += ("Deterministic functions (for training): \n "
                      " {} \n".format(", ".join(func_text)))
 
-        text += "Loss function: \n  {} \n".format(str(self.loss_cls))
+        text += "Loss function: \n  {} \n".format(str(self.loss_str))
         return text
 
     @property
