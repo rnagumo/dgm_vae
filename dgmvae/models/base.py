@@ -11,6 +11,23 @@ class BaseVAE(nn.Module):
 
         self.distributions = []
 
+    def forward(self, x, reconstruct=False, return_latent=False):
+        # Encode without sampling
+        if not reconstruct:
+            return self.encode(x, mean=True)
+
+        # Reconstruct image
+        latent = self.encode(x)
+        obs = self.decode(latent, mean=True)
+
+        # If return_latent=True, return dict of latent and x
+        if return_latent:
+            latent.update({"x": obs})
+            return latent
+
+        # Return tensor of reconstructed image
+        return obs
+
     def encode(self, *inputs, mean=False):
         """Encodes latent z given observable x"""
         raise NotImplementedError
@@ -21,10 +38,6 @@ class BaseVAE(nn.Module):
 
     def sample(self, batch_size, **kwargs):
         """Samples observable x from sampled latent z"""
-        raise NotImplementedError
-
-    def forward(self, x, return_latent=False):
-        """Reconstructs observable x' given inputs data x"""
         raise NotImplementedError
 
     def loss_func(self, *inputs, **kwargs):
