@@ -37,8 +37,8 @@ class FactorVAE(BaseVAE):
         self._gamma_value = gamma
 
         # Dimension shuffle
-        self.prior = pxd.Normal(loc=torch.tensor(0.), scale=torch.tensor(1.),
-                                var=["z"], features_shape=[z_dim])
+        self.prior = pxd.Normal(
+            loc=torch.zeros(z_dim), scale=torch.ones(z_dim), var=["z"])
         self.decoder = Decoder(channel_num, z_dim)
         self.encoder = Encoder(channel_num, z_dim)
         self.encoder_shf = InferenceShuffleDim(self.encoder)

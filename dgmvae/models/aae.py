@@ -99,11 +99,9 @@ class AAE(BaseVAE):
 
         # Prior
         self.prior_z = pxd.Normal(
-            loc=torch.tensor(0.), scale=torch.tensor(1.),
-            var=["z"], features_shape=[z_dim])
+            loc=torch.zeros(z_dim), scale=torch.ones(z_dim), var=["z"])
         self.prior_c = pxd.Categorical(
-            probs=torch.ones(c_dim, dtype=torch.float32) / c_dim,
-            var=["c"])
+            probs=torch.ones(c_dim, dtype=torch.float32) / c_dim, var=["c"])
 
         # Encoder
         self.encoder_func = EncoderFunction(channel_num)
