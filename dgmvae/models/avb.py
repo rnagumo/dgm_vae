@@ -122,7 +122,7 @@ class AVB(BaseVAE):
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder, self.prior, self.disc)
 
-    def encode(self, x, mean=False):
+    def encode(self, x, mean=False, **kwargs):
         batch_n = x.size(0)
         e = self.normal.sample(batch_n=batch_n)
         inputs = {"x": x, "e": e["e"]}
@@ -131,33 +131,25 @@ class AVB(BaseVAE):
             return self.encoder.sample_mean(inputs)
         return self.encoder.sample(inputs, return_all=False)
 
-    def decode(self, z, mean=False):
-        if not isinstance(z, dict):
-            z = {"z": z}
+    def decode(self, latent, mean=False, **kwargs):
+        if not isinstance(latent, dict):
+            latent = {"z": latent}
 
         if mean:
-            return self.decoder.sample_mean(z)
-        return self.decoder.sample(z, return_all=False)
+            return self.decoder.sample_mean(latent)
+        return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1):
+    def sample(self, batch_n=1, **kwargs):
         z = self.prior.sample(batch_n=batch_n)
         return self.decoder.sample_mean(z)
 
-    def forward(self, x, return_latent=False):
-        z = self.encode(x)
-        sample = self.decode(z, mean=True)
-        if return_latent:
-            z.update({"x": sample})
-            return z
-        return sample
-
-    def loss_func(self, x_dict, **kwargs):
+    def loss_func(self, x, **kwargs):
 
         optimizer_idx = kwargs["optimizer_idx"]
 
         # Sample e
-        batch_n = x_dict["x"].size(0)
-        x_dict = self.normal.sample(x_dict, batch_n=batch_n)
+        batch_n = x.size(0)
+        x_dict = self.normal.sample({"x": x}, batch_n=batch_n)
 
         if optimizer_idx == 0:
             # VAE loss
