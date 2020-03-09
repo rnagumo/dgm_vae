@@ -76,12 +76,12 @@ class TestAVB(unittest.TestCase):
         x = torch.randn(self.batch_n, 1, 64, 64)
 
         loss_dict = self.model.loss_func(x, optimizer_idx=0)
-        self.assertTrue(loss_dict["loss"] >= 0)
-        self.assertTrue(loss_dict["ce_loss"] >= 0)
-        self.assertTrue(loss_dict["js_loss"] >= 0)
+        self.assertGreaterEqual(loss_dict["loss"], 0)
+        self.assertGreaterEqual(loss_dict["ce_loss"], 0)
+        self.assertGreaterEqual(loss_dict["js_loss"], 0)
 
         adv_dict = self.model.loss_func(x, optimizer_idx=1)
-        self.assertTrue(adv_dict["adv_loss"] >= 0)
+        self.assertGreaterEqual(adv_dict["adv_loss"], 0)
 
     def test_loss_str(self):
         self.assertIsInstance(self.model.loss_str, str)
