@@ -53,18 +53,19 @@ class TestAVB(unittest.TestCase):
 
     def test_forward(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
-
-        # 1. default
         z = self.model(x)
         self.assertEqual(z.size(), torch.Size([self.batch_n, self.z_dim]))
 
-        # 2. reconstruct without latent
-        obs = self.model(x, reconstruct=True)
+    def test_reconstruct(self):
+        x = torch.randn(self.batch_n, 1, 64, 64)
+
+        # 1. reconstruct without latent
+        obs = self.model.reconstruct(x)
         self.assertIsInstance(obs, torch.Tensor)
         self.assertEqual(obs.size(), torch.Size([self.batch_n, 1, 64, 64]))
 
-        # 3. reconstruct with latent
-        sample = self.model(x, reconstruct=True, return_latent=True)
+        # 2. reconstruct with latent
+        sample = self.model.reconstruct(x, return_latent=True)
         self.assertIsInstance(sample, dict)
         self.assertEqual(
             sample["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))
