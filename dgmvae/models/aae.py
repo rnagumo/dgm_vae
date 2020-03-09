@@ -123,7 +123,7 @@ class AAE(BaseVAE):
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder_z, self.prior_z, self.disc)
 
-    def encode(self, x, mean=False):
+    def encode(self, x, mean=False, **kwargs):
 
         h = self.encoder_func.sample(x, return_all=False)
 
@@ -154,7 +154,7 @@ class AAE(BaseVAE):
             return self.decoder.sample_mean(latent)
         return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1):
+    def sample(self, batch_n=1, **kwargs):
         z = self.prior_z.sample(batch_n=batch_n)
         c = self.prior_c.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})

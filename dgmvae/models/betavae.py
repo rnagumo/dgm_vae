@@ -48,31 +48,23 @@ class BetaVAE(BaseVAE):
             return self.encoder.sample_mean(x)
         return self.encoder.sample(x, return_all=False)
 
-    def decode(self, z, mean=False):
-        if not isinstance(z, dict):
-            z = {"z": z}
+    def decode(self, latent, mean=False):
+        if not isinstance(latent, dict):
+            latent = {"z": latent}
 
         if mean:
-            return self.decoder.sample_mean(z)
-        return self.decoder.sample(z, return_all=False)
+            return self.decoder.sample_mean(latent)
+        return self.decoder.sample(latent, return_all=False)
 
     def sample(self, batch_n=1):
         z = self.prior.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean(z)
         return sample
 
-    def forward(self, x, return_latent=False):
-        z = self.encode(x)
-        sample = self.decode(z, mean=True)
-        if return_latent:
-            z.update({"x": sample})
-            return z
-        return sample
-
-    def loss_func(self, x_dict, **kwargs):
+    def loss_func(self, x, **kwargs):
 
         # TODO
-        x_dict.update({"beta": self._beta_value, "c": self._c_value})
+        x_dict = {"x": x, "beta": self._beta_value, "c": self._c_value}
 
         ce_loss = self.ce.eval(x_dict).mean()
         kl_loss = (self.beta * (self.kl - self.c).abs()).eval(x_dict).mean()

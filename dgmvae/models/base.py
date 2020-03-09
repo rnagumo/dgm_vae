@@ -11,16 +11,16 @@ class BaseVAE(nn.Module):
 
         self.distributions = []
 
-    def forward(self, x, reconstruct=False, return_latent=False):
+    def forward(self, x):
         # Encode without sampling
-        if not reconstruct:
-            return self.encode(x, mean=True)
+        return self.encode(x, mean=True)
 
+    def reconstruct(self, x, return_latent=False):
         # Reconstruct image
         latent = self.encode(x)
         obs = self.decode(latent, mean=True)
 
-        # If return_latent=True, return dict of latent and x
+        # If return_latent=True, return dict of latent and obs
         if return_latent:
             latent.update({"x": obs})
             return latent

@@ -45,7 +45,7 @@ class TCVAE(BaseVAE):
         self.beta = pxl.Parameter("beta")
         self.gamma = pxl.Parameter("gamma")
 
-    def encode(self, x, mean=False):
+    def encode(self, x, mean=False, **kwargs):
         if not isinstance(x, dict):
             x = {"x": x}
 
@@ -53,31 +53,24 @@ class TCVAE(BaseVAE):
             return self.encoder.sample_mean(x)
         return self.encoder.sample(x, return_all=False)
 
-    def decode(self, z, mean=False):
-        if not isinstance(z, dict):
-            z = {"z": z}
+    def decode(self, latent, mean=False, **kwargs):
+        if not isinstance(latent, dict):
+            latent = {"z": latent}
 
         if mean:
-            return self.decoder.sample_mean(z)
-        return self.decoder.sample(z, return_all=False)
+            return self.decoder.sample_mean(latent)
+        return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1):
+    def sample(self, batch_n=1, **kwargs):
         z = self.prior.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean(z)
         return sample
 
-    def forward(self, x, return_latent=False):
-        z = self.encode(x)
-        sample = self.decode(z, mean=True)
-        if return_latent:
-            z.update({"x": sample})
-            return z
-        return sample
+    def loss_func(self, x, **kwargs):
 
-    def loss_func(self, x_dict, **kwargs):
-
-        x_dict.update({"alpha": self._alpha_value, "beta": self._beta_value,
-                       "gamma": self._gamma_value})
+        x_dict = {"x": x, "alpha": self._alpha_value, "beta": self._beta_value,
+                  "gamma": self._gamma_value,
+                  "dataset_size": kwargs["dataset_size"]}
 
         # Sample z from encoder
         x_dict = self.encoder.sample(x_dict)

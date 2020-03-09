@@ -55,7 +55,7 @@ class FactorVAE(BaseVAE):
         self.adv_js = pxl.AdversarialKullbackLeibler(
             self.encoder, self.encoder_shf, self.disc)
 
-    def encode(self, x, mean=False):
+    def encode(self, x, mean=False, **kwargs):
         if not isinstance(x, dict):
             x = {"x": x}
 
@@ -63,7 +63,7 @@ class FactorVAE(BaseVAE):
             return self.encoder.sample_mean(x)
         return self.encoder.sample(x, return_all=False)
 
-    def decode(self, z, mean=False):
+    def decode(self, z, mean=False, **kwargs):
         if not isinstance(z, dict):
             z = {"z": z}
 
@@ -71,29 +71,26 @@ class FactorVAE(BaseVAE):
             return self.decoder.sample_mean(z)
         return self.decoder.sample(z, return_all=False)
 
-    def sample(self, batch_n=1):
+    def sample(self, batch_n=1, **kwargs):
         z = self.prior.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean(z)
         return sample
 
-    def forward(self, x, return_latent=False):
-        z = self.encode(x)
-        sample = self.decode(z, mean=True)
-        if return_latent:
-            z.update({"x": sample})
-            return z
-        return sample
+    def loss_func(self, x, **kwargs):
 
-    def loss_func(self, x_dict, **kwargs):
+        len_x = x.size(0)
+        len_half = x.size(0) // 2
 
-        optimizer_idx = kwargs["optimizer_idx"]
+        # `x` and `x_shf` should have the same batch size
+        if len_x % 2 == 0:
+            x_dict = {"x": x[:len_half], "x_shf": x[len_half:]}
+        else:
+            x_dict = {"x": x[:len_half], "x_shf": x[len_half + 1:]}
 
-        x = x_dict["x"]
-        len_x = x.size(0) // 2
-        x_dict.update({"x": x[:len_x], "x_shf": x[len_x:]})
+        # Add coeff
         x_dict.update({"beta": self._beta_value, "gamma": self._gamma_value})
 
-        if optimizer_idx == 0:
+        if kwargs["optimizer_idx"] == 0:
             # VAE loss
             ce_loss = self.ce.eval(x_dict).mean()
             kl_loss = (self.beta * self.kl).eval(x_dict).mean()
@@ -103,7 +100,7 @@ class FactorVAE(BaseVAE):
             loss_dict = {"loss": loss, "ce_loss": ce_loss, "kl_loss": kl_loss,
                          "tc_loss": tc_loss}
             return loss_dict
-        elif optimizer_idx == 1:
+        elif kwargs["optimizer_idx"] == 1:
             # Discriminator loss
             loss = self.adv_js.eval(x_dict, discriminator=True)
             return {"adv_loss": loss}
