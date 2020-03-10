@@ -23,7 +23,7 @@ def main():
     args = init_args()
 
     # Configs
-    condig_path = os.getenv("CONFIG_PATH", "./config.json")
+    condig_path = os.getenv("CONFIG_PATH", "./train/config.json")
     with pathlib.Path(condig_path).open() as f:
         config = json.load(f)
 
@@ -59,12 +59,12 @@ def main():
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # Updater
-    root = os.getenv("DATA_ROOT", "../data/mnist/")
+    root = os.getenv("DATA_ROOT", "./data/mnist/")
     updater = dvu.VAEUpdater(model, args, root, args.batch_size)
 
     # Trainer
     params = {
-        "default_save_path": os.getenv("OUTPUT_PATH", "../logs/"),
+        "default_save_path": os.getenv("OUTPUT_PATH", "./logs/"),
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
