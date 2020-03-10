@@ -89,7 +89,7 @@ def glob_ckpt_path():
     dir_list = pathlib.Path(save_dir, "lightning_logs").glob("version_*")
 
     # Glob latest run
-    logdir = sorted(dir_list)[:-1]
+    logdir = sorted(list(dir_list))[:-1]
     return list(logdir.glob("checkpoints/epoch=*.ckpt"))[0]
 
 
