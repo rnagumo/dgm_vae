@@ -101,7 +101,7 @@ def init_args():
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--val-interval", type=int, default=1)
-    parser.add_argument("--log-save-interval", type=int, default=100)
+    parser.add_argument("--log-save-interval", type=int, default=5)
 
     return parser.parse_args()
 
