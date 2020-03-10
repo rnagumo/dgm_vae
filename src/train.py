@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import pathlib
 
 import torch
@@ -22,7 +23,8 @@ def main():
     args = init_args()
 
     # Configs
-    with pathlib.Path(args.config).open() as f:
+    condig_path = os.getenv("CONFIG_PATH", "./config.json")
+    with pathlib.Path(condig_path).open() as f:
         config = json.load(f)
 
     # Cuda setting
@@ -61,7 +63,7 @@ def main():
 
     # Trainer
     params = {
-        "default_save_path": args.logdir,
+        "default_save_path": os.getenv("OUTPUT_PATH", "../logs"),
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
@@ -76,8 +78,6 @@ def main():
 
 def init_args():
     parser = argparse.ArgumentParser(description="VAE training")
-    parser.add_argument("--logdir", type=str, default="./logs/")
-    parser.add_argument("--config", type=str, default="./src/config.json")
     parser.add_argument("--model", type=str, default="beta")
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
