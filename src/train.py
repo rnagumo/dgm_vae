@@ -59,11 +59,12 @@ def main():
         raise KeyError(f"Not implemented model is specified, {args.model}")
 
     # Updater
-    updater = dvu.VAEUpdater(model, args, **config["updater_params"])
+    root = os.getenv("DATA_ROOT", "../data/mnist/")
+    updater = dvu.VAEUpdater(model, args, root, args.batch_size)
 
     # Trainer
     params = {
-        "default_save_path": os.getenv("OUTPUT_PATH", "../logs"),
+        "default_save_path": os.getenv("OUTPUT_PATH", "../logs/"),
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
@@ -82,6 +83,7 @@ def init_args():
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--val-interval", type=int, default=1)
     parser.add_argument("--log-save-interval", type=int, default=100)
 
