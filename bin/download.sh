@@ -17,3 +17,11 @@ if [[ ! -d "mpi3d_toy" ]]; then
   wget -O mpi3d_toy/mpi3d_toy.npz https://storage.googleapis.com/disentanglement_dataset/data_npz/sim_toy_64x_ordered_without_heldout_factors.npz
 fi
 echo "Downloading mpi3d_toy completed!"
+
+echo "Downloading cars3d dataset."
+if [[ ! -d "cars3d" ]]; then
+  mkdir cars3d
+  wget -O cars3d/cars3d.tar.gz http://www.scottreed.info/files/nips2015-analogy-data.tar.gz
+  tar -zxvf cars3d.tar.gz
+fi
+echo "Downloading cars3d completed!"
