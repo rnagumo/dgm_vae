@@ -1,4 +1,6 @@
 
+# https://github.com/pfnet-research/chainer-disentanglement-lib/blob/master/bin/download_dataset.sh
+
 export DISENTANGLEMENT_LIB_DATA=./data/
 cd ${DISENTANGLEMENT_LIB_DATA}
 
