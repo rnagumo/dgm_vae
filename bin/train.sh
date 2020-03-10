@@ -16,4 +16,7 @@ export EVALUATION_NAME=${MODEL_NAME}/model/${DATASET_NAME}
 # Config for training
 export CONFIG_PATH=./train/config.json
 
-python ./train/train.py --model ${MODEL_NAME} --epochs 1
+# Other parameters
+EPOCHS=$2
+
+python ./train/train.py --model ${MODEL_NAME} --epochs ${EPOCHS}
