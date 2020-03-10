@@ -79,17 +79,7 @@ def main():
     trainer.fit(updater)
 
     # Export model
-    path = glob_ckpt_path()
-    loaded_updater = dvu.VAEUpdater.load_from_checkpoint(path)
-    utils.export_model(loaded_updater.model, input_shape=(1, 1, 64, 64))
-
-
-def glob_ckpt_path():
-    """Globs latest run from lightning_logs dir"""
-    save_dir = os.getenv("SAVE_PATH", "./logs/")
-    dir_list = list(pathlib.Path(save_dir, "lightning_logs").glob("version_*"))
-    logdir = sorted(dir_list)[-1]
-    return list(logdir.glob("checkpoints/epoch=*.ckpt"))[0]
+    utils.export_model(model, input_shape=(1, 1, 64, 64))
 
 
 def init_args():
