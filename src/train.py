@@ -80,7 +80,7 @@ def main():
 
     # Export model
     path = glob_ckpt_path()
-    loaded_updater = pl.LightningModule.load_from_checkpoint(path)
+    loaded_updater = dvu.VAEUpdater.load_from_checkpoint(path)
     utils.export_model(loaded_updater.model, input_shape=(1, 1, 64, 64))
 
 
