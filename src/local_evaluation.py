@@ -144,6 +144,9 @@ for _metric_name in expected_evaluation_metrics:
 
 print("Final Scores : ", final_scores)
 
+# Save
+with open(os.path.join(experiment_output_path, "local_scores.json"), "w") as f:
+    json.dump(final_scores, f, ensure_ascii=False)
 
 ##############################################################################
 # (Optional) Generate Visualizations
