@@ -76,8 +76,8 @@ def main():
 
 def init_args():
     parser = argparse.ArgumentParser(description="VAE training")
-    parser.add_argument("--logdir", type=str, default="../logs/")
-    parser.add_argument("--config", type=str, default="./config.json")
+    parser.add_argument("--logdir", type=str, default="./logs/")
+    parser.add_argument("--config", type=str, default="./src/config.json")
     parser.add_argument("--model", type=str, default="beta")
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
