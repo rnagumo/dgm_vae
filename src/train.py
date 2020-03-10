@@ -6,7 +6,9 @@ import json
 import os
 import pathlib
 
+import numpy as np
 import torch
+from torch.backends import cudnn
 import pytorch_lightning as pl
 
 import dgmvae.models as dvm
@@ -35,6 +37,9 @@ def main():
 
     # Random seed
     torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    cudnn.deterministic = True
+    cudnn.benchmark = False
 
     # -------------------------------------------------------------------------
     # 2. Training
