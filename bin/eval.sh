@@ -12,3 +12,5 @@ export DATA_ROOT=./${DISENTANGLEMENT_LIB_DATA}/${DATASET_NAME}/
 export OUTPUT_PATH=./logs/
 export SAVE_PATH=${OUTPUT_PATH}/${MODEL_NAME}/
 export EVALUATION_NAME=${MODEL_NAME}/model/${DATASET_NAME}
+
+python ./src/local_evaluation.py
