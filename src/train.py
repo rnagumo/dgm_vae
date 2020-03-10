@@ -12,6 +12,8 @@ import pytorch_lightning as pl
 import dgmvae.models as dvm
 import dgmvae.updaters as dvu
 
+import utils_pytorch as utils
+
 
 def main():
 
@@ -64,7 +66,7 @@ def main():
 
     # Trainer
     params = {
-        "default_save_path": os.getenv("OUTPUT_PATH", "./logs/"),
+        "default_save_path": os.getenv("SAVE_PATH", "./logs/"),
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
@@ -75,6 +77,20 @@ def main():
 
     # Run
     trainer.fit(updater)
+
+    # Export model
+    path = glob_ckpt_path()
+    loaded_updater = pl.LightningModule.load_from_checkpoint(path)
+    utils.export_model(loaded_updater.model, input_shape=(1, 1, 64, 64))
+
+
+def glob_ckpt_path():
+    save_dir = os.getenv("SAVE_PATH", "./logs/")
+    dir_list = pathlib.Path(save_dir, "lightning_logs").glob("version_*")
+
+    # Glob latest run
+    logdir = sorted(dir_list)[:-1]
+    return list(logdir.glob("checkpoints/epoch=*.ckpt"))[0]
 
 
 def init_args():
