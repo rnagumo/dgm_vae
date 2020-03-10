@@ -71,6 +71,10 @@ def main():
     # Run
     trainer.fit(updater)
 
+    # Deep copy
+    trained_model = model_dict[args.model](**config[f"{args.model}_params"])
+    trained_model.load_state_dict(updater.model.state_dict())
+
     # Export model
     utils.export_model(updater.model, input_shape=(1, 1, 64, 64))
 
