@@ -79,7 +79,7 @@ def main():
     trainer.fit(updater)
 
     # Export model
-    utils.export_model(model, input_shape=(1, 1, 64, 64))
+    utils.export_model(updater.model, input_shape=(1, 1, 64, 64))
 
 
 def init_args():
