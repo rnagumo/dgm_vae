@@ -26,26 +26,26 @@ ExperimentConfig = namedtuple('ExperimentConfig',
 
 def get_config():
     """
-    This function reads the environment variables DGMVAE_OUTPUT_PATH,
-    DGMVAE_EVALUATION_NAME and DGMVAE_DATASET_NAME and returns a
+    This function reads the environment variables OUTPUT_PATH,
+    EVALUATION_NAME and DATASET_NAME and returns a
     named tuple.
     """
-    return ExperimentConfig(base_path=os.getenv("DGMVAE_OUTPUT_PATH", "./scratch/shared"),
-                            experiment_name=os.getenv("DGMVAE_EVALUATION_NAME", "experiment_name"),
-                            dataset_name=os.getenv("DGMVAE_DATASET_NAME", "cars3d"))
+    return ExperimentConfig(base_path=os.getenv("OUTPUT_PATH", "./scratch/shared"),
+                            experiment_name=os.getenv("EVALUATION_NAME", "experiment_name"),
+                            dataset_name=os.getenv("DATASET_NAME", "cars3d"))
 
 
 def get_dataset_name():
-    """Reads the name of the dataset from the environment variable `DGMVAE_DATASET_NAME`."""
-    return os.getenv("DGMVAE_DATASET_NAME", "cars3d")
+    """Reads the name of the dataset from the environment variable `DATASET_NAME`."""
+    return os.getenv("DATASET_NAME", "cars3d")
 
 
 def use_cuda():
     """
     Whether to use CUDA for evaluation. Returns True if CUDA is available and
-    the environment variable DGMVAE_CUDA is not set to False.
+    the environment variable CUDA is not set to False.
     """
-    return torch.cuda.is_available() and os.getenv('DGMVAE_CUDA', True)
+    return torch.cuda.is_available() and os.getenv('CUDA', True)
 
 
 def get_model_path(base_path=None, experiment_name=None, make=True):
@@ -56,10 +56,10 @@ def get_model_path(base_path=None, experiment_name=None, make=True):
     ----------
     base_path : str
         Path to the directory where the experiments are to be stored.
-        This defaults to DGMVAE_OUTPUT_PATH (see `get_config` above) and which in turn
+        This defaults to OUTPUT_PATH (see `get_config` above) and which in turn
         defaults to './scratch/shared'.
     experiment_name : str
-        Name of the experiment. This defaults to DGMVAE_EVALUATION_NAME which in turn
+        Name of the experiment. This defaults to EVALUATION_NAME which in turn
         defaults to 'experiment_name'.
     make : Makes the directory where the returned path leads to (if it doesn't exist already)
 
@@ -68,9 +68,9 @@ def get_model_path(base_path=None, experiment_name=None, make=True):
     str
         Path to where the model should be stored (to be found by the evaluation function later).
     """
-    base_path = os.getenv("DGMVAE_OUTPUT_PATH", "../scratch/shared") \
+    base_path = os.getenv("OUTPUT_PATH", "../scratch/shared") \
         if base_path is None else base_path
-    experiment_name = os.getenv("DGMVAE_EVALUATION_NAME", "experiment_name") \
+    experiment_name = os.getenv("EVALUATION_NAME", "experiment_name") \
         if experiment_name is None else experiment_name
     model_path = os.path.join(base_path, experiment_name, 'representation', 'pytorch_model.pt')
     if make:
