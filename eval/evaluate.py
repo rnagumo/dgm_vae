@@ -41,8 +41,8 @@ from tensorflow.python.framework.errors_impl import NotFoundError
 
 # Some more redundant code, but this allows us to not import utils_pytorch
 def get_dataset_name():
-    """Reads the name of the dataset from the environment variable `AICROWD_DATASET_NAME`."""
-    return os.getenv("AICROWD_DATASET_NAME", "cars3d")
+    """Reads the name of the dataset from the environment variable `DATASET_NAME`."""
+    return os.getenv("DATASET_NAME", "cars3d")
 
 
 def evaluate_with_gin(model_dir,

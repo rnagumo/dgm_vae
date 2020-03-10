@@ -46,8 +46,8 @@ import numpy as np
 # 0. Settings
 # By default, we save all the results in subdirectories of the following path.
 ##############################################################################
-base_path = os.getenv("AICROWD_OUTPUT_PATH","./scratch/shared")
-experiment_name = os.getenv("AICROWD_EVALUATION_NAME", "experiment_name")
+base_path = os.getenv("OUTPUT_PATH","./scratch/shared")
+experiment_name = os.getenv("EVALUATION_NAME", "experiment_name")
 DATASET_NAME = "auto" 
 overwrite = True
 experiment_output_path = os.path.join(base_path, experiment_name)
