@@ -14,9 +14,9 @@ export SAVE_PATH=${OUTPUT_PATH}/${MODEL_NAME}/
 export EVALUATION_NAME=${MODEL_NAME}/model/${DATASET_NAME}
 
 # Config for training
-export CONFIG_PATH=./train/config.json
+export CONFIG_PATH=./src/config.json
 
 # Other parameters
-EPOCHS=$2
+EPOCHS=${2:-5}
 
 python ./src/train.py --model ${MODEL_NAME} --epochs ${EPOCHS}
