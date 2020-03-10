@@ -105,7 +105,8 @@ def export_model(model, path=None, input_shape=(1, 3, 64, 64), use_script_module
         Path to where the model is saved.
     """
     path = get_model_path() if path is None else path
-    model = deepcopy(model).cpu().eval()
+    # model = deepcopy(model).cpu().eval()
+    model = model.cpu().eval()  # pre-deepcopied model
     if isinstance(model, torch.jit.ScriptModule):
         assert use_script_module, "Provided model is a ScriptModule, please set use_script_module to True."
     if use_script_module:

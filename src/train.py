@@ -41,24 +41,17 @@ def main():
     # -------------------------------------------------------------------------
 
     # VAE model
-    if args.model == "beta":
-        model = dvm.BetaVAE(**config["beta_params"])
-    elif args.model == "factor":
-        model = dvm.FactorVAE(**config["factor_params"])
-    elif args.model == "dipi":
-        model = dvm.DIPVAE(**config["dip-i_params"])
-    elif args.model == "dipii":
-        model = dvm.DIPVAE(**config["dip-ii_params"])
-    elif args.model == "joint":
-        model = dvm.JointVAE(**config["joint_params"])
-    elif args.model == "tcvae":
-        model = dvm.TCVAE(**config["tcvae_params"])
-    elif args.model == "aae":
-        model = dvm.AAE(**config["aae_params"])
-    elif args.model == "avb":
-        model = dvm.AVB(**config["avb_params"])
-    else:
-        raise KeyError(f"Not implemented model is specified, {args.model}")
+    model_dict = {
+        "beta": dvm.BetaVAE,
+        "factor": dvm.FactorVAE,
+        "dipi": dvm.DIPVAE,
+        "dipii": dvm.DIPVAE,
+        "joint": dvm.JointVAE,
+        "tcvae": dvm.TCVAE,
+        "aae": dvm.AAE,
+        "avb": dvm.AVB,
+    }
+    model = model_dict[args.model](**config[f"{args.model}_params"])
 
     # Updater
     root = os.getenv("DATA_ROOT", "./data/mnist/")
@@ -78,8 +71,12 @@ def main():
     # Run
     trainer.fit(updater)
 
+    # Deep copy
+    trained_model = model_dict[args.model](**config[f"{args.model}_params"])
+    trained_model.load_state_dict(updater.model.state_dict())
+
     # Export model
-    utils.export_model(model, input_shape=(1, 1, 64, 64))
+    utils.export_model(updater.model, input_shape=(1, 1, 64, 64))
 
 
 def init_args():
