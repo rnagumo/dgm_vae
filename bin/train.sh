@@ -19,4 +19,4 @@ export CONFIG_PATH=./train/config.json
 # Other parameters
 EPOCHS=$2
 
-python ./train/train.py --model ${MODEL_NAME} --epochs ${EPOCHS}
+python ./src/train.py --model ${MODEL_NAME} --epochs ${EPOCHS}
