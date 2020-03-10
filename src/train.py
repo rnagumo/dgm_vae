@@ -81,7 +81,8 @@ def main():
     trained_model.load_state_dict(updater.model.state_dict())
 
     # Export model
-    utils.export_model(updater.model, input_shape=(1, 1, 64, 64))
+    ch_num = config[f"{args.model}_params"]["channel_num"]
+    utils.export_model(updater.model, input_shape=(1, ch_num, 64, 64))
 
 
 def init_args():
