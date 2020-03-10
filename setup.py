@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    "torch==1.4.0",
-    "torchvision==0.5.0",
-    "pytorch-lightning==0.7.0",
-    "pixyz==0.1.4",
+    "torch>=1.4.0",
+    "torchvision>=0.5.0",
+    "pytorch-lightning==0.7.1",
+    "pixyz>=0.1.4",
     "disentanglement-lib==1.4"
 ]
 
