@@ -43,9 +43,9 @@ def main():
         model = dvm.BetaVAE(**config["beta_params"])
     elif args.model == "factor":
         model = dvm.FactorVAE(**config["factor_params"])
-    elif args.model == "dip-i":
+    elif args.model == "dipi":
         model = dvm.DIPVAE(**config["dip-i_params"])
-    elif args.model == "dip-ii":
+    elif args.model == "dipii":
         model = dvm.DIPVAE(**config["dip-ii_params"])
     elif args.model == "joint":
         model = dvm.JointVAE(**config["joint_params"])
