@@ -16,6 +16,6 @@ export OUTPUT_PATH=./logs/
 export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 
 # Config for training
-export CONFIG_PATH=./src/config.json
+export CONFIG_PATH=./src/config_ch3.json
 
 python ./src/train.py --model ${MODEL_NAME} --epochs 100 --seed ${SEED}
