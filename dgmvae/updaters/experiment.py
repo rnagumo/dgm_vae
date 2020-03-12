@@ -70,7 +70,7 @@ class VAEUpdater(pl.LightningModule):
                 transforms.Resize(64), transforms.ToTensor()])
             dataset = datasets.MNIST(root=self.root, train=True,
                                      transform=_transform)
-        elif self.dataset == "dsprites":
+        elif self.dataset == "dsprites_full":
             dataset = DSpritesDataset(root=self.root)
         elif self.dataset == "cars3d":
             dataset = Cars3dDataset(root=self.root)
