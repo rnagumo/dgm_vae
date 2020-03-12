@@ -50,24 +50,24 @@ class VAEUpdater(pl.LightningModule):
 
         return results
 
-    def validation_step(self, batch, batch_idx, optimizer_idx=0):
-        x, y = batch
+    # def validation_step(self, batch, batch_idx, optimizer_idx=0):
+    #     x, y = batch
 
-        # Set device
-        if self.device is None:
-            self.device = x.device
+    #     # Set device
+    #     if self.device is None:
+    #         self.device = x.device
 
-        return self.model.loss_func(x, optimizer_idx=optimizer_idx,
-                                    dataset_size=self.val_size)
+    #     return self.model.loss_func(x, optimizer_idx=optimizer_idx,
+    #                                 dataset_size=self.val_size)
 
-    def validation_epoch_end(self, outputs):
-        # Accumulate val loss
-        val_loss = torch.stack([x["loss"] for x in outputs]).mean()
-        results = {
-            "val_loss": val_loss,
-            "log": {"val/loss": val_loss}
-        }
-        return results
+    # def validation_epoch_end(self, outputs):
+    #     # Accumulate val loss
+    #     val_loss = torch.stack([x["loss"] for x in outputs]).mean()
+    #     results = {
+    #         "val_loss": val_loss,
+    #         "log": {"val/loss": val_loss}
+    #     }
+    #     return results
 
     def configure_optimizers(self):
         optims = [torch.optim.Adam(self.model.parameters())]
