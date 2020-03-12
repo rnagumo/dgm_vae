@@ -27,9 +27,14 @@ def main():
     args = init_args()
 
     # Configs
-    condig_path = os.getenv("CONFIG_PATH", "./train/config.json")
+    condig_path = os.getenv("CONFIG_PATH", "./src/config.json")
     with pathlib.Path(condig_path).open() as f:
         config = json.load(f)
+
+    # Path
+    root = os.getenv("DATA_ROOT", "./data/mnist/")
+    save_path = pathlib.Path(os.getenv("SAVE_PATH", "./logs/"),
+                             os.getenv("EVALUATION_NAME", "dev"))
 
     # Cuda setting
     use_cuda = torch.cuda.is_available() and args.cuda != "null"
@@ -59,12 +64,9 @@ def main():
     model = model_dict[args.model](**config[f"{args.model}_params"])
 
     # Updater
-    root = os.getenv("DATA_ROOT", "./data/mnist/")
     updater = dvu.VAEUpdater(model, args, root, args.batch_size)
 
     # Trainer
-    save_path = pathlib.Path(
-        os.getenv("SAVE_PATH", "./logs/"), os.getenv("EVALUATION_NAME", "dev"))
     params = {
         "default_save_path": save_path,
         "gpus": gpus,
