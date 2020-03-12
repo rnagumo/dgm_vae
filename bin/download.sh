@@ -21,7 +21,7 @@ echo "Check mpi3d_toy"
 # fi
 
 echo "Check cars3d"
-if [[ ! -d "cars3d" ]]; then
+if [[ ! -d "cars" ]]; then
   echo "Downloading cars3d dataset."
   wget -O cars3d.tar.gz http://www.scottreed.info/files/nips2015-analogy-data.tar.gz
   tar -zxf cars3d.tar.gz
