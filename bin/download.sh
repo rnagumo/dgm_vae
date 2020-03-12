@@ -22,6 +22,6 @@ echo "Downloading cars3d dataset."
 if [[ ! -d "cars3d" ]]; then
   mkdir cars3d
   wget -O cars3d/cars3d.tar.gz http://www.scottreed.info/files/nips2015-analogy-data.tar.gz
-  tar -zxvf cars3d.tar.gz
+  tar -zxvf cars3d/cars3d.tar.gz
 fi
 echo "Downloading cars3d completed!"

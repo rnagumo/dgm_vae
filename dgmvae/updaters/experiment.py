@@ -6,6 +6,9 @@ import torch
 from torchvision import datasets, transforms
 import pytorch_lightning as pl
 
+from ..datasets.cars3d import Cars3dDataset
+from ..datasets.dsprites import DSpritesDataset
+
 
 class VAEUpdater(pl.LightningModule):
 
@@ -50,24 +53,24 @@ class VAEUpdater(pl.LightningModule):
 
         return results
 
-    def validation_step(self, batch, batch_idx, optimizer_idx=0):
-        x, y = batch
+    # def validation_step(self, batch, batch_idx, optimizer_idx=0):
+    #     x, y = batch
 
-        # Set device
-        if self.device is None:
-            self.device = x.device
+    #     # Set device
+    #     if self.device is None:
+    #         self.device = x.device
 
-        return self.model.loss_func(x, optimizer_idx=optimizer_idx,
-                                    dataset_size=self.val_size)
+    #     return self.model.loss_func(x, optimizer_idx=optimizer_idx,
+    #                                 dataset_size=self.val_size)
 
-    def validation_epoch_end(self, outputs):
-        # Accumulate val loss
-        val_loss = torch.stack([x["loss"] for x in outputs]).mean()
-        results = {
-            "val_loss": val_loss,
-            "log": {"val/loss": val_loss}
-        }
-        return results
+    # def validation_epoch_end(self, outputs):
+    #     # Accumulate val loss
+    #     val_loss = torch.stack([x["loss"] for x in outputs]).mean()
+    #     results = {
+    #         "val_loss": val_loss,
+    #         "log": {"val/loss": val_loss}
+    #     }
+    #     return results
 
     def configure_optimizers(self):
         optims = [torch.optim.Adam(self.model.parameters())]
@@ -85,12 +88,18 @@ class VAEUpdater(pl.LightningModule):
             datasets.MNIST(root=self.root, train=False, download=True)
 
     def train_dataloader(self):
-        # Dataset
-        _transform = self.data_transform()
 
+        # Dataset
         if self.dataset == "mnist":
+            _transform = self.data_transform()
             dataset = datasets.MNIST(root=self.root, train=True,
                                      transform=_transform)
+        elif self.dataset == "dsprites":
+            dataset = DSpritesDataset(root=self.root)
+        elif self.dataset == "cars3d":
+            dataset = Cars3dDataset(root=self.root)
+        else:
+            raise KeyError(f"Unexpected dataset is specified: {self.dataset}")
 
         # Params for data loader
         params = {"batch_size": self.batch_size}
