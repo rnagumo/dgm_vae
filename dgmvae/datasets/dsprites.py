@@ -1,5 +1,9 @@
 
-"""Dataset class for dSprites"""
+"""Dataset class for dSprites
+
+ref)
+https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/dsprites.py
+"""
 
 import pathlib
 

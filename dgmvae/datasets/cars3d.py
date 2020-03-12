@@ -1,5 +1,9 @@
 
-"""Dataset class for cars3d"""
+"""Dataset class for cars3d
+
+ref)
+https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/cars3d.py
+"""
 
 import pathlib
 from PIL import Image
