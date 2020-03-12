@@ -7,7 +7,7 @@ SEED=${2:-0}
 
 # Dataset path
 export DISENTANGLEMENT_LIB_DATA=./data/
-export DATASET_NAME=cars3d
+export DATASET_NAME=cars
 export DATA_ROOT=./${DISENTANGLEMENT_LIB_DATA}/${DATASET_NAME}/
 
 # Logging path
