@@ -1,6 +1,5 @@
 
 # Specify model name
-# export MODEL_NAME=beta
 export MODEL_NAME=$1
 
 # Other parameters
