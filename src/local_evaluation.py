@@ -52,7 +52,6 @@ DATASET_NAME = "auto"
 overwrite = True
 experiment_output_path = os.path.join(base_path, experiment_name)
 ROOT = os.getenv("NDC_ROOT", ".")
-print(f"Experiment output path: {experiment_output_path}")
 
 # Print the configuration for reference
 if not MONKEY:
