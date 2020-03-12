@@ -12,17 +12,13 @@ import torch
 
 class Cars3dDataset(torch.utils.data.Dataset):
 
-    def __init__(self, root, subdir=None):
+    def __init__(self, root):
         super().__init__()
-
-        # Configure path
-        subdir = "data/cars/" if subdir is None else subdir
-        root = pathlib.Path(root, subdir)
 
         # Load pre-downloaded data
         data = []
         targets = []
-        for i, path in enumerate(root.glob("*.mat")):
+        for i, path in enumerate(pathlib.Path(root).glob("*.mat")):
             # Data
             data.append(torch.tensor(_load_mesh(path)))
 
