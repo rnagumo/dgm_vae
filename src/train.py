@@ -63,8 +63,10 @@ def main():
     updater = dvu.VAEUpdater(model, args, root, args.batch_size)
 
     # Trainer
+    save_path = pathlib.Path(
+        os.getenv("SAVE_PATH", "./logs/"), os.getenv("EVALUATION_NAME", "dev"))
     params = {
-        "default_save_path": os.getenv("SAVE_PATH", "./logs/"),
+        "default_save_path": save_path,
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
