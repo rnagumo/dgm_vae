@@ -73,7 +73,6 @@ def main():
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
-        "check_val_every_n_epoch": args.val_interval,
         "log_save_interval": args.log_save_interval,
     }
     trainer = pl.Trainer(**params)
@@ -97,7 +96,6 @@ def init_args():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=5)
     parser.add_argument("--batch-size", type=int, default=128)
-    parser.add_argument("--val-interval", type=int, default=1)
     parser.add_argument("--log-save-interval", type=int, default=5)
 
     return parser.parse_args()
