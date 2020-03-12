@@ -13,7 +13,11 @@ class BaseVAE(nn.Module):
 
     def forward(self, x):
         """Encodes without sampling"""
-        return self.encode(x, mean=True)
+        latents = self.encode(x, mean=True)
+
+        if isinstance(latents, tuple):
+            return latents[0]
+        return latents
 
     def reconstruct(self, x, return_latent=False):
         """Reconstructs image"""
