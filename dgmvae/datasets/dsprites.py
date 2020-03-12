@@ -22,7 +22,7 @@ class DSpritesDataset(torch.utils.data.Dataset):
             targets = torch.tensor(dataset["latents_classes"])
 
         # Reshape dataset (batch, channel, height, width)
-        self.data = data.unsqueeze(1)
+        self.data = data.unsqueeze(1).float()
         self.targets = targets
 
     def __getitem__(self, index):

@@ -34,7 +34,7 @@ class Cars3dDataset(torch.utils.data.Dataset):
         targets = torch.stack(targets).view(-1, 3)
 
         # Reshape dataset (batch, channel, height, width)
-        self.data = data.permute(0, 3, 1, 2)
+        self.data = data.permute(0, 3, 1, 2).float()
         self.targets = targets
 
     def __getitem__(self, index):
