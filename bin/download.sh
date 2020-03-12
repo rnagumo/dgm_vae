@@ -26,5 +26,8 @@ if [[ ! -d "cars3d" ]]; then
   mkdir cars3d
   wget -O cars3d.tar.gz http://www.scottreed.info/files/nips2015-analogy-data.tar.gz
   tar -zxf cars3d.tar.gz
+  mv data/cars/ cars/
+  rm -rf data
+  rm cars3d.tar.gz
   echo "Downloading cars3d completed!"
 fi
