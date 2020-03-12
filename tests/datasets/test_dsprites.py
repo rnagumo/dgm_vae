@@ -1,6 +1,6 @@
 
 import unittest
-import torch
+import pathlib
 
 import dgmvae.datasets as dvd
 
@@ -9,7 +9,8 @@ class TestDSpritesDataset(unittest.TestCase):
 
     def test_dataset(self):
         # Need pre-downloaded dataset
-        dataset = dvd.DSpritesDataset("../../data/dsprites")
+        path = pathlib.Path(__file__).parent.parent.parent
+        dataset = dvd.DSpritesDataset(path.joinpath("data/dsprites"))
 
         x, y = dataset[0]
         self.assertTupleEqual(x.size(), (1, 64, 64))
