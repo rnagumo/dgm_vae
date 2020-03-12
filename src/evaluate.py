@@ -127,6 +127,8 @@ def evaluate(model_dir,
                 gin.bind_parameter("dataset.name", get_dataset_name())
         dataset = named_data.get_named_ground_truth_data()
 
+    print(model_dir)
+
     if os.path.exists(os.path.join(model_dir, 'tfhub')):
         # Path to TFHub module of previously trained representation.
         module_path = os.path.join(model_dir, "tfhub")
