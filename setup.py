@@ -12,6 +12,7 @@ install_requires = [
     "tensorflow-probability==0.7.0",
 ]
 
+
 extras_require = {
     "tf": "tensorflow==1.14.0",
     "tf_gpu": "tensorflow-gpu==1.14.0",
