@@ -72,7 +72,7 @@ class VAEUpdater(pl.LightningModule):
                                      transform=_transform)
         elif self.dataset == "dsprites":
             dataset = DSpritesDataset(root=self.root)
-        elif self.dataset == "cars3d":
+        elif self.dataset == "cars":
             dataset = Cars3dDataset(root=self.root)
         else:
             raise KeyError(f"Unexpected dataset is specified: {self.dataset}")
