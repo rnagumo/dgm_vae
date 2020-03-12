@@ -11,12 +11,12 @@ if [[ ! -d "dsprites" ]]; then
 fi
 echo "Downloading dSprites completed!"
 
-echo "Downloading mpi3d_toy dataset."
-if [[ ! -d "mpi3d_toy" ]]; then
-  mkdir mpi3d_toy
-  wget -O mpi3d_toy/mpi3d_toy.npz https://storage.googleapis.com/disentanglement_dataset/data_npz/sim_toy_64x_ordered_without_heldout_factors.npz
-fi
-echo "Downloading mpi3d_toy completed!"
+# echo "Downloading mpi3d_toy dataset."
+# if [[ ! -d "mpi3d_toy" ]]; then
+#   mkdir mpi3d_toy
+#   wget -O mpi3d_toy/mpi3d_toy.npz https://storage.googleapis.com/disentanglement_dataset/data_npz/sim_toy_64x_ordered_without_heldout_factors.npz
+# fi
+# echo "Downloading mpi3d_toy completed!"
 
 echo "Downloading cars3d dataset."
 if [[ ! -d "cars3d" ]]; then
