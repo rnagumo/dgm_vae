@@ -73,9 +73,8 @@ class TestJointVAE(unittest.TestCase):
 
     def test_forward(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
-        z, c = self.model(x)
+        z = self.model(x)
         self.assertEqual(z.size(), torch.Size([self.batch_n, self.z_dim]))
-        self.assertEqual(c.size(), torch.Size([self.batch_n, self.c_dim]))
 
     def test_reconstruct(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
