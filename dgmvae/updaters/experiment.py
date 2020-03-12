@@ -91,7 +91,8 @@ class VAEUpdater(pl.LightningModule):
 
         # Dataset
         if self.dataset == "mnist":
-            _transform = self.data_transform()
+            _transform = transforms.Compose([
+                transforms.Resize(64), transforms.ToTensor()])
             dataset = datasets.MNIST(root=self.root, train=True,
                                      transform=_transform)
         elif self.dataset == "dsprites":
@@ -130,12 +131,3 @@ class VAEUpdater(pl.LightningModule):
         self.x_org = x_org[:8]
 
         return loader
-
-    @staticmethod
-    def data_transform():
-        _transform = transforms.Compose([
-            transforms.Resize(64),
-            transforms.ToTensor(),
-        ])
-
-        return _transform
