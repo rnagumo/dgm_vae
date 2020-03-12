@@ -38,9 +38,7 @@ class Cars3dDataset(torch.utils.data.Dataset):
         self.targets = targets
 
     def __getitem__(self, index):
-        img = self.data[index]
-        target = self.targets[index]
-        return img, target
+        return self.data[index], self.targets[index]
 
     def __len__(self):
         return self.data.size(0)
