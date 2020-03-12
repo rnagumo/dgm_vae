@@ -8,7 +8,7 @@ class TestCars3dDataset(unittest.TestCase):
 
     def test_dataset(self):
         # Need pre-downloaded dataset
-        dataset = dvd.Cars3dDataset("../../data/cars3d/")
+        dataset = dvd.Cars3dDataset("../../data/cars/")
 
         x, y = dataset[0]
         self.assertTupleEqual(x.size(), (3, 64, 64))
