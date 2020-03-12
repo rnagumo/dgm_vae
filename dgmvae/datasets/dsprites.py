@@ -21,14 +21,12 @@ class DSpritesDataset(torch.utils.data.Dataset):
             data = torch.tensor(dataset["imgs"])
             targets = torch.tensor(dataset["latents_classes"])
 
-        self.data = data
+        # Reshape dataset (batch, channel, height, width)
+        self.data = data.unsqueeze(1)
         self.targets = targets
 
     def __getitem__(self, index):
-        # Image size (channel, height, width)
-        img = self.data[index].unsqueeze(0)
-        target = self.targets[index]
-        return img, target
+        return self.data[index], self.targets[index]
 
     def __len__(self):
-        return len(self.data)
+        return self.data.size(0)
