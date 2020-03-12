@@ -35,6 +35,7 @@ def main():
     root = os.getenv("DATA_ROOT", "./data/mnist/")
     save_path = pathlib.Path(os.getenv("SAVE_PATH", "./logs/"),
                              os.getenv("EVALUATION_NAME", "dev"))
+    dataset = os.getenv("DATASET_NAME", "mnist")
 
     # Cuda setting
     use_cuda = torch.cuda.is_available() and args.cuda != "null"
@@ -64,7 +65,7 @@ def main():
     model = model_dict[args.model](**config[f"{args.model}_params"])
 
     # Updater
-    updater = dvu.VAEUpdater(model, args, root, args.batch_size)
+    updater = dvu.VAEUpdater(model, args, dataset, root, args.batch_size)
 
     # Trainer
     params = {
