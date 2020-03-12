@@ -63,6 +63,11 @@ class VAEUpdater(pl.LightningModule):
             datasets.MNIST(root=self.root, train=False, download=True)
 
     def train_dataloader(self):
+        """Loads train data loader.
+
+        The specified dataset name should be same in disentanglement_lib.
+        https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/named_data.py
+        """
 
         # Dataset
         if self.dataset == "mnist":
