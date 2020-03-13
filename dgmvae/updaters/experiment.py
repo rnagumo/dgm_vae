@@ -60,7 +60,6 @@ class VAEUpdater(pl.LightningModule):
         """Download dataset"""
         if self.dataset == "mnist":
             datasets.MNIST(root=self.root, train=True, download=True)
-            datasets.MNIST(root=self.root, train=False, download=True)
 
     def train_dataloader(self):
         """Loads train data loader.
