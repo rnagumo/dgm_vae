@@ -1,6 +1,6 @@
 
 # Specify model name
-export MODEL_NAME=$1
+export MODEL_NAME=${1:-beta}
 
 # Other parameters
 SEED=${2:-0}
