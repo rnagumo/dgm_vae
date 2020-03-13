@@ -29,6 +29,7 @@ class DSpritesDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         # Reshape dataset (channel, height, width)
+        # and change dtype uint8 -> float32
         return self.data[index].unsqueeze(0).float(), self.targets[index]
 
     def __len__(self):

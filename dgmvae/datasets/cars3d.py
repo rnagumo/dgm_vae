@@ -38,6 +38,7 @@ class Cars3dDataset(torch.utils.data.Dataset):
         self.targets = targets
 
     def __getitem__(self, index):
+        # Change dtype uint8 -> float32
         return self.data[index].float(), self.targets[index]
 
     def __len__(self):
