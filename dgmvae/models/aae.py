@@ -99,11 +99,9 @@ class AAE(BaseVAE):
 
         # Prior
         self.prior_z = pxd.Normal(
-            loc=torch.tensor(0.), scale=torch.tensor(1.),
-            var=["z"], features_shape=[z_dim])
+            loc=torch.zeros(z_dim), scale=torch.ones(z_dim), var=["z"])
         self.prior_c = pxd.Categorical(
-            probs=torch.ones(c_dim, dtype=torch.float32) / c_dim,
-            var=["c"])
+            probs=torch.ones(c_dim, dtype=torch.float32) / c_dim, var=["c"])
 
         # Encoder
         self.encoder_func = EncoderFunction(channel_num)
@@ -113,10 +111,8 @@ class AAE(BaseVAE):
         # Decoder
         self.decoder = JointDecoder(channel_num, z_dim, c_dim)
 
-        self.distributions = nn.ModuleList([
-            self.prior_z, self.prior_c, self.encoder_func,
-            self.encoder_z, self.encoder_c, self.decoder,
-        ])
+        self.distributions = [self.prior_z, self.prior_c, self.encoder_func,
+                              self.encoder_z, self.encoder_c, self.decoder]
 
         # Loss
         self.ce = pxl.CrossEntropy(self.encoder_z, self.decoder)
@@ -127,7 +123,7 @@ class AAE(BaseVAE):
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder_z, self.prior_z, self.disc)
 
-    def encode(self, x, mean=False):
+    def encode(self, x, mean=False, **kwargs):
 
         h = self.encoder_func.sample(x, return_all=False)
 
@@ -141,40 +137,34 @@ class AAE(BaseVAE):
         z.update(c)
         return z
 
-    def decode(self, latent=None, z=None, c=None, mean=False):
-        if latent is None:
+    def decode(self, latent, mean=False, **kwargs):
+        if not latent:
             latent = {}
-            if isinstance(z, dict):
-                latent.update(z)
+            if "z" in kwargs:
+                latent["z"] = kwargs["z"]
             else:
-                latent["z"] = z
+                raise ValueError("z is not given")
 
-            if isinstance(c, dict):
-                latent.update(c)
+            if "c" in kwargs:
+                latent["c"] = kwargs["c"]
             else:
-                latent["c"] = c
+                raise ValueError("z is not given")
 
         if mean:
             return self.decoder.sample_mean(latent)
         return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1):
+    def sample(self, batch_n=1, **kwargs):
         z = self.prior_z.sample(batch_n=batch_n)
         c = self.prior_c.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
-    def forward(self, x, return_latent=False):
-        latent = self.encode(x)
-        sample = self.decode(latent=latent, mean=True)
+    def loss_func(self, x, **kwargs):
+        # Input
+        x_dict = {"x": x}
 
-        if return_latent:
-            latent.update({"x": sample})
-            return latent
-        return sample
-
-    def loss_func(self, x_dict, **kwargs):
-
+        # Select optimizer
         optimizer_idx = kwargs["optimizer_idx"]
 
         # Sample h (surrogate latent) and c (categorical latent)
@@ -192,9 +182,9 @@ class AAE(BaseVAE):
             return {"adv_loss": loss}
 
     @property
-    def loss_cls(self):
-        return (self.ce + self.adv_js).expectation(
-                    self.encoder_c * self.encoder_func)
+    def loss_str(self):
+        return str((self.ce + self.adv_js).expectation(
+                   self.encoder_c * self.encoder_func))
 
     @property
     def second_optim(self):

@@ -3,13 +3,18 @@
 
 import argparse
 import json
+import os
 import pathlib
 
+import numpy as np
 import torch
+from torch.backends import cudnn
 import pytorch_lightning as pl
 
 import dgmvae.models as dvm
 import dgmvae.updaters as dvu
+
+import utils_pytorch as utils
 
 
 def main():
@@ -22,8 +27,15 @@ def main():
     args = init_args()
 
     # Configs
-    with pathlib.Path(args.config).open() as f:
+    condig_path = os.getenv("CONFIG_PATH", "./src/config.json")
+    with pathlib.Path(condig_path).open() as f:
         config = json.load(f)
+
+    # Path
+    root = os.getenv("DATA_ROOT", "./data/mnist/")
+    save_path = pathlib.Path(os.getenv("SAVE_PATH", "./logs/"),
+                             os.getenv("EVALUATION_NAME", "dev"))
+    dataset = os.getenv("DATASET_NAME", "mnist")
 
     # Cuda setting
     use_cuda = torch.cuda.is_available() and args.cuda != "null"
@@ -31,41 +43,36 @@ def main():
 
     # Random seed
     torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    cudnn.deterministic = True
+    cudnn.benchmark = False
 
     # -------------------------------------------------------------------------
     # 2. Training
     # -------------------------------------------------------------------------
 
     # VAE model
-    if args.model == "beta":
-        model = dvm.BetaVAE(**config["beta_params"])
-    elif args.model == "factor":
-        model = dvm.FactorVAE(**config["factor_params"])
-    elif args.model == "dip-i":
-        model = dvm.DIPVAE(**config["dip-i_params"])
-    elif args.model == "dip-ii":
-        model = dvm.DIPVAE(**config["dip-ii_params"])
-    elif args.model == "joint":
-        model = dvm.JointVAE(**config["joint_params"])
-    elif args.model == "tcvae":
-        model = dvm.TCVAE(**config["tcvae_params"])
-    elif args.model == "aae":
-        model = dvm.AAE(**config["aae_params"])
-    elif args.model == "avb":
-        model = dvm.AVB(**config["avb_params"])
-    else:
-        raise KeyError(f"Not implemented model is specified, {args.model}")
+    model_dict = {
+        "beta": dvm.BetaVAE,
+        "factor": dvm.FactorVAE,
+        "dipi": dvm.DIPVAE,
+        "dipii": dvm.DIPVAE,
+        "joint": dvm.JointVAE,
+        "tcvae": dvm.TCVAE,
+        "aae": dvm.AAE,
+        "avb": dvm.AVB,
+    }
+    model = model_dict[args.model](**config[f"{args.model}_params"])
 
     # Updater
-    updater = dvu.VAEUpdater(model, args, **config["updater_params"])
+    updater = dvu.VAEUpdater(model, args, dataset, root, args.batch_size)
 
     # Trainer
     params = {
-        "default_save_path": args.logdir,
+        "default_save_path": save_path,
         "gpus": gpus,
         "early_stop_callback": None,
         "max_epochs": args.epochs,
-        "check_val_every_n_epoch": args.val_interval,
         "log_save_interval": args.log_save_interval,
     }
     trainer = pl.Trainer(**params)
@@ -73,17 +80,23 @@ def main():
     # Run
     trainer.fit(updater)
 
+    # Deep copy
+    trained_model = model_dict[args.model](**config[f"{args.model}_params"])
+    trained_model.load_state_dict(updater.model.state_dict())
+
+    # Export model
+    ch_num = config[f"{args.model}_params"]["channel_num"]
+    utils.export_model(updater.model, input_shape=(1, ch_num, 64, 64))
+
 
 def init_args():
     parser = argparse.ArgumentParser(description="VAE training")
-    parser.add_argument("--logdir", type=str, default="../logs/")
-    parser.add_argument("--config", type=str, default="./config.json")
     parser.add_argument("--model", type=str, default="beta")
     parser.add_argument("--cuda", type=str, default="0")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--val-interval", type=int, default=1)
-    parser.add_argument("--log-save-interval", type=int, default=100)
+    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--log-save-interval", type=int, default=5)
 
     return parser.parse_args()
 

@@ -9,38 +9,55 @@ class BaseVAE(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.distributions = nn.ModuleDict([])
+        self.distributions = []
 
-    def encode(self, *inputs, mean=False):
-        """Encodes latent z given observable x"""
+    def forward(self, x):
+        """Encodes without sampling"""
+        latents = self.encode(x, mean=True)
+
+        if isinstance(latents, tuple):
+            return latents[0]
+        return latents
+
+    def reconstruct(self, x, return_latent=False):
+        """Reconstructs image"""
+        latent = self.encode(x)
+        obs = self.decode(latent, mean=True)
+
+        # If `return_latent`=True, return dict of latent and obs
+        if return_latent:
+            latent.update({"x": obs})
+            return latent
+
+        # Return tensor of reconstructed image
+        return obs
+
+    def encode(self, x, mean=False, **kwargs):
+        """Encodes latent given observable x"""
         raise NotImplementedError
 
-    def decode(self, *inputs, mean=False):
-        """Decodes observable x given latent z"""
+    def decode(self, latent, mean=False, **kwargs):
+        """Decodes observable x given latent"""
         raise NotImplementedError
 
-    def sample(self, batch_size, **kwargs):
+    def sample(self, batch_n=1, **kwargs):
         """Samples observable x from sampled latent z"""
         raise NotImplementedError
 
-    def forward(self, x, return_latent=False):
-        """Reconstructs observable x' given inputs data x"""
-        raise NotImplementedError
-
-    def loss_func(self, *inputs, **kwargs):
-        """Calculates loss"""
+    def loss_func(self, x, **kwargs):
+        """Calculates loss given observable x"""
         raise NotImplementedError
 
     @property
-    def loss_cls(self):
-        """Returns instance of pixyz.losses.Loss class for printing"""
+    def loss_str(self):
+        """Returns loss string"""
         raise NotImplementedError
 
     def __str__(self):
         prob_text = []
         func_text = []
 
-        for prob in self.distributions._modules.values():
+        for prob in self.distributions:
             if isinstance(prob, Distribution):
                 prob_text.append(prob.prob_text)
             else:
@@ -52,7 +69,7 @@ class BaseVAE(nn.Module):
             text += ("Deterministic functions (for training): \n "
                      " {} \n".format(", ".join(func_text)))
 
-        text += "Loss function: \n  {} \n".format(str(self.loss_cls))
+        text += "Loss function: \n  {} \n".format(str(self.loss_str))
         return text
 
     @property
