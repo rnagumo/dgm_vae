@@ -22,11 +22,12 @@ class DSpritesDataset(torch.utils.data.Dataset):
         path = pathlib.Path(root, filename)
         with open(path, "rb") as f:
             dataset = np.load(f, encoding="latin1", allow_pickle=True)
-            data = torch.tensor(dataset["imgs"])
+            data = torch.tensor(
+                dataset["imgs"], dtype=torch.float32).unsqueeze(1)
             targets = torch.tensor(dataset["latents_classes"])
 
         # Reshape dataset (batch, channel, height, width)
-        self.data = data.unsqueeze(1).float()
+        self.data = data
         self.targets = targets
 
     def __getitem__(self, index):
