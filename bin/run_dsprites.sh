@@ -18,4 +18,4 @@ export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 export CONFIG_PATH=./src/config_ch1.json
 
 python ./src/train.py --model ${MODEL_NAME} --epochs 100 --seed ${SEED}
-# python ./src/local_evaluation.py
+python ./src/local_evaluation.py
