@@ -34,11 +34,11 @@ class Cars3dDataset(torch.utils.data.Dataset):
         targets = torch.stack(targets).view(-1, 3)
 
         # Reshape dataset (batch, channel, height, width)
-        self.data = data.permute(0, 3, 1, 2).float()
+        self.data = data.permute(0, 3, 1, 2)
         self.targets = targets
 
     def __getitem__(self, index):
-        return self.data[index], self.targets[index]
+        return self.data[index].float(), self.targets[index]
 
     def __len__(self):
         return self.data.size(0)
