@@ -21,7 +21,7 @@ extras_require = {
 
 setup(
     name="dgmvae",
-    version="0.2",
+    version="0.3",
     packages=find_packages(),
     install_requires=install_requires,
     extras_require=extras_require,
