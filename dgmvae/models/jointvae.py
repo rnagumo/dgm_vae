@@ -100,7 +100,7 @@ class JointDecoder(pxd.Bernoulli):
 
 class JointVAE(BaseVAE):
     def __init__(self, channel_num, z_dim, c_dim, temperature, gamma_z,
-                 gamma_c, **kwargs):
+                 gamma_c, cap_z, cap_c, **kwargs):
         super().__init__()
 
         self.channel_num = channel_num
@@ -108,6 +108,8 @@ class JointVAE(BaseVAE):
         self.c_dim = c_dim
         self._gamma_z_value = gamma_z
         self._gamma_c_value = gamma_c
+        self._cap_z_value = cap_z
+        self._cap_c_value = cap_c
 
         # Distributions
         self.prior_z = pxd.Normal(
@@ -178,8 +180,13 @@ class JointVAE(BaseVAE):
     def loss_func(self, x, **kwargs):
 
         # TODO: update capacity values per epoch
-        x_dict = {"x": x, "gamma_z": self._gamma_z_value,
-                  "gamma_c": self._gamma_c_value, "cap_z": 1, "cap_c": 1}
+        x_dict = {
+            "x": x,
+            "gamma_z": self._gamma_z_value,
+            "gamma_c": self._gamma_c_value,
+            "cap_z": self._cap_z_value,
+            "cap_c": self._cap_c_value,
+        }
 
         # Sample h (surrogate latent variable)
         x_dict = self.encoder_func.sample(x_dict)
