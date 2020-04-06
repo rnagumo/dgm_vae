@@ -3,10 +3,10 @@ import unittest
 import pathlib
 
 import dgmvae.datasets as dvd
-from .base_case import BaseTestCase
+from .base_dataset_case import BaseDatasetTestCase
 
 
-class TestCars3dDataset(unittest.TestCase, BaseTestCase):
+class TestCars3dDataset(unittest.TestCase, BaseDatasetTestCase):
 
     def setUp(self):
         # Need pre-downloaded dataset

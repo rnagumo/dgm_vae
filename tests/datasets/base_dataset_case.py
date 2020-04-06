@@ -4,7 +4,7 @@
 import torch
 
 
-class BaseTestCase:
+class BaseDatasetTestCase:
 
     def test_dataset(self):
         x, y = self.dataset[0]
@@ -13,6 +13,11 @@ class BaseTestCase:
 
         data_len = len(self.dataset)
         self.assertEqual(data_len, self.all_factors)
+
+        # Test sample_batch
+        batch_data, batch_targets = self.dataset.sample_fixed_batch(32)
+        self.assertTupleEqual(batch_data.size(), (32, self.channel, 64, 64))
+        self.assertTupleEqual(batch_targets.size(), (32, self.latents))
 
         # Test sample_fixed_batch
         factor_index = self.dataset.sample_factor_index()

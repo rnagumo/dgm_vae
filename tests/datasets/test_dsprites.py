@@ -3,10 +3,10 @@ import unittest
 import pathlib
 
 import dgmvae.datasets as dvd
-from .base_case import BaseTestCase
+from .base_dataset_case import BaseDatasetTestCase
 
 
-class TestDSpritesDataset(unittest.TestCase, BaseTestCase):
+class TestDSpritesDataset(unittest.TestCase, BaseDatasetTestCase):
 
     def setUp(self):
         # Need pre-downloaded dataset

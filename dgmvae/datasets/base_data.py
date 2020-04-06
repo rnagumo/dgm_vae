@@ -21,6 +21,18 @@ class BaseDataset(torch.utils.data.Dataset):
         self.targets = None
         self.factor_sizes = []
 
+    def sample_batch(self, batch_size):
+        # Sample data with replacement
+        batch_index = torch.randint(self.targets.size(0), (batch_size,))
+        batch_data = self.data[batch_index].float()
+        batch_targets = self.targets[batch_index]
+
+        # Expand channel dim
+        if batch_data.dim() == 3:
+            batch_data = batch_data.unsqueeze(1)
+
+        return batch_data, batch_targets
+
     def sample_factor_index(self):
         """Samples fixed factor column."""
         return torch.randint(len(self.factor_sizes), (1,))
