@@ -37,10 +37,11 @@ class DSpritesDataset(BaseDataset):
         path = pathlib.Path(root, filename)
         with np.load(path, encoding="latin1", allow_pickle=True) as dataset:
             data = torch.tensor(dataset["imgs"])
-            targets = torch.tensor(dataset["latents_classes"])
+            targets = torch.tensor(dataset["latents_classes"][:, 1:])
 
         self.data = data
         self.targets = targets
+        self.factor_sizes = [3, 6, 40, 32, 32]
 
     def __getitem__(self, index):
         # Reshape dataset (channel, height, width)

@@ -37,4 +37,11 @@ class BaseDataset(torch.utils.data.Dataset):
 
         # Sample batch
         batch_index = torch.randint(tmp_targets.size(0), (batch_size,))
-        return tmp_data[batch_index], tmp_targets[batch_index]
+        batch_data = tmp_data[batch_index].float()
+        batch_targets = tmp_targets[batch_index]
+
+        # Expand channel dim
+        if batch_data.dim() == 3:
+            batch_data = batch_data.unsqueeze(1)
+
+        return batch_data, batch_targets
