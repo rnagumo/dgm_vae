@@ -42,13 +42,12 @@ class Cars3dDataset(BaseDataset):
             # Factor label
             targets.append(torch.tensor(_load_factor(i)))
 
-        # Unsqueeze minibatch
-        data = torch.stack(data).view(-1, 64, 64, 3)
-        targets = torch.stack(targets).view(-1, 3)
+        # Unsqueeze and reshape dataset (batch, channel, height, width)
+        self.data = torch.stack(data).view(-1, 64, 64, 3).permute(0, 3, 1, 2)
+        self.targets = torch.stack(targets).view(-1, 3)
 
-        # Reshape dataset (batch, channel, height, width)
-        self.data = data.permute(0, 3, 1, 2)
-        self.targets = targets
+        # Latent size
+        self.factor_sizes = [4, 24, 183]
 
     def __getitem__(self, index):
         # Change dtype uint8 -> float32
