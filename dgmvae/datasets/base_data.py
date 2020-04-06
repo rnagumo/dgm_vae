@@ -1,4 +1,13 @@
 
+"""Dataset class for disentanglement score
+
+BaseDataset
+https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/ground_truth_data.py
+
+SplitDiscreteStateSpace, StateSpaceAtomIndex
+https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/util.py
+"""
+
 import torch
 
 
@@ -51,12 +60,14 @@ class SplitDiscreteStateSpace:
         return len(self.latent_factor_indices)
 
     def sample_latnet_factors(self, num):
+        """Samples a batch of the latent factors."""
         factors = torch.zeros(num, self.num_factors)
         for pos, i in enumerate(self.latent_factor_indices):
             factors[:, pos] = self._sample_factor(i, num)
         return factors
 
     def sample_all_factors(self, latent_factors):
+        """Samples the remaining factors based on the latent factors."""
         num_samples = latent_factors.shape[0]
         all_factors = torch.zeros(num_samples, self.num_factors)
         all_factors[:, self.latent_factor_indices] = latent_factors
@@ -77,15 +88,18 @@ class StateSpaceAtomIndex:
         num_total_atoms = torch.prod(factor_sizes)
 
         self.factor_sizes = factor_sizes
-        self.factor_bases = num_total_atoms / torch.cumprod(factor_sizes)
+        self.factor_bases = num_total_atoms / torch.cumprod(factor_sizes, 0)
 
         ftr_ss_index = self._features_to_state_space_index(features)
-        if torch.unique(ftr_ss_index).size(0) == num_total_atoms:
+        if torch.unique(ftr_ss_index).size(0) != num_total_atoms:
             raise ValueError("Features matrix does not cover the whole "
-                             "state space.")
+                             "state space, {} != {}".format(
+                                 torch.unique(ftr_ss_index).size(0),
+                                 num_total_atoms
+                             ))
 
         lookup_table = torch.zeros(num_total_atoms)
-        lookup_table[ftr_ss_index] = torch.arange(num_total_atoms)
+        lookup_table[ftr_ss_index] = torch.arange(num_total_atoms).float()
         self.state_space_to_save_space_index = lookup_table
 
     def features_to_index(self, features):
@@ -100,5 +114,4 @@ class StateSpaceAtomIndex:
                 or torch.any(features < 0)):
             raise ValueError("Feature indices have to be within "
                              "(0, factor_size-1)")
-
-        return torch.dot(features, self.factor_bases)
+        return torch.matmul(features, self.factor_bases)
