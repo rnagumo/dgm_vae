@@ -44,4 +44,4 @@ class BaseDataset(torch.utils.data.Dataset):
         if batch_data.dim() == 3:
             batch_data = batch_data.unsqueeze(1)
 
-        return batch_data, batch_targets
+        return factor_index, batch_data, batch_targets

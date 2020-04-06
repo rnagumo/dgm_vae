@@ -22,13 +22,15 @@ class TestDSpritesDataset(unittest.TestCase):
         self.assertEqual(data_len, 737280)
 
         # Test sample_fixed_batch
-        batch_data, batch_targets = dataset.sample_fixed_batch(32)
+        factor_index, batch_data, batch_targets \
+            = dataset.sample_fixed_batch(32)
         self.assertTupleEqual(batch_data.size(), (32, 1, 64, 64))
         self.assertTupleEqual(batch_targets.size(), (32, 5))
 
         # Check that only one column in targets has the same value
-        cnt = 0
         for i in range(5):
             tmp = batch_targets[:, i].float()
-            cnt += int(torch.all(tmp == tmp.mean()))
-        self.assertEqual(cnt, 1)
+            if i == factor_index:
+                self.assertTrue(torch.all(tmp == tmp.mean()))
+            else:
+                self.assertFalse(torch.all(tmp == tmp.mean()))
