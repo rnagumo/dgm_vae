@@ -68,3 +68,37 @@ class SplitDiscreteStateSpace:
 
     def _sample_factor(self, i, num):
         return torch.randint(self.factor_sizes[i], size=(num,))
+
+
+class StateSpaceAtomIndex:
+    """Index mapping from features to positions of state space atoms."""
+
+    def __init__(self, factor_sizes, features):
+        num_total_atoms = torch.prod(factor_sizes)
+
+        self.factor_sizes = factor_sizes
+        self.factor_bases = num_total_atoms / torch.cumprod(factor_sizes)
+
+        ftr_ss_index = self._features_to_state_space_index(features)
+        if torch.unique(ftr_ss_index).size(0) == num_total_atoms:
+            raise ValueError("Features matrix does not cover the whole "
+                             "state space.")
+
+        lookup_table = torch.zeros(num_total_atoms)
+        lookup_table[ftr_ss_index] = torch.arange(num_total_atoms)
+        self.state_space_to_save_space_index = lookup_table
+
+    def features_to_index(self, features):
+        state_space_index = self._features_to_state_space_index(features)
+        return self.state_space_to_save_space_index[state_space_index]
+
+    def _features_to_state_space_index(self, features):
+        """Returns the indices in the atom space for given factors
+        configurations.
+        """
+        if (torch.any(features > self.factor_sizes.unsqueeze(0))
+                or torch.any(features < 0)):
+            raise ValueError("Feature indices have to be within "
+                             "(0, factor_size-1)")
+
+        return torch.dot(features, self.factor_bases)
