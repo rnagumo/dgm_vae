@@ -3,9 +3,6 @@
 
 BaseDataset
 https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/ground_truth_data.py
-
-SplitDiscreteStateSpace, StateSpaceAtomIndex
-https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/util.py
 """
 
 import torch
