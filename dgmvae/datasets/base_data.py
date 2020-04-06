@@ -21,11 +21,17 @@ class BaseDataset(torch.utils.data.Dataset):
         self.targets = None
         self.factor_sizes = []
 
-    def sample_fixed_batch(self, batch_size):
-        """Samples batch observations and factors with fixed coordinate."""
+    def sample_factor_index(self):
+        """Samples fixed factor column."""
+        return torch.randint(len(self.factor_sizes), (1,))
 
-        # Select random coordinate to keep fixed
-        factor_index = torch.randint(len(self.factor_sizes), (1,))
+    def sample_fixed_batch(self, batch_size, factor_index=None):
+        """Samples batch observations and factors with fixed coordinate,
+        mainly used for calculating Factor-VAE metrics.
+        """
+
+        if factor_index is None:
+            factor_index = self.sample_factor_index()
 
         # Fixed factor value
         factor_value = torch.randint(self.factor_sizes[factor_index], (1,))
@@ -44,4 +50,27 @@ class BaseDataset(torch.utils.data.Dataset):
         if batch_data.dim() == 3:
             batch_data = batch_data.unsqueeze(1)
 
-        return factor_index, batch_data, batch_targets
+        return batch_data, batch_targets
+
+    def sample_paired_batch(self, batch_size, factor_index=None):
+        """Samples paired batch observations and factors with fixed coordinate,
+        mainly used for calculating beta-VAE metrics.
+        """
+
+        if factor_index is None:
+            factor_index = self.sample_factor_index()
+
+        data = []
+        targets = []
+        for _ in range(batch_size):
+            # Sample paired observations which share the same factor at only
+            # one column
+            _data, _label = self.sample_fixed_batch(2, factor_index)
+            data.append(_data)
+            targets.append(_label)
+
+        # Sample size of (batch_size, 2, c, w, h), (batch_size, 2, latents)
+        data = torch.stack(data)
+        targets = torch.stack(targets)
+
+        return data[:, 0], data[:, 1], targets[:, 0], targets[:, 1]
