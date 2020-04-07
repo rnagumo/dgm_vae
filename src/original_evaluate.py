@@ -25,11 +25,9 @@ def main():
 
     # Path config
     experiment_output_path = pathlib.Path(base_path, experiment_name)
-    module_path = experiment_output_path.joinpath("representation")
+    model_path = experiment_output_path.joinpath("representation")
     result_path = experiment_output_path.joinpath("original_metrics")
-
-    if not result_path.exists():
-        result_path.mkdir()
+    result_path.mkdir()
 
     # Random seed
     torch.manual_seed(0)
@@ -41,8 +39,9 @@ def main():
 
     evaluator = dgm.MetricsEvaluator()
     evaluator.load_dataset(dataset_name, root)
-    evaluator.load_model(module_path.joinpath("pytorch_model.pt"))
+    evaluator.load_model(model_path.joinpath("pytorch_model.pt"))
 
+    # Metrics name and score value name
     evaluation_metrics = {
         "factor_vae_metric": "eval_accuracy",
         "dci": "disentanglement",
@@ -50,6 +49,7 @@ def main():
         "mig": "discrete_mig",
         "irs": "IRS",
     }
+
     final_scores = {}
 
     for metric_name, score_name in evaluation_metrics.items():
