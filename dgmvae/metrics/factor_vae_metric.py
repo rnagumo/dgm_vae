@@ -10,8 +10,8 @@ https://github.com/google-research/disentanglement_lib/blob/master/disentangleme
 import numpy as np
 
 
-def factor_vae_metric(dataset, repr_fn, random_state=0, batch_size=64,
-                      num_train=10000, num_eval=1000, num_var=10000):
+def factor_vae_metric(dataset, repr_fn, batch_size=64, num_train=10000,
+                      num_eval=1000, num_var=10000):
     """Computes factor-VAE metric."""
 
     # Compute global variance
