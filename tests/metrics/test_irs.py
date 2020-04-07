@@ -4,7 +4,7 @@ import dgmvae.metrics as dgm
 from .shared import TestMetricBase
 
 
-class TestBetavaeMetric(TestMetricBase):
+class TestIRSMetric(TestMetricBase):
 
     def test_metric(self):
         scores = dgm.irs(self.dataset, self.repr_fn, num_train=100)
