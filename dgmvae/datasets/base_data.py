@@ -21,6 +21,10 @@ class BaseDataset(torch.utils.data.Dataset):
         self.targets = None
         self.factor_sizes = []
 
+    @property
+    def num_factors(self):
+        return len(self.factor_sizes)
+
     def sample_batch(self, batch_size):
         # Sample data with replacement
         batch_index = torch.randint(self.targets.size(0), (batch_size,))
