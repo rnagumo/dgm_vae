@@ -26,7 +26,7 @@ def main():
     # Path config
     experiment_output_path = pathlib.Path(base_path, experiment_name)
     module_path = experiment_output_path.joinpath("representation")
-    result_path = experiment_output_path.joinpath("metrics")
+    result_path = experiment_output_path.joinpath("original_metrics")
 
     # Random seed
     torch.manual_seed(0)
@@ -65,7 +65,7 @@ def main():
             json.dump(scores_dict, f)
 
     # Save scores
-    with experiment_output_path.joinpath("local_scores.json").open() as f:
+    with result_path.joinpath("local_scores.json").open() as f:
         json.dump(final_scores, f)
 
 
