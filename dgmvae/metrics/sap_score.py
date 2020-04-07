@@ -26,7 +26,7 @@ def sap_score(dataset, repr_fn, batch_size=16, num_points=5000,
 
     # Compute difference of top two score
     scores_dict = {
-        "SAP_score": compute_avg_diff_top_two(score_matrix),
+        "sap_score": compute_avg_diff_top_two(score_matrix),
     }
     return scores_dict
 

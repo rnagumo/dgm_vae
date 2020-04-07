@@ -45,9 +45,9 @@ def main():
     evaluation_metrics = {
         "factor_vae_metric": "eval_accuracy",
         "dci": "disentanglement",
-        "sap_score": "SAP_score",
+        "sap_score": "sap_score",
         "mig": "discrete_mig",
-        "irs": "IRS",
+        "irs": "irs",
     }
 
     final_scores = {}
