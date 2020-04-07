@@ -24,3 +24,12 @@ def generate_repr_factor_batch(dataset, repr_fn, batch_size, num_points):
         factors.append(targets)
 
     return np.vstack(reprs), np.vstack(factors)
+
+
+def discretize_target(target, num_bins):
+    discretized = np.zeros_like(target)
+    for i in range(target.shape[0]):
+        discretized[i] = np.digitize(
+            target[i], np.histogram(target[i], num_bins)[1][:-1])
+
+    return discretized
