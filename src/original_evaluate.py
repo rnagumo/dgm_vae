@@ -64,13 +64,13 @@ def main():
         save_path.mkdir()
 
         # Save json
-        with save_path.joinpath("evaluation_results.json").open() as f:
+        with save_path.joinpath("evaluation_results.json").open("w") as f:
             json.dump(scores_dict, f)
 
         print(metric_name, scores_dict)
 
     # Save scores
-    with result_path.joinpath("local_scores.json").open() as f:
+    with result_path.joinpath("local_scores.json").open("w") as f:
         json.dump(final_scores, f)
 
 
