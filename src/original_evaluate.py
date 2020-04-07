@@ -5,6 +5,9 @@ import json
 import os
 import pathlib
 
+import numpy as np
+import torch
+
 import dgmvae.metrics as dgm
 
 
@@ -24,6 +27,10 @@ def main():
     experiment_output_path = pathlib.Path(base_path, experiment_name)
     module_path = experiment_output_path.joinpath("representation")
     result_path = experiment_output_path.joinpath("metrics")
+
+    # Random seed
+    torch.manual_seed(0)
+    np.random.seed(0)
 
     # -------------------------------------------------------------------------
     # 2. Evaluate
