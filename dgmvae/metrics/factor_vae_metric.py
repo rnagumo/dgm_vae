@@ -53,7 +53,7 @@ def _compute_variance(dataset, repr_fn, num_var):
 
 def _generate_batch(dataset, repr_fn, batch_size, num_points, global_var):
 
-    votes = np.zeros(dataset.num_factors, global_var.shape[0])
+    votes = np.zeros((dataset.num_factors, global_var.shape[0]))
     for _ in range(num_points):
         factor_index, argmin = _generate_sample(
             dataset, repr_fn, batch_size, global_var)
