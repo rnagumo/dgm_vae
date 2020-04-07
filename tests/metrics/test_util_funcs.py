@@ -20,3 +20,15 @@ class TestUtilFuncs(TestMetricBase):
 
         self.assertTupleEqual(discretized.shape, (4, 10))
         self.assertTrue(all(target[0] + 1 == discretized[0]))
+
+    def test_discrete_mutual_info(self):
+        mus = np.random.randn(10, 10)
+        ys = np.random.randn(10, 5)
+
+        self.assertGreater(dgm.discrete_mutual_info(mus, mus).sum(), 0)
+        self.assertGreater(dgm.discrete_mutual_info(mus, ys).sum(), 0)
+
+    def test_discrete_entropy(self):
+        ys = np.random.randn(10, 5)
+
+        self.assertGreater(dgm.discrete_entropy(ys).sum(), 0)
