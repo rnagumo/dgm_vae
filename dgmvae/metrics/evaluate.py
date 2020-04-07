@@ -52,10 +52,10 @@ class MetricsEvaluator:
 
         # Load a model (as torch.jit.ScriptModule or torch.nn.Module)
         try:
-            model = torch.jit.load(path)
+            model = torch.jit.load(str(path))
         except RuntimeError:
             try:
-                model = torch.load(path)
+                model = torch.load(str(path))
             except Exception as e:
                 raise IOError("Could not load file") from e
 
