@@ -22,11 +22,11 @@ def beta_vae_metric(dataset, repr_fn, random_state=0, batch_size=64,
     model.fit(x_train, y_train)
 
     # Evaluate
-    score_dict = {
+    scores_dict = {
         "train_accuracy": model.score(x_train, y_train),
         "eval_accuracy": model.score(x_eval, y_eval),
     }
-    return score_dict
+    return scores_dict
 
 
 def _generate_batch(dataset, repr_fn, batch_size, num_points):
