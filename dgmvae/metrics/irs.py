@@ -20,9 +20,8 @@ def irs(dataset, repr_fn, batch_size=16, num_train=10000, num_bins=20):
     # Discretize true factors
     ys_discrete = discretize_target(ys, num_bins)
 
-    # Drop constant row
-    active_mus = mus[mus.var(1) > 0]
-    ys_discrete = ys_discrete[mus.var(1) > 0]
+    # Drop constant dim
+    active_mus = mus[:, mus.var(0) > 0]
 
     # Compute IRS score
     if not active_mus.any():
@@ -32,7 +31,7 @@ def irs(dataset, repr_fn, batch_size=16, num_train=10000, num_bins=20):
 
     scores_dict = {
         "irs": irs_score,
-        "num_active_dims": np.sum(mus.var(1) > 0),
+        "num_active_dims": np.sum(mus.var(0) > 0),
     }
     return scores_dict
 
