@@ -7,3 +7,4 @@ from .irs import irs
 from .mig import mig
 from .sap_score import sap_score
 from .dci import dci
+from .evaluate import MetricsEvaluator
