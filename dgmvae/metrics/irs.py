@@ -11,11 +11,11 @@ import numpy as np
 from .util_funcs import generate_repr_factor_batch, discretize_target
 
 
-def irs(dataset, repr_fn, batch_size=16, num_train=10000, num_bins=20):
+def irs(dataset, repr_fn, batch_size=16, num_points=10000, num_bins=20):
 
     # Sample dataset
     mus, ys = generate_repr_factor_batch(
-        dataset, repr_fn, batch_size, num_train)
+        dataset, repr_fn, batch_size, num_points)
 
     # Discretize true factors
     ys_discrete = discretize_target(ys, num_bins)
@@ -27,7 +27,7 @@ def irs(dataset, repr_fn, batch_size=16, num_train=10000, num_bins=20):
     if not active_mus.any():
         irs_score = 0.0
     else:
-        irs_score = compute_irs_score(active_mus, ys_discrete)["avg_score"]
+        irs_score = compute_irs_score(ys_discrete, active_mus)["avg_score"]
 
     scores_dict = {
         "irs": irs_score,
@@ -42,6 +42,7 @@ def compute_irs_score(gen_factors, latents, diff_quantile=0.99):
     Args:
         gen_factors: array of shape (num_samples, num_gen_factors)
         latents: array of shape (num_samples, num_latents)
+        diff_quantile: quantile of diffs to select (1.0 in paper)
     """
 
     num_gen = gen_factors.shape[1]
