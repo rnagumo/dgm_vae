@@ -14,4 +14,7 @@ export DATA_ROOT=./${DISENTANGLEMENT_LIB_DATA}/cars/
 export OUTPUT_PATH=./logs/
 export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 
+# Config for training
+export CONFIG_PATH=./src/metric_config.json
+
 python ./src/original_evaluate.py
