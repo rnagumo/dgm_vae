@@ -22,6 +22,7 @@ def main():
     dataset_name = os.getenv("DATASET_NAME", "cars3d")
     experiment_name = os.getenv("EVALUATION_NAME", "tmp")
     root = os.getenv("DATA_ROOT", "./data/cars/")
+    config_path = os.getenv("CONFIG_PATH", "./src/metric_config.json")
 
     # Path config
     experiment_output_path = pathlib.Path(base_path, experiment_name)
@@ -37,7 +38,12 @@ def main():
     # 2. Evaluate
     # -------------------------------------------------------------------------
 
-    evaluator = dgm.MetricsEvaluator()
+    # Load metrics config
+    with pathlib.Path(config_path).open() as f:
+        config = json.load(f)
+
+    # Set evaluator
+    evaluator = dgm.MetricsEvaluator(config)
     evaluator.load_dataset(dataset_name, root)
     evaluator.load_model(model_path.joinpath("pytorch_model.pt"))
 

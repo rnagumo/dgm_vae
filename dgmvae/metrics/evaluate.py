@@ -21,9 +21,11 @@ from ..metrics.dci import dci
 
 class MetricsEvaluator:
 
-    def __init__(self):
+    def __init__(self, config=None):
         self.dataset = None
         self.model = None
+        self.config = config
+
         self.metric_dict = {
             "beta_vae_metric": beta_vae_metric,
             "factor_vae_metric": factor_vae_metric,
@@ -69,4 +71,10 @@ class MetricsEvaluator:
         if self.dataset is None or self.model is None:
             raise ValueError("Load dataset and model before computing metric")
 
-        return self.metric_dict[metric_name](self.dataset, self.repr_fn)
+        if (self.config is not None) and (metric_name in self.config):
+            kwargs = self.config[metric_name]
+        else:
+            kwargs = {}
+
+        return self.metric_dict[metric_name](
+                   self.dataset, self.repr_fn, **kwargs)

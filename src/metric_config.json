@@ -1,0 +1,35 @@
+{
+    "beta_vae_metric": {
+        "random_state": 0,
+        "batch_size": 64,
+        "num_train": 10000,
+        "num_eval": 5000
+    },
+    "dci": {
+        "batch_size": 16,
+        "num_train": 10000,
+        "num_test": 5000
+    },
+    "factor_vae_metric": {
+        "batch_size": 64,
+        "num_train": 10000,
+        "num_eval": 5000,
+        "num_var": 10000,
+        "th_var": 0.05
+    },
+    "irs": {
+        "batch_size": 16,
+        "num_points": 10000,
+        "num_bins": 20
+    },
+    "mig": {
+        "batch_size": 16,
+        "num_train": 10000,
+        "num_bins": 20
+    },
+    "sap_score": {
+        "batch_size": 16,
+        "num_points": 5000,
+        "continuous": false
+    }
+}
