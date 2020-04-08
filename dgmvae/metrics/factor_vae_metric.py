@@ -11,7 +11,7 @@ import numpy as np
 
 
 def factor_vae_metric(dataset, repr_fn, batch_size=64, num_train=10000,
-                      num_eval=1000, num_var=10000):
+                      num_eval=5000, num_var=10000):
     """Computes factor-VAE metric."""
 
     # Compute global variance
