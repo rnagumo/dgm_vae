@@ -51,7 +51,7 @@ class VAEUpdater(pl.LightningModule):
         return results
 
     def configure_optimizers(self):
-        optims = [torch.optim.Adam(self.model.parameters())]
+        optims = [torch.optim.Adam(self.model.parameters(), lr=0.0001)]
         if self.model.second_optim is not None:
             optims.append(self.model.second_optim)
         return optims
