@@ -19,4 +19,4 @@ class TestMetricBase(unittest.TestCase):
         self.dataset.factor_sizes = factor_sizes
 
         # Representation fn
-        self.repr_fn = lambda x: torch.ones(x.size(0), 10) * x.mean()
+        self.repr_fn = lambda x: torch.rand(x.size(0), 10) * x.mean()
