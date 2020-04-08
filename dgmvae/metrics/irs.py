@@ -27,7 +27,7 @@ def irs(dataset, repr_fn, batch_size=16, num_train=10000, num_bins=20):
     if not active_mus.any():
         irs_score = 0.0
     else:
-        irs_score = compute_irs_score(active_mus, ys_discrete)["avg_score"]
+        irs_score = compute_irs_score(ys_discrete, active_mus)["avg_score"]
 
     scores_dict = {
         "irs": irs_score,
