@@ -32,8 +32,8 @@ class Encoder(pxd.Normal):
         h = h.view(-1, 1024)
         h = F.relu(self.fc1(h))
         loc = self.fc21(h)
-        scale = F.softplus(self.fc22(h))
-        return {"loc": loc, "scale": scale}
+        logvar = F.softplus(self.fc22(h))
+        return {"loc": loc, "scale": torch.exp(0.5 * logvar)}
 
 
 class Decoder(pxd.Bernoulli):
