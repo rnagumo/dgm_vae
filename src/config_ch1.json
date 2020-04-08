@@ -9,7 +9,12 @@
         "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
-        "gamma": 100
+        "gamma": 100,
+        "optimizer_params": {
+            "lr": 0.0001,
+            "beta1": 0.5,
+            "beta2": 0.9
+        }
     },
     "dipi_params": {
         "channel_num": 1,

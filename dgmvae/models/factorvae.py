@@ -50,10 +50,20 @@ class FactorVAE(BaseVAE):
         self.beta = pxl.Parameter("beta")
         self.gamma = pxl.Parameter("gamma")
 
+        # Adversarial optimizer settings
+        if "optimizer_params" in kwargs:
+            optimizer_params = {
+                "lr": kwargs["lr"],
+                "betas": (kwargs["beta1"], kwargs["beta2"]),
+            }
+        else:
+            optimizer_params = {}
+
         # Adversarial loss (Total Correlation)
         self.disc = Discriminator(z_dim)
         self.adv_js = pxl.AdversarialKullbackLeibler(
-            self.encoder, self.encoder_shf, self.disc)
+            self.encoder, self.encoder_shf, self.disc,
+            optimizer_params=optimizer_params)
 
     def encode(self, x, mean=False, **kwargs):
         if not isinstance(x, dict):
