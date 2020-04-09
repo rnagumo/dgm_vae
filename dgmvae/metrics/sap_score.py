@@ -1,5 +1,5 @@
 
-"""Implementation of the SAP score.
+"""Implementation of the SAP (Separated Attribute Predictability) score.
 
 Based on "Variational Inference of Disentangled Latent Concepts from Unlabeled
 Observations" (https://openreview.net/forum?id=H1kG7GZAW), Section 3.
@@ -16,6 +16,20 @@ from .util_funcs import generate_repr_factor_batch
 
 def sap_score(dataset, repr_fn, batch_size=16, num_points=5000,
               continuous=False):
+    """Computes SAP (Separated Attribute Predictability) score.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn: Function that takes observation as input and outputs a
+            representation.
+        batch_size (int, optional): Batch size to sample points.
+        num_points (int, optional): Number of samples.
+        continuous (bool, optional): Boolean flag which specifies that latent
+            variables are continuous or not.
+
+    Returns:
+        scores_dict (dict): Dictionary including metric score.
+    """
 
     # Sample data
     mus, ys = generate_repr_factor_batch(

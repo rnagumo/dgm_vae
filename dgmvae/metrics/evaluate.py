@@ -36,6 +36,7 @@ class MetricsEvaluator:
         }
 
     def load_dataset(self, dataset_name, root):
+        """Loads dataset of specified name."""
 
         if dataset_name == "mnist":
             _transform = transforms.Compose([
@@ -50,7 +51,11 @@ class MetricsEvaluator:
             raise KeyError(f"Unexpected dataset is specified: {dataset_name}")
 
     def load_model(self, path):
-        """Load pre-trained model."""
+        """Loads pre-trained model.
+
+        Args:
+            path (str or pathlib.Path): Path to dataset.
+        """
 
         # Load a model (as torch.jit.ScriptModule or torch.nn.Module)
         try:
@@ -64,10 +69,24 @@ class MetricsEvaluator:
         self.model = model.cpu()
 
     def repr_fn(self, x):
+        """Representation function that takes observation as input and outputs
+        a representation.
+
+        Args:
+            x (torch.tensor): Observations tensor.
+
+        Returns:
+            reprs (torch.tensor): Representations tensor.
+        """
         with torch.no_grad():
             return self.model(x)
 
     def compute_metric(self, metric_name):
+        """Computes metric.
+
+        Args:
+            metric_name (str): Metric name in metric_dict.
+        """
         if self.dataset is None or self.model is None:
             raise ValueError("Load dataset and model before computing metric")
 

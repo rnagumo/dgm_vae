@@ -12,7 +12,21 @@ import numpy as np
 
 def factor_vae_metric(dataset, repr_fn, batch_size=64, num_train=10000,
                       num_eval=5000, num_var=10000, th_var=0.05):
-    """Computes factor-VAE metric."""
+    """Computes factor-VAE metric.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn: Function that takes observation as input and outputs a
+            representation.
+        batch_size (int, optional): Batch size to sample points.
+        num_train (int, optional): Number of training data.
+        num_eval (int, optional): Number of validation data.
+        num_var (int, optional): Number of data for computing global variance.
+        th_var (float, optional): Threshold for variance.
+
+    Returns:
+        scores_dict (dict): Dictionary including metric score.
+    """
 
     # Compute global variance
     global_var = _compute_variance(dataset, repr_fn, num_var)

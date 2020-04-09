@@ -13,6 +13,19 @@ from .util_funcs import generate_repr_factor_batch
 
 
 def dci(dataset, repr_fn, batch_size=16, num_train=10000, num_test=5000):
+    """Computes Disentanglement, Completeness and Informativeness.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn: Function that takes observation as input and outputs a
+            representation.
+        batch_size (int, optional): Batch size to sample points.
+        num_train (int, optional): Number of training data.
+        num_test (int, optional): Number of validation data.
+
+    Returns:
+        scores_dict (dict): Dictionary including metric score.
+    """
 
     # Sample data
     mus_train, ys_train = generate_repr_factor_batch(

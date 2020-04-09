@@ -11,7 +11,20 @@ from sklearn import linear_model as lm
 
 def beta_vae_metric(dataset, repr_fn, random_state=0, batch_size=64,
                     num_train=10000, num_eval=5000):
-    """Compute beta-VAE metric with sklearn."""
+    """Computes beta-VAE metric with sklearn.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn: Function that takes observation as input and outputs a
+            representation.
+        random_state (int, optional): Random seed for LogisticRegression model.
+        batch_size (int, optional): Batch size to sample points.
+        num_train (int, optional): Number of training data.
+        num_eval (int, optional): Number of validation data.
+
+    Returns:
+        scores_dict (dict): Dictionary including metric score.
+    """
 
     # Sample data
     x_train, y_train = _generate_batch(dataset, repr_fn, batch_size, num_train)

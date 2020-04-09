@@ -12,6 +12,19 @@ from .util_funcs import generate_repr_factor_batch, discretize_target
 
 
 def irs(dataset, repr_fn, batch_size=16, num_points=10000, num_bins=20):
+    """Interventional Robustness Score.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn: Function that takes observation as input and outputs a
+            representation.
+        batch_size (int, optional): Batch size to sample points.
+        num_points (int, optional): Number of samples.
+        num_bins (int, optional): Number of bins for discretization.
+
+    Returns:
+        scores_dict (dict): Dictionary including metric score.
+    """
 
     # Sample dataset
     mus, ys = generate_repr_factor_batch(
@@ -40,9 +53,13 @@ def compute_irs_score(gen_factors, latents, diff_quantile=0.99):
     """Computes IRS (Interventional Robustness Score) score given dataset.
 
     Args:
-        gen_factors: array of shape (num_samples, num_gen_factors)
-        latents: array of shape (num_samples, num_latents)
-        diff_quantile: quantile of diffs to select (1.0 in paper)
+        gen_factors (np.array): array of shape (num_samples, num_gen_factors)
+        latents (np.array): array of shape (num_samples, num_latents)
+        diff_quantile (float, optional): quantile of diffs to select (1.0 in
+            paper).
+
+    Returns:
+        scores_dict (dict): Metrics dict.
     """
 
     num_gen = gen_factors.shape[1]
