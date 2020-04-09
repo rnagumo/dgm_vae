@@ -28,7 +28,7 @@ def main():
     experiment_output_path = pathlib.Path(base_path, experiment_name)
     model_path = experiment_output_path.joinpath("representation")
     result_path = experiment_output_path.joinpath("original_metrics")
-    result_path.mkdir()
+    result_path.mkdir(exist_ok=True)
 
     # Random seed
     torch.manual_seed(0)
