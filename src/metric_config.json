@@ -24,7 +24,7 @@
     },
     "mig": {
         "batch_size": 16,
-        "num_train": 10000,
+        "num_points": 10000,
         "num_bins": 20
     },
     "sap_score": {
