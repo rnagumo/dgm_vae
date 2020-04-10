@@ -59,6 +59,8 @@ def main():
     final_scores = {}
 
     for metric_name, score_name in evaluation_metrics.items():
+        print(metric_name)
+
         # Compute metric
         scores_dict = evaluator.compute_metric(metric_name)
 
