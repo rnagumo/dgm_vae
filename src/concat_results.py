@@ -27,10 +27,7 @@ def concat_dis_lib(save_dir):
     }
 
     # Results data frame
-    results = {
-        "metric": [],
-        "value": [],
-    }
+    results = {k: [] for k in evaluation_metrics}
 
     for metric, value_name in evaluation_metrics.items():
         # Glob pattern
@@ -42,8 +39,7 @@ def concat_dis_lib(save_dir):
             with path.open() as f:
                 d = json.load(f)
 
-            results["metric"].append(metric)
-            results["value"].append(d[value_name])
+            results[metric].append(d[value_name])
 
     # Save results
     save_dir = pathlib.Path(save_dir)
@@ -51,8 +47,7 @@ def concat_dis_lib(save_dir):
         save_dir.mkdir()
 
     df = pd.DataFrame(results)
-    df.index.name = "exp"
-    df.to_csv(save_dir.joinpath("dislib_results.csv"))
+    df.to_csv(save_dir.joinpath("dislib_results.csv"), index=None)
 
 
 if __name__ == "__main__":
