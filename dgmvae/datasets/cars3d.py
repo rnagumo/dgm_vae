@@ -10,11 +10,24 @@ from PIL import Image
 
 import numpy as np
 import scipy.io as sio
-
 import torch
 
+from .base_data import BaseDataset
 
-class Cars3dDataset(torch.utils.data.Dataset):
+
+class Cars3dDataset(BaseDataset):
+    """Cars3D data set.
+
+    The data set was first used in the paper "Deep Visual Analogy-Making"
+    (https://papers.nips.cc/paper/5845-deep-visual-analogy-making) and can be
+    downloaded from http://www.scottreed.info/. The images are rescaled to
+    64x64.
+
+    The ground-truth factors of variation are:
+    0 - elevation (4 different values)
+    1 - azimuth (24 different values)
+    2 - object type (183 different values)
+    """
 
     def __init__(self, root):
         super().__init__()
@@ -29,13 +42,12 @@ class Cars3dDataset(torch.utils.data.Dataset):
             # Factor label
             targets.append(torch.tensor(_load_factor(i)))
 
-        # Unsqueeze minibatch
-        data = torch.stack(data).view(-1, 64, 64, 3)
-        targets = torch.stack(targets).view(-1, 3)
+        # Unsqueeze and reshape dataset (batch, channel, height, width)
+        self.data = torch.stack(data).view(-1, 64, 64, 3).permute(0, 3, 1, 2)
+        self.targets = torch.stack(targets).view(-1, 3)
 
-        # Reshape dataset (batch, channel, height, width)
-        self.data = data.permute(0, 3, 1, 2)
-        self.targets = targets
+        # Latent size
+        self.factor_sizes = [4, 24, 183]
 
     def __getitem__(self, index):
         # Change dtype uint8 -> float32

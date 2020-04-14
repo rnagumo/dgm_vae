@@ -20,6 +20,8 @@ class TestJointVAE(unittest.TestCase):
             "temperature": 1,
             "gamma_z": 1,
             "gamma_c": 1,
+            "cap_z": 1,
+            "cap_c": 1,
         }
         self.model = dgm.JointVAE(**params)
 

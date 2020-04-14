@@ -10,8 +10,23 @@ import pathlib
 import numpy as np
 import torch
 
+from .base_data import BaseDataset
 
-class DSpritesDataset(torch.utils.data.Dataset):
+
+class DSpritesDataset(BaseDataset):
+    """DSprites dataset.
+
+    The data set was originally introduced in "beta-VAE: Learning Basic Visual
+    Concepts with a Constrained Variational Framework" and can be downloaded
+    from https://github.com/deepmind/dsprites-dataset.
+
+    The ground-truth factors of variation are (in the default setting):
+    0 - shape (3 different values)
+    1 - scale (6 different values)
+    2 - orientation (40 different values)
+    3 - position x (32 different values)
+    4 - position y (32 different values)
+    """
 
     def __init__(self, root, filename=None):
         super().__init__()
@@ -22,10 +37,11 @@ class DSpritesDataset(torch.utils.data.Dataset):
         path = pathlib.Path(root, filename)
         with np.load(path, encoding="latin1", allow_pickle=True) as dataset:
             data = torch.tensor(dataset["imgs"])
-            targets = torch.tensor(dataset["latents_classes"])
+            targets = torch.tensor(dataset["latents_classes"][:, 1:])
 
         self.data = data
         self.targets = targets
+        self.factor_sizes = [3, 6, 40, 32, 32]
 
     def __getitem__(self, index):
         # Reshape dataset (channel, height, width)
