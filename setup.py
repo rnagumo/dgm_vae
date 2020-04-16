@@ -11,8 +11,8 @@ install_requires = [
     "numpy==1.18.1",
     "tensorflow==1.14.0",
     "tensorflow-probability==0.7.0",
-    "scikit-learn=0.22.2",
-    "pandas=1.0.1",
+    "scikit-learn==0.22.2",
+    "pandas==1.0.1",
 ]
 
 
