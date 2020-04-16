@@ -53,8 +53,9 @@ class FactorVAE(BaseVAE):
         # Adversarial optimizer settings
         if "optimizer_params" in kwargs:
             optimizer_params = {
-                "lr": kwargs["lr"],
-                "betas": (kwargs["beta1"], kwargs["beta2"]),
+                "lr": kwargs["optimizer_params"]["lr"],
+                "betas": (kwargs["optimizer_params"]["beta1"],
+                          kwargs["optimizer_params"]["beta2"]),
             }
         else:
             optimizer_params = {}
