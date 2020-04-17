@@ -13,7 +13,6 @@ install_requires = [
     "tensorflow-probability==0.7.0",
     "scikit-learn==0.22.2",
     "pandas==1.0.1",
-    "h5py==2.10.0",
 ]
 
 
