@@ -1,10 +1,19 @@
 
 """Downloads Zip files from google storage.
 
+Check experimental condition and numbering with disentanglement_lib.
+
+```bash
+dlib_reproduce --model_num=<?> --only_print
+```
+
+Experimental settings are sweeped by this script.
+https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/config/unsupervised_study_v1/sweep.py
+
 ref)
 https://github.com/google-research/disentanglement_lib
 
-Request library: Raw Response Content
+Requests library: Raw Response Content
 https://requests.readthedocs.io/en/master/user/quickstart/#raw-response-content
 """
 
@@ -27,7 +36,7 @@ def main():
     parser = argparse.ArgumentParser(description="Download pretrained models")
     parser.add_argument("--exp_num", type=int, default=0,
                         help="Experiment number")
-    parser.add_argument("--seed_num", type=int, default=0,
+    parser.add_argument("--seed_num", type=int, default=50,
                         help="Number of random seed")
     args = parser.parse_args()
 
