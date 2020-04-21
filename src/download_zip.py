@@ -19,6 +19,7 @@ https://requests.readthedocs.io/en/master/user/quickstart/#raw-response-content
 
 import argparse
 import pathlib
+import zipfile
 
 import requests
 import tqdm
@@ -52,6 +53,10 @@ def main():
     # Download all data
     for n in tqdm.tqdm(range(args.exp_num, args.exp_num + args.seed_num)):
         download_data(url.format(n), path.joinpath(f"{n}.zip"))
+
+        # Unzip
+        with zipfile.ZipFile(path.joinpath(f"{n}.zip")) as f:
+            f.extractall(path)
 
 
 if __name__ == "__main__":
