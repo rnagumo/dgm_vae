@@ -20,7 +20,7 @@
         "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
-        "c": 1,
+        "c": 0,
         "lmd_od": 50,
         "lmd_d": 500,
         "dip_type": "i"
@@ -29,7 +29,7 @@
         "channel_num": 1,
         "z_dim": 10,
         "beta": 1,
-        "c": 1,
+        "c": 0,
         "lmd_od": 50,
         "lmd_d": 50,
         "dip_type": "ii"
