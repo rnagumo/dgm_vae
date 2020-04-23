@@ -85,7 +85,7 @@ class TCVAE(BaseVAE):
         log_qz_x = self.encoder.get_log_prob(x_dict)
 
         # Minibatch Weighted Sampling
-        # log q(z) size of (z_batch_size, x_batch_size, z_dim)
+        # log q(z), size of (z_batch_size, x_batch_size, z_dim)
         x_dict_tmp = {"x": x_dict["x"], "z": x_dict["z"].unsqueeze(1)}
         _logqz = self.encoder.get_log_prob(x_dict_tmp, sum_features=False)
 
@@ -94,7 +94,7 @@ class TCVAE(BaseVAE):
         batch_size = x_dict["x"].size(0)
         lognm = math.log(dataset_size * batch_size)
 
-        # log \prod q(z_j)
+        # log prod_j q(z_j) = sum_j log q(z_j)
         log_qz_prodmarginal = (torch.logsumexp(_logqz, 1) - lognm).sum(1)
 
         # log q(z)
@@ -105,11 +105,19 @@ class TCVAE(BaseVAE):
         beta = self.beta.eval(x_dict)
         gamma = self.gamma.eval(x_dict)
 
-        # Calculate ELBO loss
+        # Reconstruction
         recon = -log_px.mean()
+
+        # Index-Code MI: KL(q(z|x)||q(z))
         mutual_info = alpha * (log_qz_x - log_qz).mean()
+
+        # Total Correlation: KL(q(z)||prod_j q(z_j))
         independence = beta * (log_qz - log_qz_prodmarginal).mean()
+
+        # Dimension-wise KL: sum_j KL(q(z_j)||p(z_j))
         dim_wise_kl = gamma * (log_qz_prodmarginal - log_pz).mean()
+
+        # ELBO loss
         loss = recon + mutual_info + independence + dim_wise_kl
 
         loss_dict = {"loss": loss, "recon": recon, "mutual_info": mutual_info,
