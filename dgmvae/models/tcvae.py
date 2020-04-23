@@ -95,7 +95,7 @@ class TCVAE(BaseVAE):
         lognm = math.log(dataset_size * batch_size)
 
         # log prod_j q(z_j) = sum_j log q(z_j)
-        log_qz_prodmarginal = (torch.logsumexp(_logqz, 1) - lognm).sum(1)
+        log_qz_prodmarginal = torch.logsumexp(_logqz, 1).sum(1) - lognm
 
         # log q(z)
         log_qz = torch.logsumexp(_logqz.sum(2), 1) - lognm
