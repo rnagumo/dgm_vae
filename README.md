@@ -5,11 +5,68 @@ Deep Generative Model: Variational Auto-Encoder
 
 # Requirements
 
-* PyTorch >= 1.4.0 ([Official](https://pytorch.org/))
-* Torchvision >= 0.5.0 ([GitHub](https://github.com/pytorch/vision))
-* PyTorch Lightning >= 0.7.0 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
-* Pixyz >= 0.1.4 ([GitHub](https://github.com/masa-su/pixyz))
+* Python == 3.7
+* PyTorch == 1.4.0 ([Official](https://pytorch.org/))
+* Torchvision == 0.5.0 ([GitHub](https://github.com/pytorch/vision))
+* PyTorch Lightning == 0.7.1 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
+* Pixyz == 0.1.4 ([GitHub](https://github.com/masa-su/pixyz))
 * disentanglement_lib == 1.4 ([GitHub](https://github.com/google-research/disentanglement_lib))
+* numpy == 1.18.1
+* tensorflow == 1.14.0
+* tensorflow-probability == 0.7.0
+* scikit-learn == 0.22.2
+* pandas == 1.0.1
+
+# How to use
+
+## Set up environments
+
+Clone repository and make environments.
+
+```bash
+git clone https://github.com/rnagumo/dgmvae.git
+cd dgmvae
+```
+
+Install package in virtual env.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install .
+```
+
+Or run docker file. This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
+
+```bash
+# Option
+docker build -t dgmvae .
+docker run -it dgmvae bash
+```
+
+## Prepare dataset
+
+Download dataset ([dSprites](https://github.com/deepmind/dsprites-dataset/), [mpi3d_toy](https://github.com/rr-learning/disentanglement_dataset), or [cars3d](http://www.scottreed.info/)).
+
+```bash
+bash bin/download.sh
+```
+
+## Run experiment
+
+Training and evaluation.
+
+```bash
+bash bin/run_cars3d.sh
+```
+
+Evaluation with original metrics (run on CPU).
+
+```bash
+bash bin//eval_cars3d.sh
+```
+
+For detail, please check shell scripts in bin folder.
 
 # Reference
 

@@ -64,7 +64,7 @@ def _load_mesh(path):
     rescaled_mesh = np.zeros((flattened_mesh.shape[0], 64, 64, 3))
     for i in range(flattened_mesh.shape[0]):
         pic = Image.fromarray(flattened_mesh[i])
-        pic.thumbnail((64, 64, 3), Image.ANTIALIAS)
+        pic.thumbnail((64, 64), Image.ANTIALIAS)
         rescaled_mesh[i] = np.array(pic)
     return rescaled_mesh * 1. / 255
 

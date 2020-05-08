@@ -1,6 +1,4 @@
 
-# https://github.com/pfnet-research/chainer-disentanglement-lib/blob/master/bin/download_dataset.sh
-
 export DISENTANGLEMENT_LIB_DATA=./data/
 
 if [ ! -d ${DISENTANGLEMENT_LIB_DATA} ]; then
