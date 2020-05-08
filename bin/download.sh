@@ -2,6 +2,11 @@
 # https://github.com/pfnet-research/chainer-disentanglement-lib/blob/master/bin/download_dataset.sh
 
 export DISENTANGLEMENT_LIB_DATA=./data/
+
+if [ ! -d ${DISENTANGLEMENT_LIB_DATA} ]; then
+  echo "Make data directory."
+  mkdir ${DISENTANGLEMENT_LIB_DATA}
+fi
 cd ${DISENTANGLEMENT_LIB_DATA}
 
 echo "Check dSprites"
