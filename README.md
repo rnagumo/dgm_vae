@@ -72,17 +72,17 @@ For detail, please check shell scripts in bin folder.
 
 VAE model included in disentanglement_lib are trained with the same setteings. Pre-trained models (TF models) are downloaded from disentanglement_lib. Although pre-trained models are tested with 50 different random seeds, my experiments are tested with 10 or 5 random seeds due to the lack of GPUs.
 
-|model|Quantitative comparison|
-|:-:|:-:|
-|BetaVAE|![beta_vae_tf_compare](./images/betavae.png)|
-|FactorVAE|![factor_vae_tf_compare](./images/factorvae.png)|
-|DIPVAE-1|![dip_vae1_tf_compare](./images/dipvae1.png)|
-|DIPVAE-2|![dip_vae2_tf_compare](./images/dipvae2.png)|
-|TC-VAE|![tc_vae_tf_compare](./images/tcvae.png)|
+|Model|Ours|disentanglement_lib|
+|:-:|:-:|:-:|
+|BetaVAE|![beta_vae](./images/betavae.png)|![beta_vae_tf](./images/betavae_tf.png)|
+|FactorVAE|![factor_vae](./images/factorvae.png)|![factor_vae_tf](./images/factorvae_tf.png)|
+|DIPVAE-1|![dip_vae1](./images/dipvae1.png)|![dip_vae1_tf](./images/dipvae1_tf.png)|
+|DIPVAE-2|![dip_vae2](./images/dipvae2.png)|![dip_vae2_tf](./images/dipvae2_tf.png)|
+|TC-VAE|![tc_vae](./images/tcvae.png)|![tc_vae_tf](./images/tcvae_tf.png)|
 
 Other models not in disentanglement_lib are also trained and evaluated.
 
-|model|Quantitative evaluation|
+|Model|Quantitative evaluation|
 |:-:|:-:|
 |JointVAE|![joint_vae](./images/jointvae.png)|
 |AAE|![aae](./images/aae.png)|
@@ -90,9 +90,9 @@ Other models not in disentanglement_lib are also trained and evaluated.
 
 I tested original codes for disentanglement metrics. The following figure shows the comparison of (tf-model, disentanglement_lib metrics), (pixyz-model, disentanglement_lib metrics), and (pixyz-model, original metrics). This figure shows that my implementation seems correct.
 
-|model|Quantitative evaluation|
-|:-:|:-:|
-|BetaVAE|![beta_vae_metrics](./images/betavae_compare.png)|
+|Model|Original metrics|disentanglement_lib|
+|:-:|:-:|:-:|
+|BetaVAE|![metrics_org](./images/metrics_org.png)|![metrics_dlib](./images/metrics_dlib.png)|
 
 # Reference
 
