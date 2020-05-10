@@ -68,6 +68,32 @@ bash bin//eval_cars3d.sh
 
 For detail, please check shell scripts in bin folder.
 
+# Experimental Results
+
+VAE model included in disentanglement_lib are trained with the same setteings. Pre-trained models (TF models) are downloaded from disentanglement_lib. Although pre-trained models are tested with 50 different random seeds, my experiments are tested with 10 or 5 random seeds due to the lack of GPUs.
+
+|model|Quantitative comparison|
+|:-:|:-:|
+|BetaVAE|![beta_vae_tf_compare](./images/betavae.png)|
+|FactorVAE|![factor_vae_tf_compare](./images/factorvae.png)|
+|DIPVAE-1|![dip_vae1_tf_compare](./images/dipvae1.png)|
+|DIPVAE-2|![dip_vae2_tf_compare](./images/dipvae2.png)|
+|TC-VAE|![tc_vae_tf_compare](./images/tcvae.png)|
+
+Other models not in disentanglement_lib are also trained and evaluated.
+
+|model|Quantitative evaluation|
+|:-:|:-:|
+|JointVAE|![joint_vae](./images/jointvae.png)|
+|AAE|![aae](./images/aae.png)|
+|AVB|![avb](./images/avb.png)|
+
+I tested original codes for disentanglement metrics. The following figure shows the comparison of (tf-model, disentanglement_lib metrics), (pixyz-model, disentanglement_lib metrics), and (pixyz-model, original metrics). This figure shows that my implementation seems correct.
+
+|model|Quantitative evaluation|
+|:-:|:-:|
+|BetaVAE|![beta_vae_metrics](./images/betavae_compare.png)|
+
 # Reference
 
 * Preferred Networks: [Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
