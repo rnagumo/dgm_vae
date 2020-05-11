@@ -1,4 +1,7 @@
 
+# Run training for cars3d (3-ch image).
+# $ bash bin/run_cars3d.sh <model name> <random seed>
+
 # Specify model name
 export MODEL_NAME=${1:-beta}
 

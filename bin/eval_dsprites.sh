@@ -1,4 +1,7 @@
 
+# Run training for dSprites (1-ch image).
+# $ bash bin/eval_dsprites.sh <model name> <random seed>
+
 # Specify model name
 export MODEL_NAME=${1:-beta}
 

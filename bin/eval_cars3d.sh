@@ -1,4 +1,7 @@
 
+# Run evaluation for cars3d (3-ch image).
+# $ bash bin/eval_cars3d.sh <model name> <random seed>
+
 # Specify model name
 export MODEL_NAME=${1:-beta}
 
