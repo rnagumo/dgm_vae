@@ -16,6 +16,7 @@ Deep Generative Model: Variational Auto-Encoder
 * tensorflow-probability == 0.7.0
 * scikit-learn == 0.22.2
 * pandas == 1.0.1
+* Pillow == 6.0.0 (disentanglement_lib requires old Pillow library.)
 
 # How to use
 
@@ -36,10 +37,9 @@ source .venv/bin/activate
 pip install .
 ```
 
-Or run docker file. This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
+Or run Docker file ([doc](https://docs.docker.com/get-docker/)). This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
 
 ```bash
-# Option
 docker build -t dgmvae .
 docker run -it dgmvae bash
 ```
