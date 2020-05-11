@@ -54,7 +54,7 @@ bash bin/download.sh
 
 ## Run experiment
 
-Training and evaluation.
+Training and evaluation. Shell scripts in `bin` folder contains the necessary settings for building the environment.
 
 ```bash
 bash bin/run_cars3d.sh
@@ -63,10 +63,8 @@ bash bin/run_cars3d.sh
 Evaluation with original metrics (run on CPU).
 
 ```bash
-bash bin//eval_cars3d.sh
+bash bin/eval_cars3d.sh
 ```
-
-For detail, please check shell scripts in bin folder.
 
 # Experimental Results
 
