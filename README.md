@@ -22,7 +22,7 @@ Deep Generative Model: Variational Auto-Encoder
 
 ## Set up environments
 
-Clone repository and make environments.
+Clone repository.
 
 ```bash
 git clone https://github.com/rnagumo/dgmvae.git
@@ -37,16 +37,19 @@ source .venv/bin/activate
 pip install .
 ```
 
-Or run Docker file ([doc](https://docs.docker.com/get-docker/)). This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
+Or use [Docker](https://docs.docker.com/get-docker/) and [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker). This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
 
 ```bash
 docker build -t dgmvae .
 docker run -it dgmvae bash
+
+# Run container with GPUs if you use Docker 19.03
+docker run --gpus all -it dgmvae bash
 ```
 
 ## Prepare dataset
 
-Download dataset ([dSprites](https://github.com/deepmind/dsprites-dataset/), [mpi3d_toy](https://github.com/rr-learning/disentanglement_dataset), or [cars3d](http://www.scottreed.info/)).
+Download dataset ([dSprites](https://github.com/deepmind/dsprites-dataset/), [mpi3d_toy](https://github.com/rr-learning/disentanglement_dataset), or [cars3d](http://www.scottreed.info/)) in the data folder.
 
 ```bash
 bash bin/download.sh
@@ -57,13 +60,21 @@ bash bin/download.sh
 Training and evaluation. Shell scripts in `bin` folder contains the necessary settings for building the environment.
 
 ```bash
-bash bin/run_cars3d.sh
+# Usage
+bash bin/run_cars3d.sh <model-name> <random-seed>
+
+# Example
+bash bin/run_cars3d.sh beta 0
 ```
 
 Evaluation with original metrics (run on CPU).
 
 ```bash
-bash bin/eval_cars3d.sh
+# Usage
+bash bin/eval_cars3d.sh <model-name> <random-seed>
+
+# Example
+bash bin/eval_cars3d.sh beta 0
 ```
 
 # Experimental Results
