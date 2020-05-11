@@ -31,3 +31,6 @@ COPY ./setup.py ./setup.py
 
 # Install package
 RUN pip3 install . && rm -rf /root/.cache
+
+# Install old pillow library
+RUN pip3 install Pillow==6.0.0 && rm -rf /root/.cache
