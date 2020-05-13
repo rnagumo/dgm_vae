@@ -29,7 +29,7 @@ git clone https://github.com/rnagumo/dgmvae.git
 cd dgmvae
 ```
 
-Install package in virtual env.
+Install the package in virtual env.
 
 ```bash
 python3 -m venv .venv
@@ -42,8 +42,11 @@ Or use [Docker](https://docs.docker.com/get-docker/) and [NVIDIA Container Toolk
 ```bash
 docker build -t dgmvae .
 docker run -it dgmvae bash
+```
 
-# Run container with GPUs if you use Docker 19.03
+You can run container with GPUs by Docker 19.03.
+
+```bash
 docker run --gpus all -it dgmvae bash
 ```
 
@@ -91,15 +94,15 @@ VAE model included in disentanglement_lib are trained with the same setteings. P
 
 Other models not in disentanglement_lib are also trained and evaluated.
 
-|Model|Quantitative evaluation|
+|Model|Ours|
 |:-:|:-:|
 |JointVAE|![joint_vae](./images/jointvae.png)|
 |AAE|![aae](./images/aae.png)|
 |AVB|![avb](./images/avb.png)|
 
-I tested original codes for disentanglement metrics. The following figure shows the comparison of (tf-model, disentanglement_lib metrics), (pixyz-model, disentanglement_lib metrics), and (pixyz-model, original metrics). This figure shows that my implementation seems correct.
+I tested our implementation for disentanglement metrics. The following figures show the comparison of our implementation and disentanglement_lib with the same model. These figures show that my implementation seems correct.
 
-|Model|Original metrics|disentanglement_lib|
+|Model|Our implementation|disentanglement_lib|
 |:-:|:-:|:-:|
 |BetaVAE|![metrics_org](./images/metrics_org.png)|![metrics_dlib](./images/metrics_dlib.png)|
 
@@ -107,4 +110,5 @@ I tested original codes for disentanglement metrics. The following figure shows 
 
 * Preferred Networks: [Disentangled な表現の教師なし学習手法の検証](https://tech.preferred.jp/ja/blog/disentangled-represetation/)
 * PyTorch VAE by AntixK: [GitHub](https://github.com/AntixK/PyTorch-VAE)
+* disentanglement_lib: [GitHub](https://github.com/google-research/disentanglement_lib)
 * NeurIPS 2019 : Disentanglement Challenge Starter Kit: [GitHub](https://github.com/AIcrowd/neurips2019_disentanglement_challenge_starter_kit)
