@@ -64,7 +64,7 @@ class BaseDataset(torch.utils.data.Dataset):
             factor_index (int): Index number of selected factor.
         """
 
-        return torch.randint(len(self.factor_sizes), (1,))
+        return torch.randint(len(self.factor_sizes), (1,)).item()
 
     def sample_fixed_batch(self, batch_size: int,
                            factor_index: Optional[int] = None
@@ -88,7 +88,7 @@ class BaseDataset(torch.utils.data.Dataset):
         factor_value = torch.randint(self.factor_sizes[factor_index], (1,))
 
         # Selected dataset
-        mask = (self.targets[:, factor_index] == factor_value).squeeze(1)
+        mask = self.targets[:, factor_index] == factor_value
         tmp_data = self.data[mask]
         tmp_targets = self.targets[mask]
 
