@@ -25,6 +25,10 @@ class Shapes3D(BaseDataset):
     3 - object size (8 different values)
     4 - object type (4 different values)
     5 - azimuth (15 different values)
+
+    Args:
+        root (str): Path to root directory of data.
+        filename (str, optional): File name of dataset.
     """
 
     def __init__(self, root, filename=None):

@@ -27,9 +27,12 @@ class Cars3dDataset(BaseDataset):
     0 - elevation (4 different values)
     1 - azimuth (24 different values)
     2 - object type (183 different values)
+
+    Args:
+        root (str): Path to dataset
     """
 
-    def __init__(self, root):
+    def __init__(self, root: str):
         super().__init__()
 
         # Load pre-downloaded data
@@ -57,7 +60,15 @@ class Cars3dDataset(BaseDataset):
         return self.data.size(0)
 
 
-def _load_mesh(path):
+def _load_mesh(path: str):
+    """Loads mesh data from numpy file.
+
+    Args:
+        path (str): Path to data file
+
+    Returns:
+        data (np.ndarray): Scaled data (NHWC)
+    """
     with open(path, "rb") as f:
         mesh = np.einsum("abcde->deabc", sio.loadmat(f)["im"])
     flattened_mesh = mesh.reshape((-1,) + mesh.shape[2:])
@@ -69,7 +80,15 @@ def _load_mesh(path):
     return rescaled_mesh * 1. / 255
 
 
-def _load_factor(idx):
+def _load_factor(idx: int):
+    """Generate targets.
+
+    Args:
+        idx (int): Fixed factor index.
+
+    Returns:
+        all_factors (np.ndarray): Generated factors.
+    """
     factor1 = np.arange(4)
     factor2 = np.arange(24)
     all_factors = np.transpose([
