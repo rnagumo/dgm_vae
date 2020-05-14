@@ -8,15 +8,14 @@ Deep Generative Model: Variational Auto-Encoder
 * Python == 3.7
 * PyTorch == 1.4.0 ([Official](https://pytorch.org/))
 * Torchvision == 0.5.0 ([GitHub](https://github.com/pytorch/vision))
-* PyTorch Lightning == 0.7.1 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
 * Pixyz == 0.1.4 ([GitHub](https://github.com/masa-su/pixyz))
-* disentanglement_lib == 1.4 ([GitHub](https://github.com/google-research/disentanglement_lib))
 * numpy == 1.18.1
-* tensorflow == 1.14.0
-* tensorflow-probability == 0.7.0
 * scikit-learn == 0.22.2
+
+For running scripts, the following libraries are also needed.
+
+* PyTorch Lightning == 0.7.1 ([GitHub](https://github.com/PyTorchLightning/pytorch-lightning))
 * pandas == 1.0.1
-* Pillow == 6.0.0 (disentanglement_lib requires old Pillow library.)
 
 # How to use
 
@@ -34,7 +33,10 @@ Install the package in virtual env.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install .
+pip3 install .
+
+# Install other requirements.
+pip3 install pytorch-lightning==0.7.1 pandas==1.0.1
 ```
 
 Or use [Docker](https://docs.docker.com/get-docker/) and [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker). This Dockerfile creates a very large docker image (>4GB), so please check the upper limit of the docker memory size on your computer.
