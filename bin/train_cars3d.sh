@@ -21,4 +21,3 @@ export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 export CONFIG_PATH=./src/config_ch3.json
 
 python3 ./src/train.py --model ${MODEL_NAME} --steps 300000 --seed ${SEED}
-python3 ./src/local_evaluation.py

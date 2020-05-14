@@ -20,4 +20,4 @@ export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 # Config for training
 export CONFIG_PATH=./src/metric_config.json
 
-python3 ./src/original_evaluate.py
+python3 ./src/evaluate.py
