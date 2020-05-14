@@ -32,5 +32,6 @@ COPY ./setup.py ./setup.py
 # Install package
 RUN pip3 install . && rm -rf /root/.cache
 
-# Install old pillow library
-RUN pip3 install Pillow==6.0.0 && rm -rf /root/.cache
+# Install other requirements
+RUN pip3 install pytorch-lightning==0.7.1 pandas==1.0.1 \
+    && rm -rf /root/.cache
