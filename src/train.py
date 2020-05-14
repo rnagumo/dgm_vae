@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import pathlib
+from typing import Union
 
 import numpy as np
 import torch
@@ -87,8 +88,24 @@ def main():
                  input_shape=(1, ch_num, 64, 64))
 
 
-def export_model(model, path, input_shape=(1, 3, 64, 64),
-                 use_script_module=True):
+def export_model(model: Union[torch.nn.Module, torch.jit.ScriptModule],
+                 path: Union[str, pathlib.Path],
+                 input_shape: tuple = (1, 3, 64, 64),
+                 use_script_module: bool = True
+                 ) -> Union[str, pathlib.Path]:
+    """Exports model.
+
+    Args:
+        model (torch.nn.Module or torch.jit.ScriptModule): Saved model.
+        path (str or pathlib.Path): Path to file.
+        input_shape (tuple, optional): Tuple of input data shape.
+        use_script_module (bool, optional): Boolean flag for using script
+            module.
+
+    Returns:
+        path (str or pathlib.Path): Path to saved file.
+    """
+
     model = model.cpu().eval()
     if isinstance(model, torch.jit.ScriptModule):
         assert use_script_module, \
