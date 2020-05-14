@@ -32,7 +32,8 @@ class TCVAE(BaseVAE):
         gamma (float): Gamma regularization term.
     """
 
-    def __init__(self, channel_num, z_dim, alpha, beta, gamma, **kwargs):
+    def __init__(self, channel_num: int, z_dim: int, alpha: float, beta: float,
+                 gamma: float, **kwargs):
         super().__init__()
 
         # Parameters
