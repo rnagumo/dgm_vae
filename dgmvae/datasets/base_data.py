@@ -8,11 +8,10 @@ sample fixed batch
 https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/evaluation/metrics/factor_vae.py#L137
 """
 
-from typing import Tuple, TypeVar, Optional
+from typing import Tuple, Optional
 
 import torch
-
-Tensor = TypeVar("torch.tensor")
+from torch import Tensor
 
 
 class BaseDataset(torch.utils.data.Dataset):

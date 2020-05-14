@@ -8,18 +8,27 @@ ref)
 https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/evaluation/metrics/mig.py
 """
 
+from typing import Callable, Dict
+
 import numpy as np
+from torch import Tensor
+
+from ..datasets.base_data import BaseDataset
 from .util_funcs import (generate_repr_factor_batch, discretize_target,
                          discrete_mutual_info, discrete_entropy)
 
 
-def mig(dataset, repr_fn, batch_size=16, num_points=10000, num_bins=20):
+def mig(dataset: BaseDataset,
+        repr_fn: Callable[[Tensor], Tensor],
+        batch_size: int = 16,
+        num_points: int = 10000,
+        num_bins: int = 20) -> Dict[str, float]:
     """Computes Mutual Information Gap.
 
     Args:
         dataset (BaseDataset): Dataset class.
-        repr_fn: Function that takes observation as input and outputs a
-            representation.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
         batch_size (int, optional): Batch size to sample points.
         num_points (int, optional): Number of samples.
         num_bins (int, optional): Number of bins for discretization.

@@ -7,8 +7,10 @@ Adversarial Autoencoders
 http://arxiv.org/abs/1511.05644
 """
 
+from typing import Union, Dict, Optional
+
 import torch
-from torch import nn
+from torch import nn, optim, Tensor
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
@@ -88,7 +90,22 @@ class JointDecoder(pxd.Bernoulli):
 
 
 class AAE(BaseVAE):
-    def __init__(self, channel_num, z_dim, c_dim, beta, **kwargs):
+    """Adversarial Autoencoder (AAE).
+
+    Unsupervised clustering based on ch.6
+
+    ref) Adversarial Autoencoders
+    http://arxiv.org/abs/1511.05644
+
+    Attributes:
+        channel_num (int): Number of input channels.
+        z_dim (int): Dimension of latents `z`.
+        c_dim (int): Dimension of latents `c`.
+        beta (float): Beta regularization term.
+    """
+
+    def __init__(self, channel_num: int, z_dim: int, c_dim: int, beta: float,
+                 **kwargs):
         super().__init__()
 
         # Parameters
@@ -123,7 +140,21 @@ class AAE(BaseVAE):
         self.adv_js = pxl.AdversarialJensenShannon(
             self.encoder_z, self.prior_z, self.disc)
 
-    def encode(self, x, mean=False, **kwargs):
+    def encode(self,
+               x: Union[Tensor, Dict[str, Tensor]],
+               mean: bool = False,
+               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+        """Encodes latent given observable x.
+
+        Args:
+            x (torch.Tensor or dict): Tensor or dict or Tensor for input
+                observations.
+            mean (bool, optional): Boolean flag for returning means or samples.
+
+        Returns:
+            z (torch.Tensor or dict): Tensor of encoded latents. `z` is
+            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+        """
 
         h = self.encoder_func.sample(x, return_all=False)
 
@@ -137,7 +168,21 @@ class AAE(BaseVAE):
         z.update(c)
         return z
 
-    def decode(self, latent, mean=False, **kwargs):
+    def decode(self,
+               latent: Union[Tensor, Dict[str, Tensor]],
+               mean: bool = False,
+               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+        """Decodes observable x given latents.
+
+        Args:
+            latent (torch.Tensor or dict): Tensor or dict of latents.
+            mean (bool, optional): Boolean flag for returning means or samples.
+
+        Returns:
+            x (torch.Tensor or dict): Tensor of decoded observations. `z` is
+            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+        """
+
         if not latent:
             latent = {}
             if "z" in kwargs:
@@ -154,13 +199,31 @@ class AAE(BaseVAE):
             return self.decoder.sample_mean(latent)
         return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1, **kwargs):
+    def sample(self, batch_n: int = 1, **kwargs) -> Dict[str, Tensor]:
+        """Samples observable x from sampled latent z.
+
+        Args:
+            batch_n (int, optional): Batch size.
+
+        Returns:
+            sample (dict): Dict of sampled tensors.
+        """
+
         z = self.prior_z.sample(batch_n=batch_n)
         c = self.prior_c.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
-    def loss_func(self, x, **kwargs):
+    def loss_func(self, x: Tensor, **kwargs) -> Dict[str, Tensor]:
+        """Calculates loss given observable x.
+
+        Args:
+            x (torch.Tensor): Tensor of input observations.
+
+        Returns:
+            loss_dict (dict): Dict of calculated losses.
+        """
+
         # Input
         x_dict = {"x": x}
 
@@ -182,10 +245,10 @@ class AAE(BaseVAE):
             return {"adv_loss": loss}
 
     @property
-    def loss_str(self):
+    def loss_str(self) -> str:
         return str((self.ce + self.adv_js).expectation(
                    self.encoder_c * self.encoder_func))
 
     @property
-    def second_optim(self):
+    def second_optim(self) -> Optional[optim.Optimizer]:
         return self.adv_js.d_optimizer

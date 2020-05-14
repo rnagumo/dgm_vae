@@ -7,17 +7,27 @@ ref)
 https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/evaluation/metrics/factor_vae.py
 """
 
+from typing import Callable, Union, Dict
+
 import numpy as np
+from torch import Tensor
+
+from ..datasets.base_data import BaseDataset
 
 
-def factor_vae_metric(dataset, repr_fn, batch_size=64, num_train=10000,
-                      num_eval=5000, num_var=10000, th_var=0.05):
+def factor_vae_metric(dataset: BaseDataset,
+                      repr_fn: Callable[[Tensor], Tensor],
+                      batch_size: int = 64,
+                      num_train: int = 10000,
+                      num_eval: int = 5000,
+                      num_var: int = 10000,
+                      th_var: float = 0.05) -> Dict[str, Union[int, float]]:
     """Computes factor-VAE metric.
 
     Args:
         dataset (BaseDataset): Dataset class.
-        repr_fn: Function that takes observation as input and outputs a
-            representation.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
         batch_size (int, optional): Batch size to sample points.
         num_train (int, optional): Number of training data.
         num_eval (int, optional): Number of validation data.
@@ -60,41 +70,60 @@ def factor_vae_metric(dataset, repr_fn, batch_size=64, num_train=10000,
     return scores_dict
 
 
-def _compute_variance(dataset, repr_fn, num_var):
-    """Computes variances for each dimension of the representation."""
+def _compute_variance(dataset: BaseDataset,
+                      repr_fn: Callable[[Tensor], Tensor],
+                      num_var: int) -> np.ndarray:
+    """Computes variances for each dimension of the representation.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
+        num_var (int): Number of variables.
+
+    Returns:
+        votes (np.ndarray): Array of majority votes.
+    """
 
     data, _ = dataset.sample_batch(num_var)
     reprs = repr_fn(data)
     return reprs.var(0)
 
 
-def _generate_batch(dataset, repr_fn, batch_size, num_points, global_var,
-                    active_dims):
+def _generate_batch(dataset: BaseDataset,
+                    repr_fn: Callable[[Tensor], Tensor],
+                    batch_size: int,
+                    num_points: int,
+                    global_var: np.ndarray,
+                    active_dims: np.ndarray) -> np.ndarray:
+    """Generates batch sample.
+
+    Args:
+        dataset (BaseDataset): Dataset class.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
+        batch_size (int): Batch size for calculation.
+        num_points (int): Number of data points.
+        global_var (np.ndarray): Array of global variance.
+        active_dims (np.ndarray): Array of active dimensions.
+    """
 
     votes = np.zeros((dataset.num_factors, global_var.shape[0]))
     for _ in range(num_points):
-        factor_index, argmin = _generate_sample(
-            dataset, repr_fn, batch_size, global_var, active_dims)
+        # Select random coordinate to keep fixed
+        factor_index = dataset.sample_factor_index()
+
+        # Sample data with fixed factor
+        data, factor = dataset.sample_fixed_batch(batch_size, factor_index)
+
+        # Represent latents
+        reprs = repr_fn(data)
+
+        # Compute local variance
+        local_var = reprs.var(0)
+        argmin = np.argmin(local_var[active_dims] / global_var[active_dims])
 
         # Count (factor index, minimum variance latents) pairs
         votes[factor_index, argmin] += 1
 
     return votes
-
-
-def _generate_sample(dataset, repr_fn, batch_size, global_var, active_dims):
-
-    # Select random coordinate to keep fixed
-    factor_index = dataset.sample_factor_index()
-
-    # Sample data with fixed factor
-    data, factor = dataset.sample_fixed_batch(batch_size, factor_index)
-
-    # Represent latents
-    reprs = repr_fn(data)
-
-    # Compute local variance
-    local_var = reprs.var(0)
-    argmin = np.argmin(local_var[active_dims] / global_var[active_dims])
-
-    return factor_index, argmin

@@ -5,8 +5,10 @@ Learning Disentangled Joint Continuous and Discrete Representations
 http://arxiv.org/abs/1804.00104
 """
 
+from typing import Union, Dict
+
 import torch
-from torch import nn
+from torch import nn, Tensor
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
@@ -99,8 +101,22 @@ class JointDecoder(pxd.Bernoulli):
 
 
 class JointVAE(BaseVAE):
-    def __init__(self, channel_num, z_dim, c_dim, temperature, gamma_z,
-                 gamma_c, cap_z, cap_c, **kwargs):
+    """Joint VAE.
+
+    Attributes:
+        channel_num (int): Number of input channels.
+        z_dim (int): Dimension of continuous latents `z`.
+        c_dim (int): Dimension of discrete latents `c`.
+        temperature (float): Temperature for discrete encoder.
+        gamma_z (float): Gamma regularization term for `z`.
+        gamma_c (float): Gamma regularization term for `c`.
+        cap_z (float): Capacity for `z`.
+        cap_c (float): Capacity for `c`.
+    """
+
+    def __init__(self, channel_num: int, z_dim: int, c_dim: int,
+                 temperature: float, gamma_z: float, gamma_c: float,
+                 cap_z: float, cap_c: float, **kwargs):
         super().__init__()
 
         self.channel_num = channel_num
@@ -140,7 +156,21 @@ class JointVAE(BaseVAE):
         self.cap_z = pxl.Parameter("cap_z")
         self.cap_c = pxl.Parameter("cap_c")
 
-    def encode(self, x, mean=False, **kwargs):
+    def encode(self,
+               x: Union[Tensor, Dict[str, Tensor]],
+               mean: bool = False,
+               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+        """Encodes latent given observable x.
+
+        Args:
+            x (torch.Tensor or dict): Tensor or dict or Tensor for input
+                observations.
+            mean (bool, optional): Boolean flag for returning means or samples.
+
+        Returns:
+            z (torch.Tensor or dict): Tensor of encoded latents. `z` is
+            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+        """
 
         h = self.encoder_func.sample(x, return_all=False)
 
@@ -154,7 +184,21 @@ class JointVAE(BaseVAE):
         z.update(c)
         return z
 
-    def decode(self, latent, mean=False, **kwargs):
+    def decode(self,
+               latent: Union[Tensor, Dict[str, Tensor]],
+               mean: bool = False,
+               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+        """Decodes observable x given latents.
+
+        Args:
+            latent (torch.Tensor or dict): Tensor or dict of latents.
+            mean (bool, optional): Boolean flag for returning means or samples.
+
+        Returns:
+            x (torch.Tensor or dict): Tensor of decoded observations. `z` is
+            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+        """
+
         if not latent:
             latent = {}
             if "z" in kwargs:
@@ -171,13 +215,30 @@ class JointVAE(BaseVAE):
             return self.decoder.sample_mean(latent)
         return self.decoder.sample(latent, return_all=False)
 
-    def sample(self, batch_n=1, **kwargs):
+    def sample(self, batch_n: int = 1, **kwargs) -> Dict[str, Tensor]:
+        """Samples observable x from sampled latent z.
+
+        Args:
+            batch_n (int, optional): Batch size.
+
+        Returns:
+            sample (dict): Dict of sampled tensors.
+        """
+
         z = self.prior_z.sample(batch_n=batch_n)
         c = self.prior_c.sample(batch_n=batch_n)
         sample = self.decoder.sample_mean({"z": z["z"], "c": c["c"]})
         return sample
 
-    def loss_func(self, x, **kwargs):
+    def loss_func(self, x: Tensor, **kwargs) -> Dict[str, Tensor]:
+        """Calculates loss given observable x.
+
+        Args:
+            x (torch.Tensor): Tensor of input observations.
+
+        Returns:
+            loss_dict (dict): Dict of calculated losses.
+        """
 
         # TODO: update capacity values per epoch
         x_dict = {

@@ -1,22 +1,28 @@
 
 """DIP loss"""
 
+from typing import Tuple, Dict
+
 import sympy
 
 import torch
+from torch import Tensor
+
+import pixyz
 from pixyz.losses.losses import Loss
 from pixyz.utils import get_dict_values
 
 
-def _get_cov_mu(mu):
+def _get_cov_mu(mu: Tensor) -> Tensor:
     """Computes covariance of mu.
 
-    cov(mu) = E[mu mu^T] - E[mu]E[mu]^T
+    cov_mu = E[mu mu^T] - E[mu]E[mu]^T
 
-    Input
-        mu: [batch_size, latent_dim]
-    Output
-        cov(mu): [latent_dim, latent_dim]
+    Args:
+        mu (torch.Tensor): Mean vector, size `(batch_size, latent_dim)`.
+
+    Returns:
+        cov_mu (torch.Tensor): Cov matrix, size `(latent_dim, latent_dim)`.
     """
 
     # E[mu mu^T]
@@ -29,13 +35,14 @@ def _get_cov_mu(mu):
     return e_mu_mut - e_mu_e_mut
 
 
-def _get_e_cov(scale):
+def _get_e_cov(scale: Tensor) -> Tensor:
     """Computes expectation of cov E[Cov_encoder] from scale
 
-    Input
-        scale: [batch_size, latent_dim]
-    Output
-        cov: [latent_dim, latent_dim]
+    Args:
+        scale (torch.Tensor): Scale vector, size `(batch_size, latent_dim)`.
+
+    Returns:
+        cov (torch.Tensor): Cov matrix, size `(latent_dim, latent_dim)`.
     """
 
     # Cov
@@ -45,7 +52,22 @@ def _get_e_cov(scale):
 
 
 class DipLoss(Loss):
-    def __init__(self, p, lmd_od, lmd_d, dip_type, **kwargs):
+    """DIP loss class.
+
+    Loss class for Disentangled Inferred Prior-VAE.
+
+    Args:
+        p (pixyz.distributions.Distribution): Distribution.
+        lmd_od (float): Regularization term for off-diagonal term.
+        lmd_d (float): Regularization term for diagonal term.
+        dip_type (str): DIP type ('i' or 'ii').
+    """
+    def __init__(self,
+                 p: pixyz.distributions.Distribution,
+                 lmd_od: float,
+                 lmd_d: float,
+                 dip_type: str,
+                 **kwargs):
         super().__init__(p, **kwargs)
 
         if dip_type not in ["i", "ii"]:
@@ -55,7 +77,9 @@ class DipLoss(Loss):
         self.lmd_d = lmd_d
         self.dip_type = dip_type
 
-    def _get_eval(self, x_dict={}, **kwargs):
+    def _get_eval(self,
+                  x_dict: Dict[str, torch.Tensor] = {},
+                  **kwargs) -> Tuple[Tensor, Dict[str, torch.Tensor]]:
 
         # Compute mu and scale of normal distribution
         input_dict = get_dict_values(x_dict, self.p.input_var, True)

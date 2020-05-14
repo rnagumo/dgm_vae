@@ -5,20 +5,28 @@ Based on "A Framework for the Quantitative Evaluation of Disentangled
 Representations" (https://openreview.net/forum?id=By-7dz-AZ).
 """
 
+from typing import Callable, Dict, Tuple, Union
+
 import numpy as np
 import scipy
 from sklearn import ensemble
+from torch import Tensor
 
+from ..datasets.base_data import BaseDataset
 from .util_funcs import generate_repr_factor_batch
 
 
-def dci(dataset, repr_fn, batch_size=16, num_train=10000, num_test=5000):
+def dci(dataset: BaseDataset,
+        repr_fn: Callable[[Tensor], Tensor],
+        batch_size: int = 16,
+        num_train: int = 10000,
+        num_test: int = 5000) -> Dict[str, float]:
     """Computes Disentanglement, Completeness and Informativeness.
 
     Args:
         dataset (BaseDataset): Dataset class.
-        repr_fn: Function that takes observation as input and outputs a
-            representation.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
         batch_size (int, optional): Batch size to sample points.
         num_train (int, optional): Number of training data.
         num_test (int, optional): Number of validation data.
@@ -47,19 +55,24 @@ def dci(dataset, repr_fn, batch_size=16, num_train=10000, num_test=5000):
     return scores_dict
 
 
-def compute_importance_gbt(x_train, y_train, x_test, y_test):
+def compute_importance_gbt(x_train: Union[np.ndarray, Tensor],
+                           y_train: Union[np.ndarray, Tensor],
+                           x_test: Union[np.ndarray, Tensor],
+                           y_test: Union[np.ndarray, Tensor]
+                           ) -> Tuple[np.ndarray, float, float]:
     """Computes importance matrix with sklear gbt classifier.
 
     Args:
-        x_train (array): (num_train, num_codes)
-        y_train (array): (num_train, num_factors)
-        x_test (array): (num_test, num_codes)
-        y_test (array): (num_test, num_factors)
+        x_train (array): Array or Tensor, size `(num_train, num_codes)`.
+        y_train (array): Array or Tensor, size `(num_train, num_factors)`.
+        x_test (array): Array or Tensor, size `(num_test, num_codes)`.
+        y_test (array): Array or Tensor, size `(num_test, num_factors)`.
 
     Returns:
-        importance_matrix (array): (num_codes, num_factors)
-        train_loss (float): train Informativeness
-        test_loss (float): test Informativeness
+        importance_matrix (np.ndarray): Importance matrix,
+            `(num_codes, num_factors)`.
+        train_loss (float): train Informativeness.
+        test_loss (float): test Informativeness.
     """
 
     num_codes = x_train.shape[1]
@@ -78,7 +91,16 @@ def compute_importance_gbt(x_train, y_train, x_test, y_test):
     return importance_matrix, np.mean(train_loss), np.mean(test_loss)
 
 
-def disentanglement(importance_matrix):
+def disentanglement(importance_matrix: np.ndarray) -> float:
+    """Computes disentanglement.
+
+    Args:
+        importance_matrix (np.ndarray): Importance matrix.
+
+    Returns:
+        disentanglemtn_score (float): Calculated metric.
+    """
+
     # Compute score for each code
     per_code = 1 - scipy.stats.entropy(importance_matrix.T + 1e-11,
                                        base=importance_matrix.shape[1])
@@ -90,7 +112,16 @@ def disentanglement(importance_matrix):
     return np.sum(per_code * code_importance)
 
 
-def completeness(importance_matrix):
+def completeness(importance_matrix: np.ndarray) -> float:
+    """Computes completeness.
+
+    Args:
+        importance_matrix (np.ndarray): Importance matrix.
+
+    Returns:
+        completeness_score (float): Calculated metric.
+    """
+
     # Compute score for each factor
     per_factor = 1 - scipy.stats.entropy(importance_matrix + 1e-11,
                                          base=importance_matrix.shape[0])
