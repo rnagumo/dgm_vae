@@ -66,10 +66,10 @@ Training and evaluation. Shell scripts in `bin` folder contains the necessary se
 
 ```bash
 # Usage
-bash bin/run_cars3d.sh <model-name> <random-seed>
+bash bin/train_cars3d.sh <model-name> <random-seed>
 
 # Example
-bash bin/run_cars3d.sh beta 0
+bash bin/train_cars3d.sh beta 0
 ```
 
 Evaluation with original metrics (run on CPU).
@@ -86,13 +86,15 @@ bash bin/eval_cars3d.sh beta 0
 
 VAE model included in disentanglement_lib are trained with the same setteings. Pre-trained models (TF models) are downloaded from disentanglement_lib. Although pre-trained models are tested with 50 different random seeds, my experiments are tested with 10 or 5 random seeds due to the lack of GPUs.
 
+**Note** DIP-VAE (1, 2) and TC-VAE do not reproduce the disentanglement_lib results.
+
 |Model|Ours|disentanglement_lib|
 |:-:|:-:|:-:|
 |BetaVAE|![beta_vae](./images/betavae.png)|![beta_vae_tf](./images/betavae_tf.png)|
 |FactorVAE|![factor_vae](./images/factorvae.png)|![factor_vae_tf](./images/factorvae_tf.png)|
-|DIPVAE-1|![dip_vae1](./images/dipvae1.png)|![dip_vae1_tf](./images/dipvae1_tf.png)|
-|DIPVAE-2|![dip_vae2](./images/dipvae2.png)|![dip_vae2_tf](./images/dipvae2_tf.png)|
-|TC-VAE|![tc_vae](./images/tcvae.png)|![tc_vae_tf](./images/tcvae_tf.png)|
+|DIPVAE-1|not reproduced|![dip_vae1_tf](./images/dipvae1_tf.png)|
+|DIPVAE-2|not reproduced|![dip_vae2_tf](./images/dipvae2_tf.png)|
+|TC-VAE|not reproduced|![tc_vae_tf](./images/tcvae_tf.png)|
 
 Other models not in disentanglement_lib are also trained and evaluated.
 
