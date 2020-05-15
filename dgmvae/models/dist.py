@@ -6,6 +6,7 @@ from torch import nn
 from torch.nn import functional as F
 
 import pixyz.distributions as pxd
+from pixyz.utils import get_dict_values, sum_samples
 
 
 class Encoder(pxd.Normal):
@@ -27,13 +28,28 @@ class Encoder(pxd.Normal):
         self.fc21 = nn.Linear(256, z_dim)
         self.fc22 = nn.Linear(256, z_dim)
 
+        self.encoded_params = {}
+
     def forward(self, x):
         h = self.conv(x)
         h = h.view(-1, 1024)
         h = F.relu(self.fc1(h))
         loc = self.fc21(h)
         scale = F.softplus(self.fc22(h))
-        return {"loc": loc, "scale": scale}
+        self.encoded_params = {"loc": loc, "scale": scale}
+        return self.encoded_params
+
+    def get_log_prob_wo_forward(self, x_dict: dict, sum_features: bool = True):
+        # Override `set_dist` method
+        self._dist = self.distribution_torch_class(**self.encoded_params)
+
+        # Calculate log prob
+        x_targets = get_dict_values(x_dict, self._var)
+        log_prob = self.dist.log_prob(*x_targets)
+
+        if sum_features:
+            log_prob = sum_samples(log_prob)
+        return log_prob
 
 
 class Decoder(pxd.Bernoulli):
