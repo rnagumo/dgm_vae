@@ -8,7 +8,7 @@ import sympy
 import torch
 from torch import Tensor
 
-import pixyz
+from pixyz.distributions import Distribution
 from pixyz.losses.losses import Loss
 from pixyz.utils import get_dict_values
 
@@ -57,13 +57,13 @@ class DipLoss(Loss):
     Loss class for Disentangled Inferred Prior-VAE.
 
     Args:
-        p (pixyz.distributions.Distribution): Distribution.
+        p (pixyz.distributions.distributions.Distribution): Distribution.
         lmd_od (float): Regularization term for off-diagonal term.
         lmd_d (float): Regularization term for diagonal term.
         dip_type (str): DIP type ('i' or 'ii').
     """
     def __init__(self,
-                 p: pixyz.distributions.Distribution,
+                 p: Distribution,
                  lmd_od: float,
                  lmd_d: float,
                  dip_type: str,

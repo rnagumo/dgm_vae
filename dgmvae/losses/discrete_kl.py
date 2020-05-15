@@ -14,7 +14,7 @@ import sympy
 import torch
 from torch._six import inf
 
-import pixyz
+from pixyz.distributions import Distribution
 from pixyz.losses.losses import Loss
 from pixyz.utils import get_dict_values
 
@@ -25,8 +25,8 @@ def _kl_categorical_categorical(p: torch.distributions.Distribution,
     """KL divergence between categorical and categorical, KL(p||q).
 
     Args:
-        p (torch.distributions.Distribution): Distribution.
-        q (torch.distributions.Distribution): Distribution.
+        p (torch.distributions.Distribution): PyTorch Distribution class.
+        q (torch.distributions.Distribution): PyTorch Distribution class.
 
     Returns:
         t (torch.Tensor): Calculated KL divergence.
@@ -41,14 +41,14 @@ class CategoricalKullbackLeibler(Loss):
     """Kullback Leibler divergence for categorical distributions.
 
     Args:
-        p (pixyz.distributions.Distribution): Distribution.
-        q (pixyz.distributions.Distribution): Distribution.
+        p (pixyz.distributions.distributions.Distribution): Distribution class.
+        q (pixyz.distributions.distributions.Distribution): Distribution class.
         input_var (list, optional): Input variable name.
         dim (int, optional): Aggregate dimension.
     """
     def __init__(self,
-                 p: pixyz.distributions.Distribution,
-                 q: pixyz.distributions.Distribution,
+                 p: Distribution,
+                 q: Distribution,
                  input_var: Optional[List[str]] = None,
                  dim: Optional[int] = None):
         self.dim = dim
