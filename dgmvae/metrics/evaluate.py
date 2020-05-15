@@ -5,6 +5,9 @@ ref)
 https://github.com/AIcrowd/neurips2019_disentanglement_challenge_starter_kit/blob/master/evaluate.py
 """
 
+import pathlib
+from typing import Dict, Optional, Union
+
 import torch
 from torchvision import datasets, transforms
 
@@ -20,8 +23,18 @@ from ..metrics.dci import dci
 
 
 class MetricsEvaluator:
+    """Evaluator class for disentanglement metrics.
 
-    def __init__(self, config=None):
+    Args:
+        config (dict, optional): Config dict.
+
+    Attributes:
+        dataset (dgmvae.datasets.base_data.BaseDataset): Dataset class.
+        model (torch.nn.Module or torch.jit.ScriptModule): Trained model.
+        metric_dict (dict): Dict of metrics name and function.
+    """
+
+    def __init__(self, config: Optional[Dict] = None):
         self.dataset = None
         self.model = None
         self.config = config
@@ -35,8 +48,13 @@ class MetricsEvaluator:
             "dci": dci,
         }
 
-    def load_dataset(self, dataset_name, root):
-        """Loads dataset of specified name."""
+    def load_dataset(self, dataset_name: str, root: str):
+        """Loads dataset of specified name.
+
+        Args:
+            dataset_name (str): Name of dataset class.
+            root (str): Root directory of dataset file.
+        """
 
         if dataset_name == "mnist":
             _transform = transforms.Compose([
@@ -50,7 +68,7 @@ class MetricsEvaluator:
         else:
             raise KeyError(f"Unexpected dataset is specified: {dataset_name}")
 
-    def load_model(self, path):
+    def load_model(self, path: Union[str, pathlib.Path]):
         """Loads pre-trained model.
 
         Args:
@@ -68,7 +86,7 @@ class MetricsEvaluator:
 
         self.model = model.cpu()
 
-    def repr_fn(self, x):
+    def repr_fn(self, x: torch.Tensor):
         """Representation function that takes observation as input and outputs
         a representation.
 
@@ -78,15 +96,17 @@ class MetricsEvaluator:
         Returns:
             reprs (torch.tensor): Representations tensor.
         """
+
         with torch.no_grad():
             return self.model(x)
 
-    def compute_metric(self, metric_name):
+    def compute_metric(self, metric_name: str):
         """Computes metric.
 
         Args:
             metric_name (str): Metric name in metric_dict.
         """
+
         if self.dataset is None or self.model is None:
             raise ValueError("Load dataset and model before computing metric")
 

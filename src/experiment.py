@@ -6,8 +6,7 @@ import torch
 from torchvision import datasets, transforms
 import pytorch_lightning as pl
 
-from ..datasets.cars3d import Cars3dDataset
-from ..datasets.dsprites import DSpritesDataset
+import dgmvae.datasets as dvd
 
 
 class VAEUpdater(pl.LightningModule):
@@ -75,9 +74,9 @@ class VAEUpdater(pl.LightningModule):
             dataset = datasets.MNIST(root=self.root, train=True,
                                      transform=_transform)
         elif self.dataset == "dsprites_full":
-            dataset = DSpritesDataset(root=self.root)
+            dataset = dvd.DSpritesDataset(root=self.root)
         elif self.dataset == "cars3d":
-            dataset = Cars3dDataset(root=self.root)
+            dataset = dvd.Cars3dDataset(root=self.root)
         else:
             raise KeyError(f"Unexpected dataset is specified: {self.dataset}")
 

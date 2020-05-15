@@ -1,8 +1,6 @@
 
 """Base test case for dataset class"""
 
-import torch
-
 
 class BaseDatasetTestCase:
 
@@ -30,7 +28,7 @@ class BaseDatasetTestCase:
         for i in range(self.latents):
             tmp = batch_targets[:, i].float()
             self.assertFalse(
-                (i == factor_index) ^ torch.all(tmp == tmp.mean()))
+                (i == factor_index) ^ (tmp == tmp.mean()).all().item())
 
         # Test sample_paired_batch
         data1, data2, targets1, targets2 = self.dataset.sample_paired_batch(
@@ -41,5 +39,5 @@ class BaseDatasetTestCase:
         self.assertTupleEqual(targets2.size(), (32, self.latents))
 
         for i in range(self.latents):
-            flg = torch.all(targets1[:, i] == targets2[:, i])
+            flg = (targets1[:, i] == targets2[:, i]).all().item()
             self.assertFalse((i == factor_index) ^ flg)

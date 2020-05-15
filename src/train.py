@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import pathlib
+from typing import Union
 
 import numpy as np
 import torch
@@ -12,9 +13,8 @@ from torch.backends import cudnn
 import pytorch_lightning as pl
 
 import dgmvae.models as dvm
-import dgmvae.updaters as dvu
 
-import utils_pytorch as utils
+from experiment import VAEUpdater
 
 
 def main():
@@ -27,14 +27,15 @@ def main():
     args = init_args()
 
     # Configs
-    condig_path = os.getenv("CONFIG_PATH", "./src/config.json")
+    condig_path = os.getenv("CONFIG_PATH", "./src/config_ch1.json")
     with pathlib.Path(condig_path).open() as f:
         config = json.load(f)
 
     # Path
-    root = os.getenv("DATA_ROOT", "./data/mnist/")
+    root = pathlib.Path(os.getenv("DATA_ROOT", "./data/mnist/"))
     save_path = pathlib.Path(os.getenv("SAVE_PATH", "./logs/"),
                              os.getenv("EVALUATION_NAME", "dev"))
+    model_path = save_path / "representation"
     dataset = os.getenv("DATASET_NAME", "mnist")
 
     # Cuda setting
@@ -65,7 +66,7 @@ def main():
     model = model_dict[args.model](**config[f"{args.model}_params"])
 
     # Updater
-    updater = dvu.VAEUpdater(model, args, dataset, root, args.batch_size)
+    updater = VAEUpdater(model, args, dataset, root, args.batch_size)
 
     # Trainer
     params = {
@@ -80,13 +81,45 @@ def main():
     # Run
     trainer.fit(updater)
 
-    # Deep copy
-    trained_model = model_dict[args.model](**config[f"{args.model}_params"])
-    trained_model.load_state_dict(updater.model.state_dict())
-
     # Export model
+    model_path.mkdir()
     ch_num = config[f"{args.model}_params"]["channel_num"]
-    utils.export_model(updater.model, input_shape=(1, ch_num, 64, 64))
+    export_model(updater.model, str(model_path / "pytorch_model.pt"),
+                 input_shape=(1, ch_num, 64, 64))
+
+
+def export_model(model: Union[torch.nn.Module, torch.jit.ScriptModule],
+                 path: Union[str, pathlib.Path],
+                 input_shape: tuple = (1, 3, 64, 64),
+                 use_script_module: bool = True
+                 ) -> Union[str, pathlib.Path]:
+    """Exports model.
+
+    Args:
+        model (torch.nn.Module or torch.jit.ScriptModule): Saved model.
+        path (str or pathlib.Path): Path to file.
+        input_shape (tuple, optional): Tuple of input data shape.
+        use_script_module (bool, optional): Boolean flag for using script
+            module.
+
+    Returns:
+        path (str or pathlib.Path): Path to saved file.
+    """
+
+    model = model.cpu().eval()
+    if isinstance(model, torch.jit.ScriptModule):
+        assert use_script_module, \
+            "Provided model is a ScriptModule, set use_script_module to True."
+    if use_script_module:
+        if not isinstance(model, torch.jit.ScriptModule):
+            assert input_shape is not None
+            traced_model = torch.jit.trace(model, torch.zeros(*input_shape))
+        else:
+            traced_model = model
+        torch.jit.save(traced_model, path)
+    else:
+        torch.save(model, path)  # saves model as a nn.Module
+    return path
 
 
 def init_args():
@@ -96,7 +129,7 @@ def init_args():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--steps", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--log-save-interval", type=int, default=5)
+    parser.add_argument("--log-save-interval", type=int, default=100)
 
     return parser.parse_args()
 

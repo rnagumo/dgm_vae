@@ -1,4 +1,7 @@
 
+# Run evaluation for cars3d (3-ch image).
+# $ bash bin/eval_cars3d.sh <model name> <random seed>
+
 # Specify model name
 export MODEL_NAME=${1:-beta}
 
@@ -17,4 +20,4 @@ export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 # Config for training
 export CONFIG_PATH=./src/metric_config.json
 
-python ./src/original_evaluate.py
+python3 ./src/evaluate.py

@@ -5,6 +5,8 @@ ref)
 https://github.com/google-research/disentanglement_lib/blob/master/disentanglement_lib/data/ground_truth/dsprites.py
 """
 
+from typing import Optional
+
 import pathlib
 
 import numpy as np
@@ -26,9 +28,13 @@ class DSpritesDataset(BaseDataset):
     2 - orientation (40 different values)
     3 - position x (32 different values)
     4 - position y (32 different values)
+
+    Args:
+        root (str): Path to root directory of data.
+        filename (str, optional): File name of dataset.
     """
 
-    def __init__(self, root, filename=None):
+    def __init__(self, root: str, filename: Optional[str] = None):
         super().__init__()
 
         # Load pre-downloaded dataset

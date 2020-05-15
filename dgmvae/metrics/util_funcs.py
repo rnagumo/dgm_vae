@@ -1,23 +1,32 @@
 
-"""Utils."""
+"""Utils for calculation of disentanglement metrics."""
+
+from typing import Callable, Union, Tuple
 
 import numpy as np
 import sklearn
+from torch import Tensor
+
+from ..datasets.base_data import BaseDataset
 
 
-def generate_repr_factor_batch(dataset, repr_fn, batch_size, num_points):
-    """Computes Mutual Information Gap.
+def generate_repr_factor_batch(dataset: BaseDataset,
+                               repr_fn: Callable[[Tensor], Tensor],
+                               batch_size: int,
+                               num_points: int
+                               ) -> Tuple[np.ndarray, np.ndarray]:
+    """Generates batch samples of representations and factors.
 
     Args:
         dataset (BaseDataset): Dataset class.
-        repr_fn: Function that takes observation as input and outputs a
-            representation.
+        repr_fn (callable): Function that takes observation as input and
+            outputs a representation.
         batch_size (int, optional): Batch size to sample points.
         num_points (int, optional): Number of samples.
 
     Returns:
-        reprs (np.array): Represented latents (num_points, num_latents)
-        factors (np.array): True factors (num_points, num_factors)
+        reprs (np.array): Represented latents `(num_points, num_latents)`
+        factors (np.array): True factors `(num_points, num_factors)`
     """
 
     reprs = []
@@ -40,16 +49,18 @@ def generate_repr_factor_batch(dataset, repr_fn, batch_size, num_points):
     return np.vstack(reprs), np.vstack(factors)
 
 
-def discretize_target(target, num_bins):
+def discretize_target(target: Union[np.ndarray, Tensor],
+                      num_bins: int) -> np.ndarray:
     """Discretizes targets.
 
     Args:
-        target (array like): Targets of shape (num_points, num_latents).
+        target (np.ndarray or torch.Tensor): Targets of shape
+            `(num_points, num_latents)`.
         num_bins (int): Number of bins.
 
     Returns:
         discretized (np.array): Discretized targets of shape
-            (num_points, num_latents).
+            `(num_points, num_latents)`.
     """
 
     discretized = np.zeros_like(target)
@@ -60,17 +71,18 @@ def discretize_target(target, num_bins):
     return discretized
 
 
-def discrete_mutual_info(mus, ys):
+def discrete_mutual_info(mus: Union[np.ndarray, Tensor],
+                         ys: Union[np.ndarray, Tensor]) -> np.ndarray:
     """Discrete Mutual Information for all code-factor pairs.
 
     Args:
-        mus (array like): Mean representation vector of shape
-            (num_samples, num_codes).
-        ys (array like): True factor vector of shape
-            (num_samples, num_factors).
+        mus (np.ndarray or torch.Tensor): Mean representation vector of shape
+            `(num_samples, num_codes)`.
+        ys (np.ndarray or torch.Tensor): True factor vector of shape
+            `(num_samples, num_factors)`.
 
     Returns:
-        mi (np.array): MI matrix of shape (num_codes, num_factors).
+        mi (np.ndarray): MI matrix of shape `(num_codes, num_factors)`.
     """
 
     num_codes = mus.shape[1]
@@ -83,14 +95,15 @@ def discrete_mutual_info(mus, ys):
     return mi
 
 
-def discrete_entropy(ys):
+def discrete_entropy(ys: Union[np.ndarray, Tensor]) -> np.ndarray:
     """Discrete Mutual Information for all code-factor pairs.
 
     Args:
-        ys (array like): Vector of shape (num_samples, num_factors).
+        ys (np.ndarray or torch.Tensor): Vector of shape
+            `(num_samples, num_factors)`.
 
     Returns:
-        h (np.array): Entropy vector of shape (num_factors).
+        h (np.ndarray): Entropy vector of shape `(num_factors)`.
     """
 
     num_factors = ys.shape[1]

@@ -1,4 +1,7 @@
 
+# Run training for dSprites (1-ch image).
+# $ bash bin/run_dsprites.sh <model name> <random seed>
+
 # Specify model name
 export MODEL_NAME=${1:-beta}
 
@@ -17,5 +20,4 @@ export EVALUATION_NAME=${DATASET_NAME}_${MODEL_NAME}_${SEED}/
 # Config for training
 export CONFIG_PATH=./src/config_ch1.json
 
-python ./src/train.py --model ${MODEL_NAME} --steps 300000 --seed ${SEED}
-python ./src/local_evaluation.py
+python3 ./src/train.py --model ${MODEL_NAME} --steps 300000 --seed ${SEED}
