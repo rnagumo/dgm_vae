@@ -6,6 +6,9 @@ Disentangled Inferred Prior-VAE
 Variational Inference of Disentangled Latent Concepts from Unlabeled
 Observations
 http://arxiv.org/abs/1711.00848
+
+ref)
+https://github.com/paruby/DIP-VAE
 """
 
 import torch
