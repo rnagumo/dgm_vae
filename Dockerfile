@@ -24,7 +24,6 @@ RUN apt-get update \
 WORKDIR /home/dgmvae/
 COPY ./bin/ ./bin/
 COPY ./dgmvae/ ./dgmvae/
-COPY ./extra_metrics_configs/ ./extra_metrics_configs/
 COPY ./src/ ./src/
 COPY ./tests/ ./tests/
 COPY ./setup.py ./setup.py
