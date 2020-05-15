@@ -141,12 +141,12 @@ class TCVAE(BaseVAE):
         log_pz = self.prior.get_log_prob(x_dict)
 
         # log q(z|x)
-        log_qz_x = self.encoder.get_log_prob(x_dict)
+        log_qz_x = self.encoder.get_log_prob_wo_forward(x_dict)
 
         # Minibatch Weighted Sampling
         # log q(z), size of (z_batch_size, x_batch_size, z_dim)
-        x_dict_tmp = {"x": x_dict["x"], "z": x_dict["z"].unsqueeze(1)}
-        _logqz = self.encoder.get_log_prob(x_dict_tmp, sum_features=False)
+        _logqz = self.encoder.get_log_prob_wo_forward(
+            {"z": x_dict["z"].unsqueeze(1)}, sum_features=False)
 
         # log NM
         dataset_size = x_dict["dataset_size"]
@@ -154,7 +154,7 @@ class TCVAE(BaseVAE):
         lognm = math.log(dataset_size * batch_size)
 
         # log prod_j q(z_j) = sum_j log q(z_j)
-        log_qz_prodmarginal = torch.logsumexp(_logqz, 1).sum(1) - lognm
+        log_qz_prodmarginal = (torch.logsumexp(_logqz, 1) - lognm).sum(1)
 
         # log q(z)
         log_qz = torch.logsumexp(_logqz.sum(2), 1) - lognm
