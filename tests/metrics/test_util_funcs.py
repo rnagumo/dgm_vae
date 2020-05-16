@@ -1,4 +1,6 @@
 
+import unittest
+
 import numpy as np
 
 import dgmvae.metrics as dgm
@@ -32,3 +34,7 @@ class TestUtilFuncs(TestMetricBase):
         ys = np.random.randn(10, 5)
 
         self.assertGreater(dgm.discrete_entropy(ys).sum(), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

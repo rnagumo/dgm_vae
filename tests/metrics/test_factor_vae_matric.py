@@ -1,4 +1,5 @@
 
+import unittest
 
 import dgmvae.metrics as dgm
 from .shared import TestMetricBase
@@ -13,3 +14,7 @@ class TestFactorVaeMetric(TestMetricBase):
         self.assertTrue(0 < scores["train_accuracy"] <= 1.0)
         self.assertTrue(0 < scores["eval_accuracy"] <= 1.0)
         self.assertGreaterEqual(scores["num_active_dims"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

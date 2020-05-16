@@ -1,5 +1,4 @@
 
-import pathlib
 import unittest
 
 import torch
@@ -43,3 +42,7 @@ class TmpModel(torch.nn.Module):
     def forward(self, x):
         x = x.view(-1, 64 * 64)
         return self.fc(x)
+
+
+if __name__ == "__main__":
+    unittest.main()

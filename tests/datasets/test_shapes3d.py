@@ -16,3 +16,7 @@ class TestShapes3D(unittest.TestCase, BaseDatasetTestCase):
         self.channel = 3
         self.latents = 6
         self.all_factors = 480000
+
+
+if __name__ == "__main__":
+    unittest.main()

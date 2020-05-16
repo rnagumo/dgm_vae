@@ -16,3 +16,7 @@ class TestDSpritesDataset(unittest.TestCase, BaseDatasetTestCase):
         self.channel = 1
         self.latents = 5
         self.all_factors = 737280
+
+
+if __name__ == "__main__":
+    unittest.main()

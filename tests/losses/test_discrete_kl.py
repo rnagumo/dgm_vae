@@ -19,3 +19,7 @@ class TestCategoricalKullbackLeibler(unittest.TestCase):
 
         # Evaluate
         self.assertGreaterEqual(loss_cls.eval(), 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

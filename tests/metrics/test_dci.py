@@ -1,4 +1,5 @@
 
+import unittest
 
 import dgmvae.metrics as dgm
 from .shared import TestMetricBase
@@ -14,3 +15,7 @@ class TestDciMetric(TestMetricBase):
         self.assertTrue(0.0 <= scores["informativeness_test"] <= 1.0)
         self.assertTrue(0.0 <= scores["disentanglement"] <= 1.0)
         self.assertTrue(0.0 <= scores["completeness"] <= 1.0)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -16,3 +16,7 @@ class TestCars3dDataset(unittest.TestCase, BaseDatasetTestCase):
         self.channel = 3
         self.latents = 3
         self.all_factors = 24 * 4 * 183
+
+
+if __name__ == "__main__":
+    unittest.main()
