@@ -62,7 +62,7 @@ bash bin/download.sh
 
 ## Run experiment
 
-Training and evaluation. Shell scripts in `bin` folder contains the necessary settings for building the environment.
+Train models. Shell scripts in `bin` folder contains the necessary settings for building the environment.
 
 ```bash
 # Usage
@@ -72,7 +72,7 @@ bash bin/train_cars3d.sh <model-name> <random-seed>
 bash bin/train_cars3d.sh beta 0
 ```
 
-Evaluation with original metrics (run on CPU).
+Evaluate disentanglement metrics with the pre-trained model (run on CPU).
 
 ```bash
 # Usage
