@@ -40,8 +40,8 @@ class BaseVAE(nn.Module):
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            obs (dict of [str, torch.Tensor]): Encoded latents and decoded
-                observations.
+            sample_dict (dict of [str, torch.Tensor]): Encoded latents and
+                decoded observations.
         """
 
         latents = self.encode(x_dict)
@@ -59,7 +59,8 @@ class BaseVAE(nn.Module):
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            latents (dict of [str, torch.Tensor]): Tensor of encoded latents.
+            z_dict (dict of [str, torch.Tensor]): Dict of tensor of encoded
+                latents.
         """
         raise NotImplementedError
 
@@ -72,7 +73,8 @@ class BaseVAE(nn.Module):
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            x (dict of [str, torch.Tensor]): Tensor of decoded observations.
+            x_dict (dict of [str, torch.Tensor]): Dict of tensor of decoded
+                observations.
         """
         raise NotImplementedError
 
@@ -83,7 +85,8 @@ class BaseVAE(nn.Module):
             batch_n (int): Batch size.
 
         Returns:
-            samples (dict of [str, torch.Tensor]): Dict of sampled tensor.
+            x_dict (dict of [str, torch.Tensor]): Dict of sampled obsercation
+                tensor.
         """
         raise NotImplementedError
 

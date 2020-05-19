@@ -150,7 +150,8 @@ class AAE(BaseVAE):
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            latents (dict of [str, torch.Tensor]): Tensor of encoded latents.
+            z_dict (dict of [str, torch.Tensor]): Dict of tensor of encoded
+                latents.
         """
 
         h = self.encoder_func.sample(x_dict, return_all=False)
@@ -175,7 +176,8 @@ class AAE(BaseVAE):
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            x (dict of [str, torch.Tensor]): Tensor of decoded observations.
+            x_dict (dict of [str, torch.Tensor]): Dict of tensor of decoded
+                observations.
         """
 
         if mean:
@@ -191,7 +193,8 @@ class AAE(BaseVAE):
             batch_n (int): Batch size.
 
         Returns:
-            samples (dict of [str, torch.Tensor]): Dict of sampled tensor.
+            x_dict (dict of [str, torch.Tensor]): Dict of sampled obsercation
+                tensor.
         """
 
         z = self.prior_z.sample(batch_n=batch_n)
