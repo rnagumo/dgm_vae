@@ -27,16 +27,19 @@ class TestDIPVAE1(unittest.TestCase):
     def test_encode(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
 
-        latent = self.model.encode(x)
+        latent = self.model.encode({"x": x})
         self.assertIsInstance(latent, dict)
         self.assertEqual(
             latent["z"].size(), torch.Size([self.batch_n, self.z_dim]))
 
-        z = self.model.encode(x, mean=True)
-        self.assertEqual(z.size(), torch.Size([self.batch_n, self.z_dim]))
+        z = self.model.encode({"x": x}, mean=True)
+        self.assertIsInstance(latent, dict)
+        self.assertEqual(
+            latent["z"].size(), torch.Size([self.batch_n, self.z_dim]))
 
     def test_decode(self):
-        latent = torch.randn(self.batch_n, self.z_dim)
+        z = torch.randn(self.batch_n, self.z_dim)
+        latent = {"z": z}
 
         obs = self.model.decode(latent)
         self.assertIsInstance(obs, dict)
@@ -44,15 +47,16 @@ class TestDIPVAE1(unittest.TestCase):
             obs["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))
 
         obs = self.model.decode(latent, mean=True)
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([self.batch_n, 1, 64, 64]))
+        self.assertIsInstance(obs, dict)
+        self.assertEqual(
+            obs["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))
 
     def test_sample(self):
         batch_n = 2
         obs = self.model.sample(batch_n=batch_n)
 
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([batch_n, 1, 64, 64]))
+        self.assertIsInstance(obs, dict)
+        self.assertEqual(obs["x"].size(), torch.Size([batch_n, 1, 64, 64]))
 
     def test_forward(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
@@ -62,13 +66,7 @@ class TestDIPVAE1(unittest.TestCase):
     def test_reconstruct(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
 
-        # 1. reconstruct without latent
-        obs = self.model.reconstruct(x)
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([self.batch_n, 1, 64, 64]))
-
-        # 2. reconstruct with latent
-        sample = self.model.reconstruct(x, return_latent=True)
+        sample = self.model.reconstruct({"x": x})
         self.assertIsInstance(sample, dict)
         self.assertEqual(
             sample["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))

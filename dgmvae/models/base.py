@@ -1,7 +1,7 @@
 
 """Base VAE class."""
 
-from typing import Union, Dict, Optional
+from typing import Dict, Optional
 
 from torch import nn, optim, Tensor
 from pixyz.distributions.distributions import Distribution
@@ -28,77 +28,62 @@ class BaseVAE(nn.Module):
             latents (torch.Tensor): Tensor of encoded latents.
         """
 
-        latents = self.encode(x, mean=True)
+        latents = self.encode({"x": x}, mean=True)
+        return latents["z"]
 
-        if isinstance(latents, tuple):
-            return latents[0]
-        return latents
-
-    def reconstruct(self, x: Tensor,
-                    return_latent: bool = False
-                    ) -> Union[Tensor, Dict[str, Tensor]]:
+    def reconstruct(self, x_dict: Dict[str, Tensor], mean: bool = True
+                    ) -> Dict[str, Tensor]:
         """Reconstructs images.
 
         Args:
-            x (torch.Tensor): Input tensor.
+            x_dict (dict of [str, torch.Tensor]): Input tensor.
+            mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            obs (torch.Tensor or dict): Decoded obsercations. If
-            `return_latent` is `True`, `obs` is Tensor, otherwise, dict.
+            obs (dict of [str, torch.Tensor]): Encoded latents and decoded
+                observations.
         """
 
-        latent = self.encode(x)
-        obs = self.decode(latent, mean=True)
-
-        # If `return_latent`=True, return dict of latent and obs
-        if return_latent:
-            latent.update({"x": obs})
-            return latent
-
-        # Return tensor of reconstructed image
+        latents = self.encode(x_dict)
+        obs = self.decode(latents, mean=mean)
+        obs.update(latents)
         return obs
 
-    def encode(self,
-               x: Union[Tensor, Dict[str, Tensor]],
-               mean: bool = False,
-               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
-        """Encodes latent given observable x.
+    def encode(self, x_dict: Dict[str, Tensor], mean: bool = False, **kwargs
+               ) -> Dict[str, Tensor]:
+        """Encodes latents given observable x.
 
         Args:
-            x (torch.Tensor or dict): Tensor or dict or Tensor for input
+            x_dict (dict of [str, torch.Tensor]): Dict of Tensor for input
                 observations.
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            z (torch.Tensor or dict): Tensor of encoded latents. `z` is
-            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+            latents (dict of [str, torch.Tensor]): Tensor of encoded latents.
         """
         raise NotImplementedError
 
-    def decode(self,
-               latent: Union[Tensor, Dict[str, Tensor]],
-               mean: bool = False,
-               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+    def decode(self, z_dict: Dict[str, Tensor], mean: bool = False, **kwargs
+               ) -> Dict[str, Tensor]:
         """Decodes observable x given latents.
 
         Args:
-            latent (torch.Tensor or dict): Tensor or dict of latents.
+            z_dict (dict of [str, torch.Tensor]): Dict of latents tensors.
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            x (torch.Tensor or dict): Tensor of decoded observations. `z` is
-            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+            x (dict of [str, torch.Tensor]): Tensor of decoded observations.
         """
         raise NotImplementedError
 
-    def sample(self, batch_n: int = 1, **kwargs) -> Dict[str, Tensor]:
+    def sample(self, batch_n: int) -> Dict[str, Tensor]:
         """Samples observable x from sampled latent z.
 
         Args:
-            batch_n (int, optional): Batch size.
+            batch_n (int): Batch size.
 
         Returns:
-            sample (dict): Dict of sampled tensors.
+            samples (dict of [str, torch.Tensor]): Dict of sampled tensor.
         """
         raise NotImplementedError
 
@@ -109,7 +94,7 @@ class BaseVAE(nn.Module):
             x (torch.Tensor): Tensor of input observations.
 
         Returns:
-            loss_dict (dict): Dict of calculated losses.
+            loss_dict (dict of [str, torch.Tensor]): Dict of calculated losses.
         """
         raise NotImplementedError
 

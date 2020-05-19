@@ -24,16 +24,19 @@ class TestAAE(unittest.TestCase):
     def test_encode(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
 
-        latent = self.model.encode(x)
+        latent = self.model.encode({"x": x})
         self.assertIsInstance(latent, dict)
         self.assertEqual(
             latent["z"].size(), torch.Size([self.batch_n, self.z_dim]))
         self.assertEqual(
             latent["c"].size(), torch.Size([self.batch_n, self.c_dim]))
 
-        z, c = self.model.encode(x, mean=True)
-        self.assertEqual(z.size(), torch.Size([self.batch_n, self.z_dim]))
-        self.assertEqual(c.size(), torch.Size([self.batch_n, self.c_dim]))
+        latent = self.model.encode({"x": x}, mean=True)
+        self.assertIsInstance(latent, dict)
+        self.assertEqual(
+            latent["z"].size(), torch.Size([self.batch_n, self.z_dim]))
+        self.assertEqual(
+            latent["c"].size(), torch.Size([self.batch_n, self.c_dim]))
 
     def test_decode(self):
         z = torch.randn(self.batch_n, self.z_dim)
@@ -46,28 +49,16 @@ class TestAAE(unittest.TestCase):
             obs["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))
 
         obs = self.model.decode(latent, mean=True)
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([self.batch_n, 1, 64, 64]))
-
-        # Input without dict
-        obs = self.model.decode(None, z=z, c=c)
         self.assertIsInstance(obs, dict)
         self.assertEqual(
             obs["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))
-
-    @unittest.expectedFailure
-    def test_decode_with_none(self):
-        # Wrong input
-        z = torch.randn(self.batch_n, self.z_dim)
-        c = torch.randn(self.batch_n, self.c_dim)
-        _ = self.model.decode(z=z, c=c)
 
     def test_sample(self):
         batch_n = 2
         obs = self.model.sample(batch_n=batch_n)
 
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([batch_n, 1, 64, 64]))
+        self.assertIsInstance(obs, dict)
+        self.assertEqual(obs["x"].size(), torch.Size([batch_n, 1, 64, 64]))
 
     def test_forward(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
@@ -76,14 +67,7 @@ class TestAAE(unittest.TestCase):
 
     def test_reconstruct(self):
         x = torch.randn(self.batch_n, 1, 64, 64)
-
-        # 1. reconstruct without latent
-        obs = self.model.reconstruct(x)
-        self.assertIsInstance(obs, torch.Tensor)
-        self.assertEqual(obs.size(), torch.Size([self.batch_n, 1, 64, 64]))
-
-        # 2. reconstruct with latent
-        sample = self.model.reconstruct(x, return_latent=True)
+        sample = self.model.reconstruct({"x": x})
         self.assertIsInstance(sample, dict)
         self.assertEqual(
             sample["x"].size(), torch.Size([self.batch_n, 1, 64, 64]))

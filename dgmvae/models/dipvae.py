@@ -11,7 +11,7 @@ ref)
 https://github.com/paruby/DIP-VAE
 """
 
-from typing import Union, Dict
+from typing import Dict
 
 import torch
 from torch import Tensor
@@ -27,7 +27,7 @@ from ..losses.dip_loss import DipLoss
 class DIPVAE(BaseVAE):
     """DIP-VAE (Disentangled Inferred Prior-VAE)
 
-    Attributes:
+    Args:
         channel_num (int): Number of input channels.
         z_dim (int): Dimension of latents `z`.
         beta (float): Beta regularization term.
@@ -63,64 +63,54 @@ class DIPVAE(BaseVAE):
         self.kl = _beta * (_kl - _c).abs()
         self.dip = DipLoss(self.encoder, lmd_od, lmd_d, dip_type)
 
-    def encode(self,
-               x: Union[Tensor, Dict[str, Tensor]],
-               mean: bool = False,
-               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
-        """Encodes latent given observable x.
+    def encode(self, x_dict: Dict[str, Tensor], mean: bool = False, **kwargs
+               ) -> Dict[str, Tensor]:
+        """Encodes latents given observable x.
 
         Args:
-            x (torch.Tensor or dict): Tensor or dict or Tensor for input
+            x_dict (dict of [str, torch.Tensor]): Dict of Tensor for input
                 observations.
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            z (torch.Tensor or dict): Tensor of encoded latents. `z` is
-            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+            latents (dict of [str, torch.Tensor]): Tensor of encoded latents.
         """
 
-        if not isinstance(x, dict):
-            x = {"x": x}
-
         if mean:
-            return self.encoder.sample_mean(x)
-        return self.encoder.sample(x, return_all=False)
+            z = self.encoder.sample_mean(x_dict)
+            return {"z": z}
+        return self.encoder.sample(x_dict, return_all=False)
 
-    def decode(self,
-               latent: Union[Tensor, Dict[str, Tensor]],
-               mean: bool = False,
-               **kwargs) -> Union[Tensor, Dict[str, Tensor]]:
+    def decode(self, z_dict: Dict[str, Tensor], mean: bool = False, **kwargs
+               ) -> Dict[str, Tensor]:
         """Decodes observable x given latents.
 
         Args:
-            latent (torch.Tensor or dict): Tensor or dict of latents.
+            z_dict (dict of [str, torch.Tensor]): Dict of latents tensors.
             mean (bool, optional): Boolean flag for returning means or samples.
 
         Returns:
-            x (torch.Tensor or dict): Tensor of decoded observations. `z` is
-            `torch.Tensor` if `mean` is `True`, otherwise, dict.
+            x (dict of [str, torch.Tensor]): Tensor of decoded observations.
         """
 
-        if not isinstance(latent, dict):
-            latent = {"z": latent}
-
         if mean:
-            return self.decoder.sample_mean(latent)
-        return self.decoder.sample(latent, return_all=False)
+            x = self.decoder.sample_mean(z_dict)
+            return {"x": x}
+        return self.decoder.sample(z_dict, return_all=False)
 
-    def sample(self, batch_n: int = 1, **kwargs) -> Dict[str, Tensor]:
+    def sample(self, batch_n: int) -> Dict[str, Tensor]:
         """Samples observable x from sampled latent z.
 
         Args:
-            batch_n (int, optional): Batch size.
+            batch_n (int): Batch size.
 
         Returns:
-            sample (dict): Dict of sampled tensors.
+            samples (dict of [str, torch.Tensor]): Dict of sampled tensor.
         """
 
         z = self.prior.sample(batch_n=batch_n)
-        sample = self.decoder.sample_mean(z)
-        return sample
+        x = self.decoder.sample_mean(z)
+        return {"x": x}
 
     def loss_func(self, x: Tensor, **kwargs) -> Dict[str, Tensor]:
         """Calculates loss given observable x.
@@ -129,7 +119,7 @@ class DIPVAE(BaseVAE):
             x (torch.Tensor): Tensor of input observations.
 
         Returns:
-            loss_dict (dict): Dict of calculated losses.
+            loss_dict (dict of [str, torch.Tensor]): Dict of calculated losses.
         """
 
         x_dict = {"x": x, "beta": self._beta_value, "c": self._c_value}
