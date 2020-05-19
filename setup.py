@@ -14,6 +14,7 @@ install_requires = [
 setup(
     name="dgmvae",
     version="0.5",
+    description="VAE model packages for disentanglement experiment",
     packages=find_packages(),
     install_requires=install_requires,
 )
